@@ -49,11 +49,11 @@ export function StatusBar() {
         const data = await response.json();
 
         const current = data.current_condition[0];
-        const temp = Math.round(parseInt(current.temp_F));
+        const temp = Math.round(parseInt(current.temp_F, 10));
         const condition = current.weatherDesc[0].value;
 
         // Map weather codes to simple icons
-        const weatherCode = parseInt(current.weatherCode);
+        const weatherCode = parseInt(current.weatherCode, 10);
         let icon = '☀️';
 
         if (weatherCode === 113) icon = '☀️'; // Clear/Sunny
