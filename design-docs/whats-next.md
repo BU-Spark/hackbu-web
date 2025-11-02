@@ -17,11 +17,38 @@ We've successfully built the core OS-style interface with:
 
 ---
 
-## 🎯 Next Priority: Missing Core Features
+## 🎯 Priority List
+
+### 🔴 Critical
+
+1. [About Page/Window](#1-about-pagewindow--critical)
+2. [Live/Streaming Page](#2-livestreaming-page--critical)
+
+### 🟡 Medium Priority
+
+3. [BU Google OAuth](#3-bu-google-oauth--medium-priority)
+4. [Leaderboard with Real Scoring](#4-leaderboard-with-real-scoring--medium-priority)
+5. [Contextual Help for Apps](#11-contextual-help-for-apps--medium-priority)
+6. [Accessibility Improvements](#10-accessibility-improvements--medium-priority)
+
+### 🟢 Nice to Have / Low Priority
+
+5. [Light Mode Theme Toggle](#5-light-mode-theme-toggle--nice-to-have)
+6. [Window Close Buttons](#6-window-close-buttons--nice-to-have)
+7. [Enhanced Terminal Commands](#7-enhanced-terminal-commands--nice-to-have)
+8. [Project & Bounty Detail Pages](#8-project--bounty-detail-pages--nice-to-have)
+9. [Discord Integration](#9-discord-integration--nice-to-have)
+10. [Resizable Windows](#12-resizable-windows--low-priority-backlogged)
+
+---
+
+## 📋 Detailed Requirements
 
 ### 1. **About Page/Window** 🔴 CRITICAL
+
 **Status**: Not implemented yet
 **Requirements** (from design doc):
+
 - Mission & Promise statement
 - Sponsors (BU IS&T + BU Spark! with logos and blurbs)
 - What We Do (3-up cards: Bounties, Projects, Events)
@@ -31,6 +58,7 @@ We've successfully built the core OS-style interface with:
 - FAQ (Eligibility, time commitment, IP/licensing, prizes, proposals)
 
 **Implementation**:
+
 - Add `about` route: `/about`
 - Add `About` window to WindowManager that can be opened from dock
 - Create `About.astro` component with full-bleed hero and content sections
@@ -40,6 +68,7 @@ We've successfully built the core OS-style interface with:
 - Persistent CTAs: Join Discord, Browse Bounties, Submit a Project
 
 **Data needed**:
+
 - Markdown or JSON for Mission, Sponsors, Team bios, FAQ entries
 - Team photos
 - Sponsor logos (already have Spark logo)
@@ -47,8 +76,10 @@ We've successfully built the core OS-style interface with:
 ---
 
 ### 2. **Live/Streaming Page** 🔴 CRITICAL
+
 **Status**: Not implemented yet
 **Requirements** (from design doc):
+
 - `/live` route that detects if stream is active
 - Embedded player (YouTube Live / Twitch)
 - Episode information card
@@ -57,6 +88,7 @@ We've successfully built the core OS-style interface with:
 - Post-stream: auto-show highlights and repo links
 
 **Implementation**:
+
 - Add `live` route: `/live`
 - Add `Live` window to WindowManager
 - Create `Live.astro` / `LiveStream.tsx` component
@@ -65,6 +97,7 @@ We've successfully built the core OS-style interface with:
 - Add "Live" button to dock (maybe with indicator when live?)
 
 **Data Model Additions**:
+
 ```prisma
 model Episode {
   id        String   @id @default(cuid())
@@ -91,6 +124,7 @@ model Quest {
 ```
 
 **Integration needs**:
+
 - YouTube API key for live status detection (or manual toggle)
 - Quest claim system (requires auth - see below)
 
@@ -99,14 +133,17 @@ model Quest {
 ## 🔐 Authentication & User Features
 
 ### 3. **BU Google OAuth** 🟡 MEDIUM PRIORITY
+
 **Status**: Not implemented
 **Requirements**:
+
 - Google OAuth restricted to `@bu.edu` domain
 - Arbitrary display names (editable in profile)
 - Optional Discord OAuth for community features
 - Anonymous read-only browsing allowed
 
 **Implementation**:
+
 - Add Auth.js (Core) with Google provider
 - Gate to `@bu.edu` emails only
 - Create `/api/auth/[...auth].ts` endpoint
@@ -114,6 +151,7 @@ model Quest {
 - Create `/profile` page for display name editing
 
 **Why needed**:
+
 - Required for Live stream check-ins and quests
 - Required for bounty submissions
 - Leaderboard attribution
@@ -121,8 +159,10 @@ model Quest {
 ---
 
 ### 4. **Leaderboard with Real Scoring** 🟡 MEDIUM PRIORITY
+
 **Status**: Currently shows static seeded data
 **Requirements**:
+
 - Track points from various sources:
   - Stream check-ins (`!checkin` command)
   - Quest completions
@@ -131,6 +171,7 @@ model Quest {
   - Discord participation (optional)
 
 **Data Model**:
+
 ```prisma
 model Points {
   id        String   @id @default(cuid())
@@ -152,6 +193,7 @@ model LeaderboardEntry {
 ```
 
 **Implementation**:
+
 - API endpoints: `/api/checkin`, `/api/quests/claim`, `/api/bounty/submit`
 - Aggregate Points into LeaderboardEntry
 - Real-time or periodic rank calculation
@@ -162,13 +204,16 @@ model LeaderboardEntry {
 ## 🎨 Polish & Enhancements
 
 ### 5. **Light Mode Theme Toggle** 🟢 NICE TO HAVE
+
 **Status**: Not implemented
 **Requirements** (from design doc):
+
 - Primary (default): Teal BG `#06B1A2`, Foreground `#D9EADF`
 - Light mode: BG `#D9EADF`, Deep teal text `#063E3A`, accents `#06B1A2`
 - Toggle button in top bar
 
 **Implementation**:
+
 - Add dark mode class to tailwind config
 - Add theme toggle button next to help/terminal buttons
 - Store preference in localStorage
@@ -177,8 +222,10 @@ model LeaderboardEntry {
 ---
 
 ### 6. **Window Close Buttons** 🟢 NICE TO HAVE
+
 **Status**: Windows have X button but it's not functional
 **Implementation**:
+
 - Wire up close button to remove window from `openWindows` array
 - Remove from `zIndices` as well
 - Keep MOTD from being closable (or warn before closing)
@@ -186,15 +233,18 @@ model LeaderboardEntry {
 ---
 
 ### 11. **Contextual Help for Apps** 🟡 MEDIUM PRIORITY
+
 **Status**: Not implemented
 **User feedback**: "i think the 'apps' when open need '?' maybe to the left of the window decoration (or other ideas?) that would link to the about section that explains it? or maybe its more like a tooltip but of the same content?"
 
 **Implementation options**:
+
 - **Option 1**: Add a "?" button in the window title bar (left of the X button) that opens a tooltip/popover explaining that specific app
 - **Option 2**: Clicking "?" jumps to the relevant section in the About page (e.g., Bounties window → About page's "What We Do > Bounties" section)
 - **Option 3**: Inline help icon that shows a brief description on hover
 
 **Content needed**:
+
 - Brief descriptions for each app:
   - **Bounties**: "Browse open coding challenges with prizes. Claim a bounty, submit your work, and earn rewards."
   - **Gallery**: "Explore student-built projects serving the BU community. All projects are open source and collaborative."
@@ -208,10 +258,12 @@ model LeaderboardEntry {
 ---
 
 ### 12. **Resizable Windows** 🟢 LOW PRIORITY (backlogged)
+
 **Status**: Not implemented
 **User feedback**: "i think we need to make the windows resizable :/ [...] i realized you can max the window and it is very usable so maybe the resizable goes far down the backlog"
 
 **Implementation**:
+
 - Add resize handles to window corners/edges
 - Respect min/max dimensions
 - Store resize state in WindowManager
@@ -222,9 +274,11 @@ model LeaderboardEntry {
 ---
 
 ### 7. **Enhanced Terminal Commands** 🟢 NICE TO HAVE
+
 **Current commands**: `help`, `apps`, `open <app>`, `status`, `clear`
 
 **Additional ideas**:
+
 - `whoami` - show current user (if logged in)
 - `about` - open About window
 - `live` - open Live window
@@ -235,9 +289,11 @@ model LeaderboardEntry {
 ---
 
 ### 8. **Project & Bounty Detail Pages** 🟢 NICE TO HAVE
+
 **Status**: Gallery and Bounties show lists, but no detail views
 
 **Implementation**:
+
 - `/project/[slug]` route for individual projects
 - `/bounty/[id]` route for individual bounties
 - Deep linking from cards/tables
@@ -246,7 +302,9 @@ model LeaderboardEntry {
 ---
 
 ### 9. **Discord Integration** 🟢 NICE TO HAVE
+
 **Requirements**:
+
 - Prominent "Join Discord" CTA
 - Discord invite link in footer
 - Optional: Discord OAuth for linking accounts
@@ -255,9 +313,11 @@ model LeaderboardEntry {
 ---
 
 ### 10. **Accessibility Improvements** 🟡 MEDIUM PRIORITY
+
 **Current status**: Basic keyboard nav works, needs audit
 
 **TODO**:
+
 - Ensure all windows have proper ARIA labels
 - Keyboard shortcuts for window management
 - Reduce motion support
@@ -271,6 +331,7 @@ model LeaderboardEntry {
 ## 📊 Content & Data Needs
 
 ### Immediate (for WIP demo):
+
 - [ ] **About page content**: Mission statement, sponsor blurbs, team bios, FAQ entries
 - [ ] **Team photos**: Staff leads, student maintainers (following Spark photo style)
 - [ ] **BU IS&T logo**: For sponsors section
@@ -278,6 +339,7 @@ model LeaderboardEntry {
 - [ ] **Discord invite link**: For all CTAs
 
 ### Short-term (for v1.0):
+
 - [ ] **Episode schedule**: First 3-5 episodes planned with titles, dates, types
 - [ ] **Quest definitions**: 5-10 quest templates for different episode types
 - [ ] **Real bounties**: Replace seed data with actual open bounties
@@ -289,6 +351,7 @@ model LeaderboardEntry {
 ## 🚀 Deployment Checklist
 
 ### Before first public demo:
+
 - [ ] About page complete
 - [ ] Live page implemented (even if no stream scheduled yet)
 - [ ] Discord links working
@@ -298,6 +361,7 @@ model LeaderboardEntry {
 - [ ] Favicon and social preview images
 
 ### Before v1.0 launch:
+
 - [ ] Auth working (BU Google OAuth)
 - [ ] Real leaderboard data
 - [ ] First stream episode ready
@@ -313,6 +377,7 @@ model LeaderboardEntry {
 ## 🎯 Recommended Next Steps
 
 ### For WIP/Demo (Short-term):
+
 1. ✅ ~~**Build About window/page**~~ - COMPLETE! Answers "what is this?"
 2. **Build Live window/page** - Most critical remaining piece, creates anticipation for streams
 3. **Add contextual help "?" buttons to windows** - Help users understand each app
@@ -320,12 +385,14 @@ model LeaderboardEntry {
 5. **Mobile responsive check** - Make sure it doesn't break on phones
 
 ### For v1.0 (Medium-term):
+
 1. **Implement Auth** - Unlocks user features
 2. **Real leaderboard scoring** - Makes gamification work
 3. **Episode & Quest system** - Powers the streaming show
 4. **Light mode toggle** - Accessibility and user preference
 
 ### For v2.0+ (Long-term):
+
 - GitHub integration for auto-tracking contributions
 - Discord bot for stream interactions
 - Project submission flow
