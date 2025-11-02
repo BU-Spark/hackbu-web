@@ -13,7 +13,7 @@ export function TableRow({ columns, data, renderCell }: TableRowProps) {
         <div className="flex gap-1 flex-wrap">
           {value.map((item, i) => (
             <span
-              key={i}
+              key={`${item}-${i}`}
               className="px-2 py-0.5 bg-spark-teal/30 rounded text-xs font-mono"
             >
               {item}
@@ -58,7 +58,7 @@ export function TableRow({ columns, data, renderCell }: TableRowProps) {
         <tbody>
           {data.map((row, idx) => (
             <tr
-              key={idx}
+              key={row.title || row.name || row.id || idx}
               className="border-b border-spark-teal/30 hover:bg-spark-teal/10 transition-colors"
             >
               {keys.map((key) => (

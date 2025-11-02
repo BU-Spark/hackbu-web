@@ -123,7 +123,7 @@ export function Live({ events }: LiveProps) {
           <div className="space-y-4">
             {upcomingEpisodes.map((episode, idx) => (
               <div
-                key={idx}
+                key={episode.title}
                 className="bg-spark-black/40 border-2 border-spark-teal/30 rounded-lg p-6 hover:border-spark-chartreuse/50 transition-colors"
               >
                 <div className="flex items-start gap-4">

@@ -157,7 +157,7 @@ export function About() {
           <div className="space-y-4">
             {faq.map((item, idx) => (
               <details
-                key={idx}
+                key={item.question}
                 className="bg-spark-black/40 border-2 border-spark-teal/30 rounded-lg p-6 hover:border-spark-chartreuse/50 transition-colors group"
               >
                 <summary className="font-display text-lg text-spark-eggshell uppercase cursor-pointer list-none flex items-center justify-between">

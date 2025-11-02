@@ -28,7 +28,7 @@ export function CardList({ items, type = 'project' }: CardListProps) {
         if (type === 'event') {
           return (
             <div
-              key={idx}
+              key={item.title || idx}
               className="border border-spark-teal/40 rounded-lg p-4 hover:border-spark-chartreuse transition-colors"
             >
               <div className="flex items-start justify-between gap-3">
@@ -48,7 +48,7 @@ export function CardList({ items, type = 'project' }: CardListProps) {
         // Project card
         return (
           <div
-            key={idx}
+            key={item.name || idx}
             className="border border-spark-teal/40 rounded-lg p-4 hover:border-spark-chartreuse transition-colors"
           >
             <div className="flex items-start justify-between gap-3">
@@ -67,7 +67,7 @@ export function CardList({ items, type = 'project' }: CardListProps) {
                 <div className="flex gap-3">
                   {links.map((link: { label: string; url: string }, i: number) => (
                     <a
-                      key={i}
+                      key={`${link.url}-${link.label}`}
                       href={link.url}
                       className="text-sm text-spark-chartreuse hover:text-spark-chartreuse/80 underline transition-colors"
                     >
