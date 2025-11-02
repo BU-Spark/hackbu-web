@@ -74,12 +74,21 @@ export function WindowManager({
   }, [openWindow]);
 
   // Prepare data for tables
-  const bountiesData = bounties.map((b) => ({
-    title: b.title,
-    prize: b.prize,
-    deadline: b.deadline || 'TBD',
-    tags: JSON.parse(b.tags),
-  }));
+  const bountiesData = bounties.map((b) => {
+    let tags: string[] = [];
+    try {
+      tags = typeof b.tags === 'string' ? JSON.parse(b.tags) : b.tags;
+    } catch (e) {
+      console.error('Failed to parse bounty tags:', e);
+      tags = [];
+    }
+    return {
+      title: b.title,
+      prize: b.prize,
+      deadline: b.deadline || 'TBD',
+      tags,
+    };
+  });
 
   const leaderboardData = leaderboard.map((l) => ({
     rank: l.rank || '#',

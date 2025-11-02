@@ -15,7 +15,15 @@ export function CardList({ items, type = 'project' }: CardListProps) {
   return (
     <div className="space-y-3">
       {items.map((item, idx) => {
-        const links = item.links ? JSON.parse(item.links) : [];
+        let links: Array<{ label: string; url: string }> = [];
+        if (item.links) {
+          try {
+            links = typeof item.links === 'string' ? JSON.parse(item.links) : item.links;
+          } catch (e) {
+            console.error('Failed to parse item links:', e);
+            links = [];
+          }
+        }
 
         if (type === 'event') {
           return (
