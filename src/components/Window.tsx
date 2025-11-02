@@ -74,7 +74,10 @@ export function Window({
   };
 
   const handleClose = () => {
-    windowRef.current?.remove();
+    // Dispatch event to WindowManager to properly close this window
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('closeWindow', { detail: id }));
+    }
   };
 
   const handleMinimize = () => {

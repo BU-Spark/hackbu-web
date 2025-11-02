@@ -52,6 +52,15 @@ export function WindowManager({
     setNextZ((z) => z + 1);
   }, []);
 
+  const closeWindow = useCallback((id: string) => {
+    setOpenWindows((prev) => prev.filter((windowId) => windowId !== id));
+    setZIndices((prev) => {
+      const newIndices = { ...prev };
+      delete newIndices[id];
+      return newIndices;
+    });
+  }, []);
+
   // Listen for events from dock and buttons
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -60,18 +69,24 @@ export function WindowManager({
       openWindow(e.detail);
     };
 
+    const handleCloseWindow = (e: CustomEvent) => {
+      closeWindow(e.detail);
+    };
+
     const handleToggleTerminal = () => {
       setTerminalOpen((prev) => !prev);
     };
 
     window.addEventListener('openWindow' as any, handleOpenWindow);
+    window.addEventListener('closeWindow' as any, handleCloseWindow);
     window.addEventListener('toggleTerminal' as any, handleToggleTerminal);
 
     return () => {
       window.removeEventListener('openWindow' as any, handleOpenWindow);
+      window.removeEventListener('closeWindow' as any, handleCloseWindow);
       window.removeEventListener('toggleTerminal' as any, handleToggleTerminal);
     };
-  }, [openWindow]);
+  }, [openWindow, closeWindow]);
 
   // Prepare data for tables
   const bountiesData = bounties.map((b) => {
