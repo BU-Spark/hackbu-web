@@ -1,5 +1,5 @@
 ---
-// No props needed for now
+import { StatusBar } from './StatusBar';
 ---
 
 <header class="fixed top-0 left-0 right-0 h-14 bg-spark-black/90 border-b border-spark-teal backdrop-blur-sm z-40 flex items-center justify-between px-6">
@@ -8,8 +8,8 @@
     <span class="font-display text-xl text-spark-eggshell">HackBU OS</span>
   </div>
 
-  <div id="statusBar" class="font-mono text-sm text-spark-eggshell/70">
-    connected • 187 online • ping: 23ms
+  <div class="flex-1 flex justify-end mr-4">
+    <StatusBar client:load />
   </div>
 
   <div class="flex items-center gap-3">

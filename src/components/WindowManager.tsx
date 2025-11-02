@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Window } from './Window';
 import { Terminal } from './Terminal';
 import { TableRow } from './TableRow';
 import { CardList } from './CardList';
+import { About } from './About';
 
 interface WindowManagerProps {
   bounties: any[];
@@ -26,31 +27,20 @@ export function WindowManager({
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [nextZ, setNextZ] = useState(11);
 
-  const openWindow = (id: string) => {
+  const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
     setZIndices((prev) => ({ ...prev, [id]: nextZ }));
     setNextZ((z) => z + 1);
 
     if (!openWindows.includes(id)) {
-      setOpenWindows((prev) => {
-        // Limit to 4 windows
-        if (prev.length >= 4) {
-          const [oldest, ...rest] = prev;
-          setZIndices((z) => {
-            const { [oldest]: _, ...remaining } = z;
-            return remaining;
-          });
-          return [...rest, id];
-        }
-        return [...prev, id];
-      });
+      setOpenWindows((prev) => [...prev, id]);
     }
-  };
+  }, [nextZ, openWindows]);
 
-  const focusWindow = (id: string) => {
+  const focusWindow = useCallback((id: string) => {
     setZIndices((prev) => ({ ...prev, [id]: nextZ }));
     setNextZ((z) => z + 1);
-  };
+  }, [nextZ]);
 
   // Listen for events from dock and buttons
   useEffect(() => {
@@ -71,7 +61,7 @@ export function WindowManager({
       window.removeEventListener('openWindow' as any, handleOpenWindow);
       window.removeEventListener('toggleTerminal' as any, handleToggleTerminal);
     };
-  }, []);
+  }, [openWindow]);
 
   // Prepare data for tables
   const bountiesData = bounties.map((b) => ({
@@ -100,8 +90,8 @@ export function WindowManager({
         <Window
           title="Message of the Day"
           id="motd"
-          initialX={(typeof window !== 'undefined' ? window.innerWidth : 1920) / 2 - 250}
-          initialY={(typeof window !== 'undefined' ? window.innerHeight : 1080) / 2 - 200}
+          initialX={80}
+          initialY={80}
           onFocus={() => focusWindow('motd')}
           zIndex={zIndices.motd}
           isFocused={focusedWindow === 'motd'}
@@ -175,6 +165,21 @@ export function WindowManager({
           isFocused={focusedWindow === 'events'}
         >
           <CardList items={events} type="event" />
+        </Window>
+      )}
+
+      {/* About Window */}
+      {openWindows.includes('about') && (
+        <Window
+          title="ℹ️ About HackBU"
+          id="about"
+          initialX={150}
+          initialY={100}
+          onFocus={() => focusWindow('about')}
+          zIndex={zIndices.about}
+          isFocused={focusedWindow === 'about'}
+        >
+          <About />
         </Window>
       )}
 

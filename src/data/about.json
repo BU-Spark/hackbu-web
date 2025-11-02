@@ -1,0 +1,115 @@
+{
+  "mission": {
+    "title": "Our Mission",
+    "statement": "HackBU is a student-led community at Boston University dedicated to building tools and systems that improve campus life. We're not just learning to code — we're solving real problems for real students, staff, and faculty. Through bounties, projects, and collaborative events, we help students find passion, build skills, form community, and make meaningful impact."
+  },
+  "sponsors": [
+    {
+      "name": "BU Spark!",
+      "logo": "/BUSPARK_Main_Blck Bkgrnd_lg.png",
+      "description": "BU Spark! empowers students to learn experientially through real-world tech projects. As our primary sponsor, Spark! provides mentorship, resources, and the creative energy that makes HackBU possible.",
+      "url": "https://www.bu.edu/spark/"
+    },
+    {
+      "name": "BU Information Services & Technology",
+      "logo": "/bu-ist-logo.png",
+      "description": "BU IS&T provides the infrastructure, API access, and technical guidance that enables HackBU projects to integrate with real campus systems. Their support turns student ideas into production-ready tools.",
+      "url": "https://www.bu.edu/tech/"
+    }
+  ],
+  "whatWeDo": [
+    {
+      "icon": "💰",
+      "title": "Bounties",
+      "description": "Tackle real coding challenges with cash prizes. From API integrations to UI improvements, bounties let you contribute to campus tech while earning recognition and rewards.",
+      "link": "bounties"
+    },
+    {
+      "icon": "🚀",
+      "title": "Projects",
+      "description": "Browse student-built tools serving the BU community. Join an existing project or propose your own. All projects are open source and built collaboratively.",
+      "link": "gallery"
+    },
+    {
+      "icon": "📅",
+      "title": "Events",
+      "description": "Join us for Syntax & Snax (casual coding sessions), Code & Tell (demo nights), hackathons, and our live streaming show where we build and learn together.",
+      "link": "events"
+    }
+  ],
+  "howToJoin": {
+    "title": "How to Join",
+    "steps": [
+      {
+        "number": 1,
+        "title": "Join Our Discord",
+        "description": "Connect with the community, ask questions, and find collaborators. Our Discord is the hub for all HackBU activity."
+      },
+      {
+        "number": 2,
+        "title": "Explore & Pick a Track",
+        "description": "Browse bounties and projects. Whether you're into Web, Data, Infrastructure, or UX — there's a place for you."
+      },
+      {
+        "number": 3,
+        "title": "Start Building",
+        "description": "Claim your first bounty, join a project team, or attend a Code & Tell. Learning happens by doing."
+      },
+      {
+        "number": 4,
+        "title": "Level Up",
+        "description": "Earn points, unlock badges, and climb the leaderboard. Help others, mentor newcomers, and grow the community."
+      }
+    ],
+    "discordUrl": "https://discord.gg/hackbu"
+  },
+  "team": [
+    {
+      "name": "BU Spark! Staff",
+      "role": "Program Leadership",
+      "description": "Spark! staff provide strategic direction, mentorship, and program support."
+    },
+    {
+      "name": "Student Maintainers",
+      "role": "Technical Leadership",
+      "description": "Experienced student developers who review PRs, mentor newcomers, and maintain core projects."
+    },
+    {
+      "name": "IS&T Advisors",
+      "role": "Technical Advisory",
+      "description": "IS&T representatives provide API access, security guidance, and infrastructure support."
+    }
+  ],
+  "faq": [
+    {
+      "question": "Who can join HackBU?",
+      "answer": "Any BU student! No prior coding experience required. We welcome all skill levels and help you learn as you go."
+    },
+    {
+      "question": "What's the time commitment?",
+      "answer": "Totally flexible. Work on bounties at your own pace, join events when you can, or dive deep into a semester-long project. You decide."
+    },
+    {
+      "question": "How do bounties and prizes work?",
+      "answer": "Bounties are posted with clear requirements and prize amounts. Submit your work, get it reviewed, and if approved, you earn the prize and leaderboard points."
+    },
+    {
+      "question": "Who owns the code I write?",
+      "answer": "All HackBU projects are open source (typically MIT license). You maintain credit and can showcase your work. BU may use projects that integrate with campus systems."
+    },
+    {
+      "question": "Can I propose my own project?",
+      "answer": "Absolutely! Pitch your idea in Discord, gather a team, and if it aligns with HackBU's mission, we'll help you build it."
+    },
+    {
+      "question": "What if I need help or get stuck?",
+      "answer": "Ask in Discord! Student maintainers and Spark! mentors are active and eager to help. We also host office hours and pair programming sessions."
+    }
+  ],
+  "codeOfConduct": {
+    "title": "Code of Conduct",
+    "summary": "HackBU is committed to providing a welcoming, safe, and inclusive environment for all participants. We do not tolerate harassment, discrimination, or disrespectful behavior of any kind.",
+    "reporting": "To report a concern or incident, contact BU Spark! staff directly via Discord DM or email spark@bu.edu. All reports are handled confidentially.",
+    "moderation": "Violations may result in removal from the community, loss of bounty eligibility, or referral to BU Student Affairs."
+  }
+}
