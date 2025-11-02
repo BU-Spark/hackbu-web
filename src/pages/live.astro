@@ -1,19 +1,10 @@
 ---
-import { db } from "../lib/db";
+import events from "../data/events.json";
 import "../styles/global.css";
 
-// Fetch streaming event with safe fallback during static builds (e.g., Netlify)
-let events: any[] = [];
-let streamTime: string = "Check Discord for schedule";
-
-try {
-  events = await db.event.findMany();
-} catch (e: any) {
-  console.warn("Skipping DB fetch for live page at build:", e?.message ?? e);
-}
-
+// Use static events to compute stream time at build time
 const streamEvent = events.find((e) => e.streamUrl);
-streamTime = streamEvent?.when || streamTime;
+const streamTime: string = streamEvent?.when || "Check Discord for schedule";
 ---
 
 <!doctype html>

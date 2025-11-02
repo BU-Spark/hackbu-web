@@ -1,28 +1,17 @@
 ---
-import { db } from "../lib/db";
+import bounties from "../data/bounties.json";
+import projects from "../data/projects.json";
+import leaderboard from "../data/leaderboard.json";
+import events from "../data/events.json";
+import motd from "../data/motd.json";
 import Desktop from "../components/Desktop.astro";
 import Topbar from "../components/Topbar.astro";
 import Dock from "../components/Dock.astro";
 import { WindowManager } from "../components/WindowManager";
 import "../styles/global.css";
 
-// Fetch data from database with safe fallbacks for static builds (e.g., Netlify)
-let bounties: any[] = [];
-let projects: any[] = [];
-let leaderboard: any[] = [];
-let events: any[] = [];
-let motdContent: string = "";
-
-try {
-  bounties = await db.bounty.findMany();
-  projects = await db.project.findMany();
-  leaderboard = await db.leaderboardEntry.findMany({ orderBy: { rank: "asc" } });
-  events = await db.event.findMany();
-  const motd = await db.mOTD.findFirst({ where: { active: true } });
-  motdContent = motd?.content || "";
-} catch (e: any) {
-  console.warn("Skipping DB fetch on index during build:", e?.message ?? e);
-}
+// Use static data at build time (no DB dependency for SSG)
+const motdContent: string = motd.content || "";
 ---
 
 <!doctype html>
@@ -110,7 +99,9 @@ try {
 
       // Help button
       document.getElementById("helpButton")?.addEventListener("click", () => {
-        window.dispatchEvent(new CustomEvent("openTerminalWithCommand", { detail: "help" }));
+        window.dispatchEvent(
+          new CustomEvent("openTerminalWithCommand", { detail: "help" })
+        );
       });
 
       // Backtick key
