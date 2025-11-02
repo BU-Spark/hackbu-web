@@ -417,14 +417,42 @@ model LeaderboardEntry {
 
 ---
 
+## 📱 Mobile Strategy
+
+### Concept: "Phone OS" Mode
+
+**Core Idea**: On mobile, the HackBU OS becomes a phone-style interface with app icons instead of windows.
+
+**Implementation**:
+
+- **Layout**: App buttons arranged like phone app icons (grid layout)
+- **No multi-window**: Single-app view at a time - tapping an app icon navigates to that app's full-screen view
+- **No terminal dropdown**: Terminal feature is desktop-only
+- **Dock buttons become app grid**: The same apps (Bounties, Gallery, Leaderboard, Events, About, Live) displayed as touch-friendly icons
+
+**Open Questions**:
+
+- **Navigation UX**: How to navigate between HackBU apps without conflicting with phone's native back/forward gestures?
+  - Option 1: Persistent top nav bar with back arrow + home icon
+  - Option 2: Bottom tab bar (mobile app style) for quick switching
+  - Option 3: Swipe gestures between apps (like mobile app switcher)
+  - Option 4: Each app has a "home" button to return to app grid
+
+**Previous idea (preserved for reference)**:
+
+- Alternative approach was to simplify to traditional nav on mobile, or attempt to keep window metaphor scaled down
+
+**Recommendation**: Test Option 1 (top nav with back/home) + app grid home screen as it's most intuitive and doesn't conflict with system gestures.
+
+---
+
 ## 🤔 Open Questions
 
 1. **Show name decision**: Which streaming show name? ("hackbu: unboxed" vs "hackbu: insider" vs other?)
-2. **Mobile strategy**: Simplify to traditional nav on mobile, or keep window metaphor?
-3. **Live detection**: Manual toggle or automated via YouTube API?
-4. **Badge design**: What do achievement badges look like? Cookie icons from Spark style guide?
-5. **Anonymous users**: Can they see everything but not interact? Or hide some features?
-6. **Discord requirement**: Is Discord account required for participation, or just encouraged?
+2. **Live detection**: Manual toggle or automated via YouTube API?
+3. **Badge design**: What do achievement badges look like? Cookie icons from Spark style guide?
+4. **Anonymous users**: Can they see everything but not interact? Or hide some features?
+5. **Discord requirement**: Is Discord account required for participation, or just encouraged?
 
 ---
 
