@@ -30,18 +30,27 @@ export function WindowManager({
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
-    setZIndices((prev) => ({ ...prev, [id]: nextZ }));
+    setZIndices((prev) => {
+      const currentMax = Math.max(...Object.values(prev), 10);
+      return { ...prev, [id]: currentMax + 1 };
+    });
     setNextZ((z) => z + 1);
 
-    if (!openWindows.includes(id)) {
-      setOpenWindows((prev) => [...prev, id]);
-    }
-  }, [nextZ, openWindows]);
+    setOpenWindows((prev) => {
+      if (!prev.includes(id)) {
+        return [...prev, id];
+      }
+      return prev;
+    });
+  }, []);
 
   const focusWindow = useCallback((id: string) => {
-    setZIndices((prev) => ({ ...prev, [id]: nextZ }));
+    setZIndices((prev) => {
+      const currentMax = Math.max(...Object.values(prev), 10);
+      return { ...prev, [id]: currentMax + 1 };
+    });
     setNextZ((z) => z + 1);
-  }, [nextZ]);
+  }, []);
 
   // Listen for events from dock and buttons
   useEffect(() => {
