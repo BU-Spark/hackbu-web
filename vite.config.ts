@@ -11,9 +11,6 @@ export default defineConfig({
         'public/backgrounds/**',
         'public/**/*.{png,jpg,jpeg,webp,avif,gif,svg}',
         'public/**/*.{mp4,webm,mov,avi}',
-        // Prisma artifacts (don’t hot-reload on DB or migrations)
-        'prisma/dev.db',
-        'prisma/migrations/**',
       ],
     },
   },

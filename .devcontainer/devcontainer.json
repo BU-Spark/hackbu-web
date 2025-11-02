@@ -45,6 +45,6 @@
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "npm install && npx prisma generate && npx prisma db push && npm run db:seed",
+  "postCreateCommand": "npm install",
   "forwardPorts": [4321]
 }
