@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Bounty {
+  id        String   @id @default(cuid())
+  title     String
+  prize     Int
+  deadline  String?  // ISO date string
+  tags      String   // JSON array as string
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id       String  @id @default(cuid())
+  slug     String  @unique
+  name     String
+  badge    String  // "🏆 Code & Tell"
+  desc     String
+  links    String  // JSON array of {label, url}
+  imageUrl String?
+}
+
+model LeaderboardEntry {
+  id     String @id @default(cuid())
+  name   String
+  points Int
+  badges String // Emoji string
+  rank   Int?
+}
+
+model Event {
+  id       String @id @default(cuid())
+  title    String
+  when     String // "Weds 6pm"
+  where    String
+  streamUrl String?
+}
+
+model MOTD {
+  id        String   @id @default(cuid())
+  content   String   // Markdown content
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

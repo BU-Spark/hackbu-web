@@ -1,0 +1,32 @@
+---
+// Random background image selection
+const backgrounds = [
+  '/backgrounds/bg-1.jpg',
+  '/backgrounds/bg-2.jpg',
+  '/backgrounds/bg-3.jpg',
+];
+const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+---
+
+<main
+  class="fixed inset-0 pt-14 overflow-hidden"
+  style={`background-image: url(${randomBg}); background-size: cover; background-position: center;`}
+>
+  <!-- Background overlay -->
+  <div class="absolute inset-0 bg-spark-teal/95"></div>
+
+  <!-- BU Spark! logo watermark (faded, top-right) -->
+  <div class="absolute top-20 right-6 opacity-30 z-0">
+    <img src="/spark-logo.png" alt="BU Spark!" class="h-24" />
+  </div>
+
+  <!-- Main desktop area -->
+  <div class="relative z-10 h-full" id="desktop">
+    <slot />
+  </div>
+
+  <!-- "Powered by" footer -->
+  <div class="absolute bottom-6 right-6 text-sm text-spark-eggshell/50 font-mono z-0">
+    Powered by BU IS&T
+  </div>
+</main>

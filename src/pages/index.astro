@@ -1,0 +1,120 @@
+---
+import { db } from '../lib/db';
+import Desktop from '../components/Desktop.astro';
+import Topbar from '../components/Topbar.astro';
+import Dock from '../components/Dock.astro';
+import { WindowManager } from '../components/WindowManager';
+import '../styles/global.css';
+
+// Fetch data from database
+const bounties = await db.bounty.findMany();
+const projects = await db.project.findMany();
+const leaderboard = await db.leaderboardEntry.findMany({ orderBy: { rank: 'asc' } });
+const events = await db.event.findMany();
+const motd = await db.mOTD.findFirst({ where: { active: true } });
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HackBU OS</title>
+  </head>
+  <body>
+    <!-- Boot Screen -->
+    <div id="boot" class="fixed inset-0 bg-spark-black z-50 flex items-center justify-center">
+      <pre id="bootlog" class="font-mono text-spark-chartreuse text-sm"></pre>
+    </div>
+
+    <Topbar />
+
+    <Desktop>
+      <WindowManager
+        client:load
+        bounties={bounties}
+        projects={projects}
+        leaderboard={leaderboard}
+        events={events}
+        motd={motd?.content || ''}
+      />
+    </Desktop>
+
+    <Dock />
+
+    <script>
+      // Boot animation
+      const boot = document.getElementById('boot');
+      const bootlog = document.getElementById('bootlog');
+      const lines = [
+        '> initializing hackbuOS v1.0 …',
+        '> connecting to bu_network …',
+        '> loading skyline assets …',
+        '> Press ` for terminal or use dock below',
+        '> ready.',
+      ];
+
+      let i = 0;
+      const bootInterval = setInterval(() => {
+        if (i < lines.length) {
+          bootlog!.textContent += lines[i] + '\n';
+          i++;
+        } else {
+          clearInterval(bootInterval);
+        }
+      }, 350);
+
+      // Skip boot on click
+      boot!.addEventListener('click', () => {
+        if (boot) {
+          boot.style.display = 'none';
+        }
+      });
+
+      // Auto-hide boot after completion
+      setTimeout(() => {
+        // Don't auto-hide, wait for user interaction
+      }, lines.length * 350 + 600);
+
+      // Wire up dock buttons
+      document.querySelectorAll('.dock-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const app = btn.getAttribute('data-open');
+          window.dispatchEvent(new CustomEvent('openWindow', { detail: app }));
+        });
+      });
+
+      // Terminal toggle
+      document.getElementById('terminalToggle')?.addEventListener('click', () => {
+        window.dispatchEvent(new Event('toggleTerminal'));
+      });
+
+      // Help button
+      document.getElementById('helpButton')?.addEventListener('click', () => {
+        window.dispatchEvent(new Event('toggleTerminal'));
+      });
+
+      // Backtick key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '`') {
+          e.preventDefault();
+          window.dispatchEvent(new Event('toggleTerminal'));
+        }
+      });
+
+      // Hide boot on any interaction
+      const hideBootOnInteraction = () => {
+        if (boot) {
+          boot.style.display = 'none';
+        }
+        document.removeEventListener('click', hideBootOnInteraction);
+        document.removeEventListener('keydown', hideBootOnInteraction);
+      };
+
+      setTimeout(() => {
+        document.addEventListener('click', hideBootOnInteraction);
+        document.addEventListener('keydown', hideBootOnInteraction);
+      }, lines.length * 350);
+    </script>
+  </body>
+</html>

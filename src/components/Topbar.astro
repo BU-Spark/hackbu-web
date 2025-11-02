@@ -1,0 +1,42 @@
+---
+// No props needed for now
+---
+
+<header class="fixed top-0 left-0 right-0 h-14 bg-spark-black/90 border-b border-spark-teal backdrop-blur-sm z-40 flex items-center justify-between px-6">
+  <div class="flex items-center gap-3">
+    <img src="/hackbu-logo.png" alt="HackBU Logo" class="h-8" />
+    <span class="font-display text-xl text-spark-eggshell">HackBU OS</span>
+  </div>
+
+  <div id="statusBar" class="font-mono text-sm text-spark-eggshell/70">
+    connected • 187 online • ping: 23ms
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button
+      id="helpButton"
+      class="px-3 py-1 rounded bg-spark-teal/20 hover:bg-spark-teal/30 text-spark-eggshell font-mono transition-colors"
+      aria-label="Help"
+    >
+      ?
+    </button>
+    <button
+      id="terminalToggle"
+      class="px-3 py-1 rounded bg-spark-chartreuse text-spark-black font-mono font-semibold hover:bg-spark-chartreuse/80 transition-all animate-pulse"
+      aria-label="Toggle terminal"
+    >
+      `
+    </button>
+  </div>
+</header>
+
+<style>
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  #terminalToggle {
+    animation: flash 1.5s ease-in-out 4; /* Flash 4 times */
+  }
+</style>
