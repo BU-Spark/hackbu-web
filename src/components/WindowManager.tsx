@@ -4,6 +4,7 @@ import { Terminal } from './Terminal';
 import { TableRow } from './TableRow';
 import { CardList } from './CardList';
 import { About } from './About';
+import { Live } from './Live';
 
 interface WindowManagerProps {
   bounties: any[];
@@ -180,6 +181,21 @@ export function WindowManager({
           isFocused={focusedWindow === 'about'}
         >
           <About />
+        </Window>
+      )}
+
+      {/* Live Window */}
+      {openWindows.includes('live') && (
+        <Window
+          title="📡 HackBU Live"
+          id="live"
+          initialX={180}
+          initialY={80}
+          onFocus={() => focusWindow('live')}
+          zIndex={zIndices.live}
+          isFocused={focusedWindow === 'live'}
+        >
+          <Live events={events} />
         </Window>
       )}
 

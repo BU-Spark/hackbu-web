@@ -75,7 +75,7 @@ async function main() {
   });
 
   // Create projects
-  await prisma.project.createMany({
+  const projects = await prisma.project.createMany({
     data: [
       {
         slug: 'terrier-transit',
@@ -140,7 +140,7 @@ async function main() {
   });
 
   // Create leaderboard entries
-  await prisma.leaderboardEntry.createMany({
+  const leaderboard = await prisma.leaderboardEntry.createMany({
     data: [
       { name: 'mvoong', points: 245, badges: '🥇🏗️💻', rank: 1 },
       { name: 'langdon', points: 180, badges: '💡🎤🔥', rank: 2 },
@@ -150,23 +150,29 @@ async function main() {
     ],
   });
 
-  // Create events
-  await prisma.event.createMany({
+  // Create events (including live stream events)
+  const events = await prisma.event.createMany({
     data: [
       {
         title: 'Syntax & Snax',
-        when: 'Wednesdays 6pm',
-        where: 'CDS 5th Floor Pavilion',
+        when: 'Thursday 4pm',
+        where: 'Spark! Space, 2nd Floor CDS',
       },
       {
         title: 'Code & Tell',
-        when: 'Last Thursday 6pm',
-        where: 'CDS Theater',
+        when: 'Last Wednesday 6:30pm',
+        where: 'Spark! Space, 2nd Floor CDS',
       },
       {
         title: 'HackBU Office Hours',
-        when: 'Fridays 3-5pm',
-        where: 'Spark!space (CDS 662)',
+        when: 'Thursdays 5-6:30pm',
+        where: 'Spark! Space, 2nd Floor CDS',
+      },
+      {
+        title: 'HackBU Live',
+        when: 'Thursday 4pm',
+        where: 'Online - YouTube Live',
+        streamUrl: 'https://youtube.com/@buspark',
       },
     ],
   });
@@ -181,7 +187,7 @@ async function main() {
 ║                                        ║
 ║  🎯 8 open bounties • $1,625 in prizes ║
 ║  🏆 Top builder: mvoong (245 pts)      ║
-║  📅 Next: Syntax & Snax (Wed 6pm)      ║
+║  📅 Next: Syntax & Snax (Thu 4pm)      ║
 ║                                        ║
 ║  💡 Tip: Windows are draggable!        ║
 ║                                        ║
@@ -193,9 +199,9 @@ async function main() {
 
   console.log('✅ Seed complete!');
   console.log(`   - ${bounties.count} bounties`);
-  console.log('   - 6 projects');
-  console.log('   - 5 leaderboard entries');
-  console.log('   - 3 events');
+  console.log(`   - ${projects.count} projects`);
+  console.log(`   - ${leaderboard.count} leaderboard entries`);
+  console.log(`   - ${events.count} events (including streaming)`);
   console.log('   - 1 MOTD');
 }
 
