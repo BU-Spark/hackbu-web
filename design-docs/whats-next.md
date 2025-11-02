@@ -20,34 +20,37 @@ We've successfully built the core OS-style interface with:
 
 ## 🎯 Priority List
 
-### 🔴 Critical
+### WIP Demo (Current Sprint)
 
-1. ~~[About Page/Window](#1-about-pagewindow--critical)~~ ✅ **COMPLETE**
-2. [Live/Streaming Page](#2-livestreaming-page--critical)
+1. [Live/Streaming Page - Placeholder version](#livestreaming-page)
+2. [Light Mode Theme Toggle](#light-mode-theme-toggle)
+3. [Contextual Help for Apps](#contextual-help-for-apps)
+4. [Window Close Buttons](#window-close-buttons)
+5. [Discord Integration - Placeholder](#discord-integration)
 
-### 🟡 Medium Priority
+### Launch Requirements (v1.0)
 
-3. [BU Google OAuth](#3-bu-google-oauth--medium-priority)
-4. [Leaderboard with Real Scoring](#4-leaderboard-with-real-scoring--medium-priority)
-5. [Contextual Help for Apps](#11-contextual-help-for-apps--medium-priority)
-6. [Accessibility Improvements](#10-accessibility-improvements--medium-priority)
+#### Required for Launch
 
-### 🟢 Nice to Have / Low Priority
+1. [Live/Streaming Page - Full version](#livestreaming-page)
+2. [BU Google OAuth](#bu-google-oauth)
+3. [Project & Bounty Detail Pages](#project--bounty-detail-pages)
+4. [Discord Integration - Full](#discord-integration)
+5. [Leaderboard with Real Scoring](#leaderboard-with-real-scoring)
 
-5. [Light Mode Theme Toggle](#5-light-mode-theme-toggle--nice-to-have)
-6. [Window Close Buttons](#6-window-close-buttons--nice-to-have)
-7. [Enhanced Terminal Commands](#7-enhanced-terminal-commands--nice-to-have)
-8. [Project & Bounty Detail Pages](#8-project--bounty-detail-pages--nice-to-have)
-9. [Discord Integration](#9-discord-integration--nice-to-have)
-10. [Resizable Windows](#12-resizable-windows--low-priority-backlogged)
+#### Nice to Have
+
+1. [Accessibility Improvements](#accessibility-improvements)
+2. [Enhanced Terminal Commands](#enhanced-terminal-commands)
+3. [Resizable Windows](#resizable-windows)
 
 ---
 
 ## 📋 Detailed Requirements
 
-### 1. **About Page/Window** ✅ COMPLETE
+### About Page/Window
 
-**Status**: Implemented and deployed
+**Status**: ✅ COMPLETE - Implemented and deployed
 **Requirements** (from design doc):
 
 - Mission & Promise statement
@@ -76,7 +79,7 @@ We've successfully built the core OS-style interface with:
 
 ---
 
-### 2. **Live/Streaming Page** 🔴 CRITICAL
+### Live/Streaming Page
 
 **Status**: Not implemented yet
 **Requirements** (from design doc):
@@ -133,7 +136,7 @@ model Quest {
 
 ## 🔐 Authentication & User Features
 
-### 3. **BU Google OAuth** 🟡 MEDIUM PRIORITY
+### BU Google OAuth
 
 **Status**: Not implemented
 **Requirements**:
@@ -159,7 +162,7 @@ model Quest {
 
 ---
 
-### 4. **Leaderboard with Real Scoring** 🟡 MEDIUM PRIORITY
+### Leaderboard with Real Scoring
 
 **Status**: Currently shows static seeded data
 **Requirements**:
@@ -204,7 +207,7 @@ model LeaderboardEntry {
 
 ## 🎨 Polish & Enhancements
 
-### 5. **Light Mode Theme Toggle** 🟢 NICE TO HAVE
+### Light Mode Theme Toggle
 
 **Status**: Not implemented
 **Requirements** (from design doc):
@@ -222,7 +225,7 @@ model LeaderboardEntry {
 
 ---
 
-### 6. **Window Close Buttons** 🟢 NICE TO HAVE
+### Window Close Buttons
 
 **Status**: Windows have X button but it's not functional
 **Implementation**:
@@ -233,7 +236,7 @@ model LeaderboardEntry {
 
 ---
 
-### 11. **Contextual Help for Apps** 🟡 MEDIUM PRIORITY
+### Contextual Help for Apps
 
 **Status**: Not implemented
 **User feedback**: "i think the 'apps' when open need '?' maybe to the left of the window decoration (or other ideas?) that would link to the about section that explains it? or maybe its more like a tooltip but of the same content?"
@@ -258,7 +261,7 @@ model LeaderboardEntry {
 
 ---
 
-### 12. **Resizable Windows** 🟢 LOW PRIORITY (backlogged)
+### Resizable Windows
 
 **Status**: Not implemented
 **User feedback**: "i think we need to make the windows resizable :/ [...] i realized you can max the window and it is very usable so maybe the resizable goes far down the backlog"
@@ -274,7 +277,7 @@ model LeaderboardEntry {
 
 ---
 
-### 7. **Enhanced Terminal Commands** 🟢 NICE TO HAVE
+### Enhanced Terminal Commands
 
 **Current commands**: `help`, `apps`, `open <app>`, `status`, `clear`
 
@@ -289,7 +292,7 @@ model LeaderboardEntry {
 
 ---
 
-### 8. **Project & Bounty Detail Pages** 🟢 NICE TO HAVE
+### Project & Bounty Detail Pages
 
 **Status**: Gallery and Bounties show lists, but no detail views
 
@@ -302,7 +305,7 @@ model LeaderboardEntry {
 
 ---
 
-### 9. **Discord Integration** 🟢 NICE TO HAVE
+### Discord Integration
 
 **Requirements**:
 
@@ -313,7 +316,7 @@ model LeaderboardEntry {
 
 ---
 
-### 10. **Accessibility Improvements** 🟡 MEDIUM PRIORITY
+### Accessibility Improvements
 
 **Current status**: Basic keyboard nav works, needs audit
 
