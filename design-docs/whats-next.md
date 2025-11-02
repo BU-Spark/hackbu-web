@@ -277,6 +277,23 @@ model LeaderboardEntry {
 
 ---
 
+### Terminal Auto-Hide on Window Focus
+
+**Status**: Not implemented
+**Issue**: Terminal dropdown stays visible when user clicks on a window, creating visual clutter and potential usability confusion.
+
+**Expected behavior**: When a user focuses any window (clicks on it), the terminal should automatically close/hide.
+
+**Implementation**:
+
+- Listen for window focus events in Terminal component or WindowManager
+- Close terminal when any window receives focus
+- User can still reopen terminal with backtick (`) key or terminal toggle button
+
+**Priority**: MEDIUM - Nice UX improvement, prevents overlapping interfaces
+
+---
+
 ### Enhanced Terminal Commands
 
 **Current commands**: `help`, `apps`, `open <app>`, `status`, `clear`
