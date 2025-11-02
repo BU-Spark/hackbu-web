@@ -18,6 +18,37 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     }
   }, [isOpen]);
 
+  // Listen for command execution requests
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOpenWithCommand = (e: CustomEvent) => {
+      // Open terminal if closed
+      if (!isOpen) {
+        onToggle();
+      }
+      // Execute the command
+      const cmd = e.detail;
+      const [command, ...args] = cmd.trim().split(/\s+/);
+      const fn = commands[command as keyof typeof commands];
+
+      let result: string;
+      if (!fn) {
+        result = `Command not found: ${command}\nType 'help' for available commands`;
+      } else {
+        result = fn(args[0]);
+      }
+
+      setOutput((prev) => [...prev, `> ${cmd}`, result].filter(Boolean));
+    };
+
+    window.addEventListener('openTerminalWithCommand' as any, handleOpenWithCommand);
+
+    return () => {
+      window.removeEventListener('openTerminalWithCommand' as any, handleOpenWithCommand);
+    };
+  }, [isOpen, onToggle]);
+
   useEffect(() => {
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
@@ -57,6 +88,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       }
 
       onOpenWindow(arg);
+      onToggle(); // Close terminal after opening app
       return `Opening ${arg}...`;
     },
 
@@ -99,18 +131,21 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-spark-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-8">
-      <div className="w-full max-w-4xl h-96 bg-spark-black border-2 border-spark-teal rounded-lg flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between px-4 py-2 bg-spark-teal">
-          <span className="font-mono font-semibold text-spark-black">
-            HackBU Terminal
+    <div
+      className={`fixed top-14 left-0 right-0 z-50 px-4 transition-transform duration-300 ease-out ${
+        isOpen ? 'translate-y-0' : '-translate-y-full'
+      }`}
+      style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
+    >
+      <div className="w-full max-w-7xl mx-auto h-96 bg-spark-black/95 border-4 border-b-0 border-spark-chartreuse rounded-b-lg flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 py-3 bg-spark-teal border-b-2 border-spark-chartreuse">
+          <span className="font-mono font-bold text-spark-black">
+            HackBU Terminal - Press ` to toggle
           </span>
           <button
             onClick={onToggle}
-            className="text-spark-black hover:text-spark-black/70 font-mono font-bold"
+            className="text-spark-black hover:text-spark-black/70 font-mono font-bold text-lg"
             aria-label="Close terminal"
           >
             ✕

@@ -1,23 +1,31 @@
 ---
 // Random background image selection
 const backgrounds = [
-  '/backgrounds/bg-1.jpg',
-  '/backgrounds/bg-2.jpg',
-  '/backgrounds/bg-3.jpg',
+  '/backgrounds/085A0479.jpg',
+  '/backgrounds/DSC04485.jpg',
+  '/backgrounds/Screen-Shot-2024-07-25-at-1.13.32-PM-700x700.png',
+  '/backgrounds/Screen-Shot-2024-07-25-at-1.29.00-PM-700x700.png',
 ];
 const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 ---
 
 <main
-  class="fixed inset-0 pt-14 overflow-hidden"
+  class="fixed inset-0 pt-14 overflow-hidden bg-gray-900"
   style={`background-image: url(${randomBg}); background-size: cover; background-position: center;`}
 >
-  <!-- Background overlay -->
-  <div class="absolute inset-0 bg-spark-teal/95"></div>
+  <!-- Background overlay - darker to fade image more -->
+  <div class="absolute inset-0 bg-gray-900/90"></div>
 
-  <!-- BU Spark! logo watermark (faded, top-right) -->
-  <div class="absolute top-20 right-6 opacity-30 z-0">
-    <img src="/spark-logo.png" alt="BU Spark!" class="h-24" />
+  <!-- Logo watermarks (bottom-right) -->
+  <div class="absolute bottom-16 right-8 flex items-end gap-4 z-0">
+    <!-- Spark logo -->
+    <div class="opacity-40">
+      <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48" />
+    </div>
+    <!-- HackBU logo -->
+    <div class="opacity-50">
+      <img src="/hackbu-logo.png" alt="HackBU" class="h-48" />
+    </div>
   </div>
 
   <!-- Main desktop area -->
@@ -26,7 +34,7 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
   </div>
 
   <!-- "Powered by" footer -->
-  <div class="absolute bottom-6 right-6 text-sm text-spark-eggshell/50 font-mono z-0">
+  <div class="absolute bottom-4 right-8 text-sm text-spark-eggshell/60 font-mono z-0">
     Powered by BU IS&T
   </div>
 </main>

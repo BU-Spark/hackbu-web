@@ -8,6 +8,7 @@ interface WindowProps {
   id: string;
   onFocus?: () => void;
   zIndex: number;
+  isFocused?: boolean;
 }
 
 export function Window({
@@ -18,6 +19,7 @@ export function Window({
   id,
   onFocus,
   zIndex,
+  isFocused = true,
 }: WindowProps) {
   const [pos, setPos] = useState({ x: initialX, y: initialY });
   const [size, setSize] = useState({ width: 600, height: 400 });
@@ -38,8 +40,8 @@ export function Window({
       const newY = e.clientY - dragOffset.current.y;
 
       // Constrain to viewport
-      const maxX = window.innerWidth - 200; // Leave at least 200px visible
-      const maxY = window.innerHeight - 60; // Leave title bar visible
+      const maxX = (typeof window !== 'undefined' ? window.innerWidth : 1920) - 200; // Leave at least 200px visible
+      const maxY = (typeof window !== 'undefined' ? window.innerHeight : 1080) - 60; // Leave title bar visible
 
       setPos({
         x: Math.max(0, Math.min(newX, maxX)),
@@ -91,8 +93,8 @@ export function Window({
       savedSize.current = size;
       setPos({ x: 20, y: 76 });
       setSize({
-        width: window.innerWidth - 40,
-        height: window.innerHeight - 96,
+        width: (typeof window !== 'undefined' ? window.innerWidth : 1920) - 40,
+        height: (typeof window !== 'undefined' ? window.innerHeight : 1080) - 96,
       });
       setIsMaximized(true);
     }
@@ -101,7 +103,9 @@ export function Window({
   return (
     <div
       ref={windowRef}
-      className="absolute bg-spark-black/95 border-2 border-spark-teal rounded-lg shadow-2xl flex flex-col overflow-hidden backdrop-blur-sm"
+      className={`absolute bg-spark-black/95 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-sm transition-all ${
+        isFocused ? 'border-4 border-spark-chartreuse' : 'border-2 border-gray-600'
+      }`}
       style={{
         left: `${pos.x}px`,
         top: `${pos.y}px`,
@@ -114,10 +118,14 @@ export function Window({
     >
       {/* Title Bar */}
       <div
-        className="bg-spark-teal px-4 py-2 flex items-center justify-between cursor-move select-none"
+        className={`px-4 py-3 flex items-center justify-between cursor-move select-none transition-colors ${
+          isFocused
+            ? 'bg-spark-teal border-b-2 border-spark-chartreuse'
+            : 'bg-gray-700 border-b border-gray-600'
+        }`}
         onMouseDown={handleMouseDown}
       >
-        <span className="font-mono text-spark-black font-semibold">{title}</span>
+        <span className={`font-mono font-bold text-base ${isFocused ? 'text-spark-black' : 'text-gray-400'}`}>{title}</span>
         <div className="flex gap-2">
           <button
             onClick={handleMinimize}

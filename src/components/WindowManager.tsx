@@ -27,6 +27,10 @@ export function WindowManager({
   const [nextZ, setNextZ] = useState(11);
 
   const openWindow = (id: string) => {
+    // Always bring window to front (whether opening new or already open)
+    setZIndices((prev) => ({ ...prev, [id]: nextZ }));
+    setNextZ((z) => z + 1);
+
     if (!openWindows.includes(id)) {
       setOpenWindows((prev) => {
         // Limit to 4 windows
@@ -40,12 +44,6 @@ export function WindowManager({
         }
         return [...prev, id];
       });
-      setZIndices((prev) => ({ ...prev, [id]: nextZ }));
-      setNextZ((z) => z + 1);
-    } else {
-      // Bring to front
-      setZIndices((prev) => ({ ...prev, [id]: nextZ }));
-      setNextZ((z) => z + 1);
     }
   };
 
@@ -56,6 +54,8 @@ export function WindowManager({
 
   // Listen for events from dock and buttons
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleOpenWindow = (e: CustomEvent) => {
       openWindow(e.detail);
     };
@@ -88,6 +88,11 @@ export function WindowManager({
     badges: l.badges,
   }));
 
+  // Find the focused window (highest z-index)
+  const focusedWindow = Object.entries(zIndices).reduce((max, [id, z]) =>
+    z > (zIndices[max] || 0) ? id : max
+  , 'motd');
+
   return (
     <>
       {/* MOTD Window */}
@@ -95,10 +100,11 @@ export function WindowManager({
         <Window
           title="Message of the Day"
           id="motd"
-          initialX={window.innerWidth / 2 - 250}
-          initialY={window.innerHeight / 2 - 200}
+          initialX={(typeof window !== 'undefined' ? window.innerWidth : 1920) / 2 - 250}
+          initialY={(typeof window !== 'undefined' ? window.innerHeight : 1080) / 2 - 200}
           onFocus={() => focusWindow('motd')}
           zIndex={zIndices.motd}
+          isFocused={focusedWindow === 'motd'}
         >
           <pre className="font-mono text-sm text-spark-chartreuse whitespace-pre">
             {motd}
@@ -115,6 +121,7 @@ export function WindowManager({
           initialY={120}
           onFocus={() => focusWindow('bounties')}
           zIndex={zIndices.bounties}
+          isFocused={focusedWindow === 'bounties'}
         >
           <TableRow
             columns={['Title', 'Prize', 'Deadline', 'Tags']}
@@ -132,6 +139,7 @@ export function WindowManager({
           initialY={160}
           onFocus={() => focusWindow('gallery')}
           zIndex={zIndices.gallery}
+          isFocused={focusedWindow === 'gallery'}
         >
           <CardList items={projects} type="project" />
         </Window>
@@ -146,6 +154,7 @@ export function WindowManager({
           initialY={220}
           onFocus={() => focusWindow('leaderboard')}
           zIndex={zIndices.leaderboard}
+          isFocused={focusedWindow === 'leaderboard'}
         >
           <TableRow
             columns={['#', 'Name', 'Points', 'Badges']}
@@ -163,6 +172,7 @@ export function WindowManager({
           initialY={120}
           onFocus={() => focusWindow('events')}
           zIndex={zIndices.events}
+          isFocused={focusedWindow === 'events'}
         >
           <CardList items={events} type="event" />
         </Window>
