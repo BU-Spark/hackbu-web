@@ -1,44 +1,44 @@
 [
   {
     "slug": "terrier-transit",
-    "name": "TerrierTransit",
-    "badge": "🏆 Code & Tell Winner",
-    "desc": "Real-time BU shuttle tracking with next-bus predictions",
-    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/terrier-transit\"},{\"label\":\"GitHub\",\"url\":\"https://github.com/bu-spark/terrier-transit\"}]"
+    "name": "CoffeeFinder 3000",
+    "badge": "☕ Demo Project",
+    "desc": "AI-powered caffeine locator for sleep-deprived students (sample data)",
+    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/terrier-transit\"},{\"label\":\"GitHub\",\"url\":\"#\"}]"
   },
   {
     "slug": "bu-menu-optimizer",
-    "name": "BU Menu Optimizer",
-    "badge": "🔧 Utility Tool",
-    "desc": "Allergen-aware dining hall menu search and meal planning",
-    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/bu-menu-optimizer\"},{\"label\":\"GitHub\",\"url\":\"https://github.com/bu-spark/menu-optimizer\"}]"
+    "name": "Meme Generator Pro",
+    "badge": "🎭 Placeholder",
+    "desc": "Turn your bugs into viral memes automatically (fictional example)",
+    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/bu-menu-optimizer\"},{\"label\":\"GitHub\",\"url\":\"#\"}]"
   },
   {
     "slug": "spark-shift-bot",
-    "name": "Spark Shift Bot",
-    "badge": "💬 Discord Bot",
-    "desc": "Automated front desk scheduling and shift-swap helper",
-    "links": "[{\"label\":\"GitHub\",\"url\":\"https://github.com/bu-spark/shift-bot\"}]"
+    "name": "Rubber Duck Oracle",
+    "badge": "🦆 Test Data",
+    "desc": "A chatbot that debugs code by quacking thoughtfully (demo only)",
+    "links": "[{\"label\":\"GitHub\",\"url\":\"#\"}]"
   },
   {
     "slug": "bu-course-graph",
-    "name": "BU Course Graph",
-    "badge": "📊 Data Viz",
-    "desc": "Interactive prerequisite and course dependency visualizer",
-    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/bu-course-graph\"},{\"label\":\"GitHub\",\"url\":\"https://github.com/bu-spark/course-graph\"}]"
+    "name": "Procrastination Tracker",
+    "badge": "⏰ Sample",
+    "desc": "Visualize how many times you've checked social media today (fake)",
+    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/bu-course-graph\"},{\"label\":\"GitHub\",\"url\":\"#\"}]"
   },
   {
     "slug": "campus-events-api",
-    "name": "Campus Events API",
-    "badge": "🔌 API",
-    "desc": "Unified API aggregating events from BU departments and orgs",
-    "links": "[{\"label\":\"Docs\",\"url\":\"/projects/campus-events-api\"},{\"label\":\"GitHub\",\"url\":\"https://github.com/bu-spark/events-api\"}]"
+    "name": "Snack Vending Machine API",
+    "badge": "🍿 Demo Data",
+    "desc": "Real-time inventory of fictional vending machines on Mars (placeholder)",
+    "links": "[{\"label\":\"Docs\",\"url\":\"/projects/campus-events-api\"},{\"label\":\"GitHub\",\"url\":\"#\"}]"
   },
   {
     "slug": "study-spot-finder",
-    "name": "Study Spot Finder",
-    "badge": "📍 Location Tool",
-    "desc": "Find open study spaces on campus with crowd-sourced occupancy",
-    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/study-spot-finder\"},{\"label\":\"GitHub\",\"url\":\"https://github.com/bu-spark/study-spots\"}]"
+    "name": "Nap Pod Finder",
+    "badge": "� Example",
+    "desc": "Locate the best napping spots on campus (not a real app)",
+    "links": "[{\"label\":\"Demo\",\"url\":\"/projects/study-spot-finder\"},{\"label\":\"GitHub\",\"url\":\"#\"}]"
   }
 ]

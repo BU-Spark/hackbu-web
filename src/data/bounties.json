@@ -1,58 +1,58 @@
 [
   {
-    "title": "Fix course-scheduler API endpoints",
-    "prize": 200,
-    "deadline": "2025-11-20",
-    "tags": "[\"Web\", \"Backend\", \"API\"]",
+    "title": "Build a coffee-powered to-do list for sleepy coders",
+    "prize": 42,
+    "deadline": "2099-12-31",
+    "tags": "[\"Demo\", \"Placeholder\", \"Fake\"]",
     "status": "open"
   },
   {
-    "title": "Build campus bus tracker mobile app",
-    "prize": 350,
-    "deadline": "2025-11-28",
-    "tags": "[\"Mobile\", \"React Native\", \"Data\"]",
+    "title": "Train AI to write commit messages in haiku form",
+    "prize": 1337,
+    "deadline": "2099-01-01",
+    "tags": "[\"AI\", \"Poetry\", \"Demo\"]",
     "status": "open"
   },
   {
-    "title": "Improve dining hall menu search UX",
-    "prize": 150,
-    "deadline": "2025-12-05",
-    "tags": "[\"Web\", \"Frontend\", \"UX\"]",
-    "status": "open"
-  },
-  {
-    "title": "Create BU events aggregator bot",
+    "title": "Create a Discord bot that only responds in emojis",
     "prize": 100,
-    "deadline": "2025-12-12",
-    "tags": "[\"Discord\", \"Bot\", \"API\"]",
+    "deadline": "2099-06-15",
+    "tags": "[\"Bot\", \"Fun\", \"Sample Data\"]",
     "status": "open"
   },
   {
-    "title": "Build room availability checker",
-    "prize": 250,
-    "deadline": "2025-12-18",
-    "tags": "[\"Web\", \"Data\", \"Scraping\"]",
+    "title": "Implement rubber duck debugging as a service",
+    "prize": 404,
+    "deadline": "2099-03-14",
+    "tags": "[\"Debugging\", \"Placeholder\", \"Quack\"]",
     "status": "open"
   },
   {
-    "title": "Design new HackBU merch templates",
-    "prize": 75,
-    "deadline": "2025-11-30",
-    "tags": "[\"Design\", \"Figma\"]",
+    "title": "Design holographic UI for time-traveling devs",
+    "prize": 9001,
+    "deadline": "2099-07-04",
+    "tags": "[\"Design\", \"Sci-Fi\", \"Demo\"]",
     "status": "open"
   },
   {
-    "title": "Optimize student org directory database",
-    "prize": 180,
-    "deadline": "2025-12-08",
-    "tags": "[\"Database\", \"Backend\", \"Performance\"]",
+    "title": "Optimize algorithm for finding lost semicolons",
+    "prize": 256,
+    "deadline": "2099-10-31",
+    "tags": "[\"Search\", \"Sample\", \"Test Data\"]",
     "status": "open"
   },
   {
-    "title": "Add dark mode to BU course planner",
-    "prize": 120,
-    "deadline": "2025-12-15",
-    "tags": "[\"Web\", \"CSS\", \"Frontend\"]",
+    "title": "Build browser extension that translates code to memes",
+    "prize": 777,
+    "deadline": "2099-04-20",
+    "tags": "[\"Extension\", \"Memes\", \"Placeholder\"]",
+    "status": "open"
+  },
+  {
+    "title": "Create API for generating placeholder text in Klingon",
+    "prize": 500,
+    "deadline": "2099-11-11",
+    "tags": "[\"API\", \"Demo\", \"qapla'\"]",
     "status": "open"
   }
 ]

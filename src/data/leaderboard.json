@@ -1,7 +1,7 @@
 [
-  { "name": "mvoong", "points": 245, "badges": "🥇🏗️💻", "rank": 1 },
-  { "name": "langdon", "points": 180, "badges": "💡🎤🔥", "rank": 2 },
-  { "name": "spark_team", "points": 165, "badges": "🧠⚡", "rank": 3 },
-  { "name": "alex_codes", "points": 140, "badges": "🚀💯", "rank": 4 },
-  { "name": "data_wizard", "points": 125, "badges": "📊✨", "rank": 5 }
+  { "name": "demo_user_123", "points": 9999, "badges": "�🎪🎨", "rank": 1 },
+  { "name": "placeholder_pete", "points": 8888, "badges": "🤖🧪�", "rank": 2 },
+  { "name": "test_data_tony", "points": 7777, "badges": "🎲🎯🎸", "rank": 3 },
+  { "name": "sample_sally", "points": 6666, "badges": "🧩🎭🎪", "rank": 4 },
+  { "name": "fake_freddy", "points": 5555, "badges": "🎨🎬🎤", "rank": 5 }
 ]
