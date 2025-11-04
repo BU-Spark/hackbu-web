@@ -81,6 +81,12 @@ export function Window({
   };
 
   const handleMinimize = () => {
+    if (!isMinimized && isMaximized) {
+      // If maximized, restore first then minimize
+      setPos(savedPos.current);
+      setSize(savedSize.current);
+      setIsMaximized(false);
+    }
     setIsMinimized(!isMinimized);
   };
 
@@ -100,6 +106,10 @@ export function Window({
         height: (typeof window !== 'undefined' ? window.innerHeight : 1080) - 96,
       });
       setIsMaximized(true);
+      // Clear minimize if maximizing
+      if (isMinimized) {
+        setIsMinimized(false);
+      }
     }
   };
 
@@ -112,8 +122,8 @@ export function Window({
       style={{
         left: `${pos.x}px`,
         top: `${pos.y}px`,
-        width: isMaximized ? `${size.width}px` : '600px',
-        height: isMaximized ? `${size.height}px` : isMinimized ? '52px' : '400px',
+        width: isMinimized ? '600px' : isMaximized ? `${size.width}px` : '600px',
+        height: isMinimized ? '52px' : isMaximized ? `${size.height}px` : '400px',
         zIndex,
       }}
       onMouseDown={onFocus}
