@@ -113,7 +113,7 @@ export function Window({
         left: `${pos.x}px`,
         top: `${pos.y}px`,
         width: isMaximized ? `${size.width}px` : '600px',
-        height: isMaximized ? `${size.height}px` : isMinimized ? '40px' : '400px',
+        height: isMaximized ? `${size.height}px` : isMinimized ? '52px' : '400px',
         zIndex,
       }}
       onMouseDown={onFocus}
@@ -132,19 +132,25 @@ export function Window({
         <div className="flex gap-2">
           <button
             onClick={handleMinimize}
-            className="w-5 h-5 rounded-full bg-spark-chartreuse hover:bg-spark-chartreuse/80 transition-colors"
+            className="w-5 h-5 rounded-full bg-[#FFBD2E] hover:bg-[#FFBD2E]/90 transition-colors flex items-center justify-center group"
             aria-label="Minimize"
-          />
+          >
+            <span className="text-[#995700] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-none pb-0.5">−</span>
+          </button>
           <button
             onClick={handleMaximize}
-            className="w-5 h-5 rounded-full bg-spark-eggshell hover:bg-spark-eggshell/80 transition-colors"
+            className="w-5 h-5 rounded-full bg-[#28CA42] hover:bg-[#28CA42]/90 transition-colors flex items-center justify-center group"
             aria-label="Maximize"
-          />
+          >
+            <span className="text-[#006500] text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-none">⛶</span>
+          </button>
           <button
             onClick={handleClose}
-            className="w-5 h-5 rounded-full bg-spark-orange hover:bg-spark-orange/80 transition-colors"
+            className="w-5 h-5 rounded-full bg-[#FF5F57] hover:bg-[#FF5F57]/90 transition-colors flex items-center justify-center group"
             aria-label="Close"
-          />
+          >
+            <span className="text-[#4D0000] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-none">×</span>
+          </button>
         </div>
       </div>
 
