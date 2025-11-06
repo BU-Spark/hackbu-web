@@ -13,6 +13,8 @@ We've successfully built the core OS-style interface with:
 - ✅ **Theme**: Full Spark color palette (teal, chartreuse, eggshell, orange, black)
 - ✅ **Database**: SQLite + Prisma with seeded data for bounties, projects, leaderboard, events
 - ✅ **Window Management**: Unlimited windows, proper focus/unfocus states, bring-to-front on click
+- ✅ **Window Maximize**: Fixed positioning to properly fill desktop area (flush with header, stops above dock)
+- ✅ **Window Resizing**: 8-point resize handles (corners + edges) with min dimensions and proper cursors
 - ✅ **Brand Integration**: Spark and HackBU logos with faded background images from Spark site
 - ✅ **About Page**: Full about page with mission, sponsors, team, FAQ, and governance sections
 
@@ -42,7 +44,6 @@ We've successfully built the core OS-style interface with:
 
 1. [Accessibility Improvements](#accessibility-improvements)
 2. [Enhanced Terminal Commands](#enhanced-terminal-commands)
-3. [Resizable Windows](#resizable-windows)
 
 ---
 
@@ -263,17 +264,22 @@ model LeaderboardEntry {
 
 ### Resizable Windows
 
-**Status**: Not implemented
-**User feedback**: "i think we need to make the windows resizable :/ [...] i realized you can max the window and it is very usable so maybe the resizable goes far down the backlog"
+**Status**: ✅ COMPLETE - Implemented and working
+**Update**: Despite initial low priority, nearly everyone who demos the site attempts to resize windows. Moved to high priority and implemented.
 
 **Implementation**:
 
-- Add resize handles to window corners/edges
-- Respect min/max dimensions
-- Store resize state in WindowManager
-- Update Window component to handle resize events
+- ✅ 8 resize handles: 4 corners (nw, ne, sw, se) + 4 edges (n, s, e, w)
+- ✅ Min dimensions: 300px width × 200px height
+- ✅ Proper cursor indicators for each resize direction
+- ✅ Edge handles positioned at outer window edges for intuitive UX
+- ✅ Smart position updates when resizing from top/left edges
+- ✅ Handles hidden when maximized or minimized
+- ✅ Touch-friendly with touchAction: 'none'
 
-**Priority**: LOW - Users can already maximize windows which provides good usability. Nice to have but not critical for v1.0.
+**Files modified**:
+
+- `src/components/Window.tsx`: Added resize state, handlers, and 8 resize handle elements
 
 ---
 
@@ -294,18 +300,49 @@ model LeaderboardEntry {
 
 ---
 
+### Window Maximize Bounds Fix
+
+**Status**: ✅ COMPLETE - Tested and working perfectly
+**Issue**: When maximizing a window, there were visual gaps:
+
+- Gap between header bottom and window top
+- Window extending below the dock buttons (overlapping)
+
+**Root cause**: Desktop component has `pt-14` (56px padding-top) to create space for the header. Windows are positioned absolutely within this desktop area, so setting `y = headerBottom` (56px) was double-counting the header offset.
+
+**Solution implemented**:
+
+- Set maximized windows to `y = 0` (Desktop padding handles the header offset automatically)
+- Measure actual dock position via `getBoundingClientRect()` instead of estimating
+- Height calculation: `dockTop - headerHeight - bottomGutter`
+- Updated drag constraints: `minY = 0` (Desktop padding prevents header overlap)
+- Updated resize handler to maintain maximized bounds on viewport changes
+- Added `id="dock"` to Dock component for DOM measurements
+
+**Key insight**: With the Desktop's `pt-14` padding, windows at `y=0` automatically appear below the header. The previous implementation was adding the header offset twice.
+
+**Files modified**:
+
+- `src/components/Window.tsx`: Updated maximize logic, resize handler, and drag constraints
+- `src/components/Dock.astro`: Added `id="dock"` for position measurements
+
+---
+
 ### Enhanced Terminal Commands
 
-**Current commands**: `help`, `apps`, `open <app>`, `status`, `clear`
+**Current commands**: `help`, `apps`, `ls`, `open <app>`, `status`, `clear`
 
-**Additional ideas**:
+**Recent additions**:
+- ✅ `ls` - List available apps (alias for `apps`) - added because everyone tries `ls` first!
+- ✅ `do a barrel roll` / `barrelroll` - Easter egg: spins the entire desktop 360°
+
+**Future ideas**:
 
 - `whoami` - show current user (if logged in)
-- `about` - open About window
-- `live` - open Live window
-- `leaderboard` - open Leaderboard window (alias to `open leaderboard`)
+- `about` - open About window (alias to `open about`)
+- `live` - open Live window (alias to `open live`)
 - `theme` or `theme toggle` - switch light/dark mode
-- `easter eggs` - fun hidden commands for community culture
+- More easter eggs - fun hidden commands for community culture (e.g., `konami code`, `sudo make me a sandwich`, etc.)
 
 ---
 
