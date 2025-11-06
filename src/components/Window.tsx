@@ -43,9 +43,12 @@ export function Window({
       const maxX = (typeof window !== 'undefined' ? window.innerWidth : 1920) - 200; // Leave at least 200px visible
       const maxY = (typeof window !== 'undefined' ? window.innerHeight : 1080) - 60; // Leave title bar visible
 
+      // Desktop has pt-14 padding, so minY=0 keeps window below header
+      const minY = 0;
+
       setPos({
         x: Math.max(0, Math.min(newX, maxX)),
-        y: Math.max(56, Math.min(newY, maxY)), // 56px for topbar
+        y: Math.max(minY, Math.min(newY, maxY)),
       });
     };
 
@@ -97,14 +100,50 @@ export function Window({
       setSize(savedSize.current);
       setIsMaximized(false);
     } else {
-      // Maximize
+      // Maximize to the desktop area (below topbar, above dock)
       savedPos.current = pos;
       savedSize.current = size;
-      setPos({ x: 20, y: 76 });
-      setSize({
-        width: (typeof window !== 'undefined' ? window.innerWidth : 1920) - 40,
-        height: (typeof window !== 'undefined' ? window.innerHeight : 1080) - 96,
-      });
+
+      const computeDesktopBounds = () => {
+        const w = typeof window !== 'undefined' ? window : undefined;
+        const bottomGutter = 8; // Small gutter above dock
+        const leftGutter = 20;
+        const rightGutter = 20;
+
+        const winW = w ? w.innerWidth : 1920;
+        const winH = w ? w.innerHeight : 1080;
+
+        let headerHeight = 56; // Topbar default (h-14)
+        let dockTop = winH - 80; // Default estimate if dock not found
+
+        if (w && typeof document !== 'undefined') {
+          const headerEl = document.querySelector('header');
+          if (headerEl) {
+            headerHeight = (headerEl as HTMLElement).offsetHeight;
+          }
+
+          // Measure actual dock position
+          const dockEl = document.getElementById('dock');
+          if (dockEl) {
+            const dockRect = dockEl.getBoundingClientRect();
+            dockTop = dockRect.top;
+          }
+        }
+
+  // Desktop has pt-14 (56px padding-top), so windows at y=0 start below header
+  // Window fills from top of desktop area (y=0) to dock top minus gutter
+  const x = leftGutter;
+  const y = 0;
+  const width = winW - (leftGutter + rightGutter);
+  // Height is from desktop top to dock top minus header height and gutter
+  const height = Math.max(120, dockTop - headerHeight - bottomGutter);
+
+  return { x, y, width, height };
+      };
+
+      const bounds = computeDesktopBounds();
+      setPos({ x: bounds.x, y: bounds.y });
+      setSize({ width: bounds.width, height: bounds.height });
       setIsMaximized(true);
       // Clear minimize if maximizing
       if (isMinimized) {
@@ -112,6 +151,45 @@ export function Window({
       }
     }
   };
+
+  // Keep maximized window fitted on viewport resize
+  useEffect(() => {
+    if (!isMaximized) return;
+    const onResize = () => {
+      const w = typeof window !== 'undefined' ? window : undefined;
+      const bottomGutter = 8; // Small gutter above dock
+      const leftGutter = 20;
+      const rightGutter = 20;
+
+      const winW = w ? w.innerWidth : 1920;
+      const winH = w ? w.innerHeight : 1080;
+
+      let headerHeight = 56;
+      let dockTop = winH - 80; // Default estimate if dock not found
+
+      if (w && typeof document !== 'undefined') {
+        const headerEl = document.querySelector('header');
+        if (headerEl) {
+          headerHeight = (headerEl as HTMLElement).offsetHeight;
+        }
+
+        // Measure actual dock position
+        const dockEl = document.getElementById('dock');
+        if (dockEl) {
+          dockTop = dockEl.getBoundingClientRect().top;
+        }
+      }
+
+      // Desktop has pt-14, so y=0 positions window at desktop top (below header)
+      setPos({ x: leftGutter, y: 0 });
+      setSize({
+        width: winW - (leftGutter + rightGutter),
+        height: Math.max(120, dockTop - headerHeight - bottomGutter),
+      });
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [isMaximized]);
 
   return (
     <div
