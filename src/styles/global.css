@@ -9,3 +9,13 @@
     @apply bg-spark-teal text-spark-eggshell font-sans;
   }
 }
+
+/* Easter egg animations */
+@keyframes barrel-roll {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

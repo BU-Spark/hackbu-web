@@ -59,6 +59,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     help: () => [
       'Available commands:',
       '  apps                    list available apps',
+      '  ls                      list available apps (alias)',
       '  open <app>              open an app window',
       '  status                  show community stats',
       '  clear                   clear terminal',
@@ -70,6 +71,18 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     ].join('\n'),
 
     apps: () => [
+      'Available apps:',
+      '  bounties      💰 Browse open coding challenges',
+      '  gallery       🚀 See student projects',
+      '  leaderboard   🏆 Top contributors',
+      '  events        📅 Upcoming meetups',
+      '  about         ℹ️  Learn about HackBU',
+      '  live          📡 Watch live streams',
+      '',
+      'Type \'open <name>\' to launch',
+    ].join('\n'),
+
+    ls: () => [
       'Available apps:',
       '  bounties      💰 Browse open coding challenges',
       '  gallery       🚀 See student projects',
@@ -106,6 +119,35 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     clear: () => {
       setOutput([]);
       return '';
+    },
+
+    // Easter eggs
+    'do a barrel roll': () => {
+      // Trigger barrel roll animation on the desktop
+      if (typeof window !== 'undefined') {
+        const desktop = document.getElementById('desktop');
+        if (desktop) {
+          desktop.style.animation = 'barrel-roll 1s ease-in-out';
+          setTimeout(() => {
+            desktop.style.animation = '';
+          }, 1000);
+        }
+      }
+      return '🎮 Executing barrel roll maneuver!';
+    },
+
+    barrelroll: () => {
+      // Alternate trigger without spaces
+      if (typeof window !== 'undefined') {
+        const desktop = document.getElementById('desktop');
+        if (desktop) {
+          desktop.style.animation = 'barrel-roll 1s ease-in-out';
+          setTimeout(() => {
+            desktop.style.animation = '';
+          }, 1000);
+        }
+      }
+      return '🎮 Executing barrel roll maneuver!';
     },
   };
 
