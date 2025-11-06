@@ -26,11 +26,17 @@ export function Window({
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState<string | null>(null);
 
   const windowRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const resizeStart = useRef({ x: 0, y: 0, width: 0, height: 0, posX: 0, posY: 0 });
   const savedSize = useRef({ width: 600, height: 400 });
   const savedPos = useRef({ x: initialX, y: initialY });
+
+  const MIN_WIDTH = 300;
+  const MIN_HEIGHT = 200;
 
   useEffect(() => {
     if (!isDragging) return;
@@ -64,6 +70,74 @@ export function Window({
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging]);
+
+  // Resize handling
+  useEffect(() => {
+    if (!isResizing || !resizeDirection) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - resizeStart.current.x;
+      const deltaY = e.clientY - resizeStart.current.y;
+
+      let newWidth = resizeStart.current.width;
+      let newHeight = resizeStart.current.height;
+      let newX = resizeStart.current.posX;
+      let newY = resizeStart.current.posY;
+
+      // Handle horizontal resizing
+      if (resizeDirection.includes('e')) {
+        newWidth = Math.max(MIN_WIDTH, resizeStart.current.width + deltaX);
+      } else if (resizeDirection.includes('w')) {
+        const proposedWidth = resizeStart.current.width - deltaX;
+        if (proposedWidth >= MIN_WIDTH) {
+          newWidth = proposedWidth;
+          newX = resizeStart.current.posX + deltaX;
+        }
+      }
+
+      // Handle vertical resizing
+      if (resizeDirection.includes('s')) {
+        newHeight = Math.max(MIN_HEIGHT, resizeStart.current.height + deltaY);
+      } else if (resizeDirection.includes('n')) {
+        const proposedHeight = resizeStart.current.height - deltaY;
+        if (proposedHeight >= MIN_HEIGHT) {
+          newHeight = proposedHeight;
+          newY = Math.max(0, resizeStart.current.posY + deltaY);
+        }
+      }
+
+      setSize({ width: newWidth, height: newHeight });
+      setPos({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      setResizeDirection(null);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, resizeDirection, MIN_WIDTH, MIN_HEIGHT]);
+
+  const handleResizeStart = (e: React.MouseEvent, direction: string) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeDirection(direction);
+    resizeStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      width: size.width,
+      height: size.height,
+      posX: pos.x,
+      posY: pos.y,
+    };
+    onFocus?.();
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return; // Don't drag if clicking buttons
@@ -200,8 +274,8 @@ export function Window({
       style={{
         left: `${pos.x}px`,
         top: `${pos.y}px`,
-        width: isMinimized ? '600px' : isMaximized ? `${size.width}px` : '600px',
-        height: isMinimized ? '52px' : isMaximized ? `${size.height}px` : '400px',
+        width: isMinimized ? '600px' : `${size.width}px`,
+        height: isMinimized ? '52px' : `${size.height}px`,
         zIndex,
       }}
       onMouseDown={onFocus}
@@ -247,6 +321,55 @@ export function Window({
         <div className="flex-1 overflow-auto p-4 text-spark-eggshell">
           {children}
         </div>
+      )}
+
+      {/* Resize Handles - only show when not maximized or minimized */}
+      {!isMaximized && !isMinimized && (
+        <>
+          {/* Corner handles */}
+          <div
+            className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize"
+            onMouseDown={(e) => handleResizeStart(e, 'nw')}
+            style={{ touchAction: 'none' }}
+          />
+          <div
+            className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize"
+            onMouseDown={(e) => handleResizeStart(e, 'ne')}
+            style={{ touchAction: 'none' }}
+          />
+          <div
+            className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize"
+            onMouseDown={(e) => handleResizeStart(e, 'sw')}
+            style={{ touchAction: 'none' }}
+          />
+          <div
+            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize"
+            onMouseDown={(e) => handleResizeStart(e, 'se')}
+            style={{ touchAction: 'none' }}
+          />
+
+          {/* Edge handles - positioned at outer edges */}
+          <div
+            className="absolute top-0 left-3 right-3 h-2 cursor-n-resize -translate-y-1"
+            onMouseDown={(e) => handleResizeStart(e, 'n')}
+            style={{ touchAction: 'none' }}
+          />
+          <div
+            className="absolute bottom-0 left-3 right-3 h-2 cursor-s-resize translate-y-1"
+            onMouseDown={(e) => handleResizeStart(e, 's')}
+            style={{ touchAction: 'none' }}
+          />
+          <div
+            className="absolute left-0 top-3 bottom-3 w-2 cursor-w-resize -translate-x-1"
+            onMouseDown={(e) => handleResizeStart(e, 'w')}
+            style={{ touchAction: 'none' }}
+          />
+          <div
+            className="absolute right-0 top-3 bottom-3 w-2 cursor-e-resize translate-x-1"
+            onMouseDown={(e) => handleResizeStart(e, 'e')}
+            style={{ touchAction: 'none' }}
+          />
+        </>
       )}
     </div>
   );
