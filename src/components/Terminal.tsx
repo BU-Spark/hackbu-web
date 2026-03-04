@@ -74,10 +74,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       'Available apps:',
       '  bounties      💰 Browse open coding challenges',
       '  gallery       🚀 See student projects',
-      '  leaderboard   🏆 Top contributors',
       '  events        📅 Upcoming meetups',
-      '  about         ℹ️  Learn about HackBU',
-      '  live          📡 Watch live streams',
       '',
       'Type \'open <name>\' to launch',
     ].join('\n'),
@@ -86,10 +83,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       'Available apps:',
       '  bounties      💰 Browse open coding challenges',
       '  gallery       🚀 See student projects',
-      '  leaderboard   🏆 Top contributors',
       '  events        📅 Upcoming meetups',
-      '  about         ℹ️  Learn about HackBU',
-      '  live          📡 Watch live streams',
       '',
       'Type \'open <name>\' to launch',
     ].join('\n'),
@@ -97,7 +91,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     open: (arg?: string) => {
       if (!arg) return 'Usage: open <app>\nRun \'apps\' to see available apps';
 
-      const validApps = ['bounties', 'gallery', 'leaderboard', 'events', 'about', 'live'];
+      const validApps = ['bounties', 'gallery', 'events'];
       if (!validApps.includes(arg)) {
         return `Unknown app: ${arg}\nRun \'apps\' to see available apps`;
       }
