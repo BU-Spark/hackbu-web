@@ -99,9 +99,11 @@ export function WindowManager({
     }
     return {
       title: b.title,
+      difficulty: b.difficulty || '',
       prize: b.prize,
       deadline: b.deadline || 'TBD',
       tags,
+      slug: b.slug,
     };
   });
 
@@ -148,8 +150,13 @@ export function WindowManager({
           isFocused={focusedWindow === 'bounties'}
         >
           <TableRow
-            columns={['Title', 'Prize', 'Deadline', 'Tags']}
+            columns={['Title', 'Difficulty', 'Prize', 'Deadline', 'Tags']}
             data={bountiesData}
+            onRowClick={(row) => {
+              if (row.slug) {
+                window.location.href = `/bounties/${row.slug}`;
+              }
+            }}
           />
         </Window>
       )}

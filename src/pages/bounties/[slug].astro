@@ -1,0 +1,95 @@
+---
+import '../../styles/global.css';
+import bounties from '../../data/bounties.json';
+
+export function getStaticPaths() {
+  return bounties.map((b: any) => ({
+    params: { slug: b.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const bounty = bounties.find((b: any) => b.slug === slug)!;
+const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags) : bounty.tags;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{bounty.title} - HackBU Bounties</title>
+  </head>
+  <body class="min-h-screen flex items-center justify-center p-8">
+    <div class="max-w-4xl w-full">
+      <div class="mb-10">
+        <span class="inline-block px-4 py-1.5 bg-spark-teal/30 rounded text-sm font-mono uppercase tracking-wider text-spark-teal mb-6">
+          {bounty.status}
+        </span>
+        <h1 class="font-display text-5xl lg:text-6xl text-spark-chartreuse mb-6">
+          {bounty.title}
+        </h1>
+
+        <div class="flex flex-wrap gap-4 mb-8">
+          <div class="px-4 py-2 bg-spark-orange text-spark-black rounded-lg font-semibold text-lg">
+            ${bounty.prize}
+          </div>
+          <div class="px-4 py-2 border border-spark-teal/50 rounded-lg text-spark-eggshell/80 font-mono text-base">
+            Deadline: {bounty.deadline}
+          </div>
+          {bounty.difficulty && (
+            <div class:list={[
+              'px-4 py-2 rounded-lg font-semibold text-base',
+              bounty.difficulty === 'Beginner' && 'bg-green-500/30 text-green-300',
+              bounty.difficulty === 'Intermediate' && 'bg-yellow-500/30 text-yellow-300',
+              bounty.difficulty === 'Advanced' && 'bg-red-500/30 text-red-300',
+            ]}>
+              {bounty.difficulty}
+            </div>
+          )}
+        </div>
+
+        <div class="flex gap-2 flex-wrap mb-10">
+          {tags.map((tag: string) => (
+            <span class="px-3 py-1 bg-spark-teal/30 rounded text-sm font-mono">
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div class="border-t border-spark-teal/30 pt-8 mb-10">
+          <h2 class="font-display text-2xl text-spark-chartreuse mb-4">Description</h2>
+          <p class="text-spark-eggshell/80 leading-relaxed text-lg">
+            {bounty.description}
+          </p>
+        </div>
+
+        <div class="border-t border-spark-teal/30 pt-8 mb-10">
+          <h2 class="font-display text-2xl text-spark-chartreuse mb-4">Project Description</h2>
+          {bounty.docLink ? (
+            <a
+              href={bounty.docLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-3 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-base"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              View Project Description Doc
+            </a>
+          ) : (
+            <p class="text-spark-eggshell/50 italic text-base">
+              No project description document linked yet.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <a
+        href="/"
+        class="inline-block px-6 py-3 border-2 border-spark-teal text-spark-eggshell rounded-lg font-semibold hover:bg-spark-teal/20 transition-colors text-base"
+      >
+        &larr; Back to HackBU OS
+      </a>
+    </div>
+  </body>
+</html>

@@ -10,8 +10,16 @@ import Dock from "../components/Dock.astro";
 import { WindowManager } from "../components/WindowManager";
 import "../styles/global.css";
 
-// Use static data at build time (no DB dependency for SSG)
-const motdContent: string = motd.content || "";
+// Compute dynamic bounty stats at build time
+const openBounties = bounties.filter((b: any) => b.status === 'open');
+const openCount = openBounties.length;
+const totalPrize = openBounties.reduce((sum: number, b: any) => sum + (b.prize || 0), 0);
+const formattedPrize = `$${totalPrize.toLocaleString('en-US')}`;
+
+// Inject dynamic values into MOTD template
+const motdContent: string = (motd.content || "")
+  .replace(/\d+ open bounties/, `${openCount} open bounties`)
+  .replace(/\$[\d,]+ in prizes/, `${formattedPrize} in prizes`);
 ---
 
 <!doctype html>

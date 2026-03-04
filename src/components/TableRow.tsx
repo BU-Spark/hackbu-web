@@ -2,9 +2,10 @@ interface TableRowProps {
   columns: string[];
   data: Record<string, any>[];
   renderCell?: (key: string, value: any, row: Record<string, any>) => React.ReactNode;
+  onRowClick?: (row: Record<string, any>) => void;
 }
 
-export function TableRow({ columns, data, renderCell }: TableRowProps) {
+export function TableRow({ columns, data, renderCell, onRowClick }: TableRowProps) {
   const keys = columns.map((col) => col.toLowerCase().replace(/\s+/g, ''));
 
   const defaultRenderCell = (key: string, value: any) => {
@@ -20,6 +21,19 @@ export function TableRow({ columns, data, renderCell }: TableRowProps) {
             </span>
           ))}
         </div>
+      );
+    }
+
+    if (key === 'difficulty' && typeof value === 'string') {
+      const colors: Record<string, string> = {
+        Beginner: 'bg-green-500/30 text-green-300',
+        Intermediate: 'bg-yellow-500/30 text-yellow-300',
+        Advanced: 'bg-red-500/30 text-red-300',
+      };
+      return (
+        <span className={`px-2 py-0.5 rounded text-xs font-mono ${colors[value] || ''}`}>
+          {value}
+        </span>
       );
     }
 
@@ -59,7 +73,8 @@ export function TableRow({ columns, data, renderCell }: TableRowProps) {
           {data.map((row, idx) => (
             <tr
               key={row.title || row.name || row.id || idx}
-              className="border-b border-spark-teal/30 hover:bg-spark-teal/10 transition-colors"
+              className={`border-b border-spark-teal/30 hover:bg-spark-teal/10 transition-colors${onRowClick ? ' cursor-pointer' : ''}`}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
               {keys.map((key) => (
                 <td key={key} className="px-3 py-3 font-sans text-sm">

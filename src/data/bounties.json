@@ -1,58 +1,101 @@
 [
   {
     "title": "Build a coffee-powered to-do list for sleepy coders",
+    "slug": "coffee-todo-list",
+    "difficulty": "Beginner",
     "prize": 42,
     "deadline": "2099-12-31",
     "tags": "[\"Demo\", \"Placeholder\", \"Fake\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Create a to-do list app that integrates with your coffee consumption. Tasks are prioritized based on caffeine levels, and completed tasks reward you with virtual coffee beans. Must support dark mode (for those late-night coding sessions) and include a \"too tired to function\" emergency mode.",
+    "docLink": ""
   },
   {
     "title": "Train AI to write commit messages in haiku form",
+    "slug": "haiku-commit-messages",
+    "difficulty": "Advanced",
     "prize": 1337,
     "deadline": "2099-01-01",
     "tags": "[\"AI\", \"Poetry\", \"Demo\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Build an AI model that analyzes your git diffs and generates commit messages in haiku format (5-7-5 syllable structure). The model should understand code semantics well enough to produce meaningful yet poetic summaries. Bonus points for supporting other poetry forms like limericks and sonnets.",
+    "docLink": ""
   },
   {
     "title": "Create a Discord bot that only responds in emojis",
+    "slug": "emoji-discord-bot",
+    "difficulty": "Beginner",
     "prize": 100,
     "deadline": "2099-06-15",
     "tags": "[\"Bot\", \"Fun\", \"Sample Data\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Develop a Discord bot that translates any message or command response entirely into emojis. It should handle complex conversations, support emoji-based polls, and include a \"translate back to English\" feature for the emoji-challenged among us.",
+    "docLink": ""
   },
   {
     "title": "Implement rubber duck debugging as a service",
+    "slug": "rubber-duck-debugging",
+    "difficulty": "Intermediate",
     "prize": 404,
     "deadline": "2099-03-14",
     "tags": "[\"Debugging\", \"Placeholder\", \"Quack\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Build a web service where developers can explain their code problems to a virtual rubber duck. The duck should provide encouraging quacks, ask clarifying questions, and occasionally offer surprisingly insightful debugging suggestions. Must include realistic duck sounds and a squeaky animation.",
+    "docLink": ""
   },
   {
     "title": "Design holographic UI for time-traveling devs",
+    "slug": "holographic-ui",
+    "difficulty": "Advanced",
     "prize": 9001,
     "deadline": "2099-07-04",
     "tags": "[\"Design\", \"Sci-Fi\", \"Demo\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Design and prototype a futuristic holographic user interface for developers who travel through time. The UI should adapt to the current time period's technology level, support gesture-based code editing, and include a timeline navigator for viewing code across different eras.",
+    "docLink": ""
   },
   {
     "title": "Optimize algorithm for finding lost semicolons",
+    "slug": "lost-semicolons",
+    "difficulty": "Intermediate",
     "prize": 256,
     "deadline": "2099-10-31",
     "tags": "[\"Search\", \"Sample\", \"Test Data\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Create an advanced search algorithm that can detect missing semicolons in any programming language. The algorithm should use pattern recognition, AST analysis, and a dash of machine learning to pinpoint exactly where that pesky semicolon should go. Include a heat map visualization of semicolon density.",
+    "docLink": ""
   },
   {
     "title": "Build browser extension that translates code to memes",
+    "slug": "code-to-memes",
+    "difficulty": "Intermediate",
     "prize": 777,
     "deadline": "2099-04-20",
     "tags": "[\"Extension\", \"Memes\", \"Placeholder\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Develop a browser extension that converts code snippets into relevant memes. It should recognize common programming patterns and match them with appropriate meme templates. Features should include meme-based code reviews, a meme gallery of your codebase, and shareable meme summaries of pull requests.",
+    "docLink": ""
   },
   {
     "title": "Create API for generating placeholder text in Klingon",
+    "slug": "klingon-placeholder-api",
+    "difficulty": "Intermediate",
     "prize": 500,
     "deadline": "2099-11-11",
     "tags": "[\"API\", \"Demo\", \"qapla'\"]",
-    "status": "open"
+    "status": "open",
+    "description": "Build a REST API that generates Lorem Ipsum-style placeholder text in Klingon. The API should support configurable paragraph lengths, sentence complexity, and dialect variations. Include endpoints for generating Klingon variable names, function names, and even entire Klingon-themed code comments.",
+    "docLink": ""
+  },
+  {
+    "title": "PlateGallery",
+    "slug": "plate-gallery",
+    "difficulty": "Intermediate",
+    "prize": 200,
+    "deadline": "2026-04-30",
+    "tags": "[\"Full Stack\",\"Automation\",\"Visualisation\"]",
+    "status": "open",
+    "description": "A community-driven platform where users across all 50 states can upload and vote on their favorite vanity license plates, building a living map of America one plate at a time. Combines full stack web development with automated content moderation and an interactive U.S. map.",
+    "docLink": "https://docs.google.com/document/d/1gi3kzYFKG_e_6IFV3GCC1VCTyqcLZ-eEkGE8kDcfoAY/edit?usp=sharing"
   }
 ]
