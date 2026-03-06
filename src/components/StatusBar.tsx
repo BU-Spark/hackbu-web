@@ -6,15 +6,21 @@ interface WeatherData {
   icon: string;
 }
 
-export function StatusBar() {
+interface StatusBarProps {
+  events?: { title: string; when: string }[];
+}
+
+export function StatusBar({ events = [] }: StatusBarProps) {
   const [userTime, setUserTime] = useState('');
   const [bostonTime, setBostonTime] = useState('');
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [countdown, setCountdown] = useState('');
 
-  // Update times every second
+  // Update times and countdown every second
   useEffect(() => {
     const updateTimes = () => {
       const now = new Date();
+      const currentYear = now.getFullYear();
 
       // User's local time
       const userTimeStr = now.toLocaleTimeString('en-US', {
@@ -32,13 +38,33 @@ export function StatusBar() {
         hour12: false,
       });
       setBostonTime(bostonTimeStr);
+
+      // Countdown to next event
+      if (events.length > 0) {
+        const upcoming = events
+          .map((e) => {
+            const d = new Date(`${e.when}, ${currentYear}`);
+            return { ...e, _date: d };
+          })
+          .filter((e) => !isNaN(e._date.getTime()) && e._date > now)
+          .sort((a, b) => a._date.getTime() - b._date.getTime());
+
+        if (upcoming.length > 0) {
+          const diff = upcoming[0]._date.getTime() - now.getTime();
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          setCountdown(`Next: ${upcoming[0].title} in ${days}d ${hours}h`);
+        } else {
+          setCountdown('No upcoming events');
+        }
+      }
     };
 
     updateTimes();
     const interval = setInterval(updateTimes, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [events]);
 
   // Fetch Boston weather
   useEffect(() => {
@@ -90,6 +116,12 @@ export function StatusBar() {
       <span>
         {weather ? `${weather.icon} ${weather.temp}°F` : '🌡️ --°F'}
       </span>
+      {countdown && (
+        <>
+          <span>•</span>
+          <span>{countdown}</span>
+        </>
+      )}
     </div>
   );
 }

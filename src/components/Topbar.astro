@@ -1,5 +1,11 @@
 ---
 import { StatusBar } from './StatusBar';
+
+interface Props {
+  events?: { title: string; when: string }[];
+}
+
+const { events = [] } = Astro.props;
 ---
 
 <header class="fixed top-0 left-0 right-0 h-14 bg-spark-black/90 border-b border-spark-teal backdrop-blur-sm z-40 flex items-center justify-between px-6">
@@ -9,7 +15,7 @@ import { StatusBar } from './StatusBar';
   </div>
 
   <div class="flex-1 flex justify-end mr-4">
-    <StatusBar client:load />
+    <StatusBar client:load events={events} />
   </div>
 
   <div class="flex items-center gap-3">

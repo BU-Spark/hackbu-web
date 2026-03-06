@@ -84,19 +84,27 @@ export function TableRow({ columns, data, renderCell, onRowClick }: TableRowProp
           </tr>
         </thead>
         <tbody>
-          {data.map((row, idx) => (
-            <tr
-              key={row.title || row.name || row.id || idx}
-              className={`border-b border-spark-teal/30 hover:bg-spark-teal/10 transition-colors${onRowClick ? ' cursor-pointer' : ''}`}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-            >
-              {keys.map((key) => (
-                <td key={key} className="px-3 py-3 font-sans text-sm">
-                  {cellRenderer(key, row[key], row)}
-                </td>
-              ))}
+          {data.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="px-3 py-8 text-center text-sm text-spark-eggshell/40 font-mono">
+                No bounties match your search.
+              </td>
             </tr>
-          ))}
+          ) : (
+            data.map((row, idx) => (
+              <tr
+                key={row.title || row.name || row.id || idx}
+                className={`border-b border-spark-teal/30 hover:bg-spark-teal/10 transition-colors${onRowClick ? ' cursor-pointer' : ''}`}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                {keys.map((key) => (
+                  <td key={key} className="px-3 py-3 font-sans text-sm">
+                    {cellRenderer(key, row[key], row)}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

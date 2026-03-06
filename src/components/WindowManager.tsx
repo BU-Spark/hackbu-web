@@ -5,6 +5,8 @@ import { TableRow } from './TableRow';
 import { CardList } from './CardList';
 import { About } from './About';
 import { Live } from './Live';
+import { BountyDetail } from './BountyDetail';
+import { playOpen, playClose, playClick } from '../lib/sounds';
 
 interface WindowManagerProps {
   bounties: any[];
@@ -29,6 +31,7 @@ export function WindowManager({
   const [nextZ, setNextZ] = useState(11);
   const [bountySearch, setBountySearch] = useState('');
   const [bountyFilter, setBountyFilter] = useState('');
+  const [selectedBounty, setSelectedBounty] = useState<any>(null);
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
@@ -40,6 +43,7 @@ export function WindowManager({
 
     setOpenWindows((prev) => {
       if (!prev.includes(id)) {
+        playOpen();
         return [...prev, id];
       }
       return prev;
@@ -55,6 +59,7 @@ export function WindowManager({
   }, []);
 
   const closeWindow = useCallback((id: string) => {
+    playClose();
     setOpenWindows((prev) => prev.filter((windowId) => windowId !== id));
     setZIndices((prev) => {
       const newIndices = { ...prev };
@@ -194,8 +199,15 @@ export function WindowManager({
               return matchesSearch && matchesDifficulty;
             })}
             onRowClick={(row) => {
-              if (row.slug) {
-                window.location.href = `/bounties/${row.slug}`;
+              playClick();
+              const full = bounties.find((b: any) => b.slug === row.slug);
+              if (full) {
+                let tags: string[] = [];
+                try {
+                  tags = typeof full.tags === 'string' ? JSON.parse(full.tags) : full.tags;
+                } catch { tags = []; }
+                setSelectedBounty({ ...full, tags });
+                openWindow('bounty-detail');
               }
             }}
           />
@@ -277,6 +289,21 @@ export function WindowManager({
           isFocused={focusedWindow === 'live'}
         >
           <Live events={events} />
+        </Window>
+      )}
+
+      {/* Bounty Detail Window */}
+      {openWindows.includes('bounty-detail') && selectedBounty && (
+        <Window
+          title={`💰 ${selectedBounty.title}`}
+          id="bounty-detail"
+          initialX={200}
+          initialY={100}
+          onFocus={() => focusWindow('bounty-detail')}
+          zIndex={zIndices['bounty-detail']}
+          isFocused={focusedWindow === 'bounty-detail'}
+        >
+          <BountyDetail bounty={selectedBounty} />
         </Window>
       )}
 

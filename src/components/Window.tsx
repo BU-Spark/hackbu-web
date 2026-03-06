@@ -268,7 +268,9 @@ export function Window({
   return (
     <div
       ref={windowRef}
-      className={`absolute bg-spark-black/95 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-sm transition-all ${
+      className={`absolute bg-spark-black/95 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-sm ${
+        isDragging || isResizing ? '' : 'transition-[border-color,box-shadow]'
+      } ${
         isFocused ? 'border-4 border-spark-chartreuse' : 'border-2 border-gray-600'
       }`}
       style={{
