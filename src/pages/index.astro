@@ -16,10 +16,50 @@ const openCount = openBounties.length;
 const totalPrize = openBounties.reduce((sum: number, b: any) => sum + (b.prize || 0), 0);
 const formattedPrize = `$${totalPrize.toLocaleString('en-US')}`;
 
-// Inject dynamic values into MOTD template
-const motdContent: string = (motd.content || "")
-  .replace(/\d+ open bounties/, `${openCount} open bounties`)
-  .replace(/\$[\d,]+ in prizes/, `${formattedPrize} in prizes`);
+// Find next upcoming event
+const now = new Date();
+const currentYear = now.getFullYear();
+function parseEventDate(when: string): Date | null {
+  const d = new Date(`${when}, ${currentYear}`);
+  return isNaN(d.getTime()) ? null : d;
+}
+const upcomingEvents = events
+  .map((e: any) => ({ ...e, _date: parseEventDate(e.when) }))
+  .filter((e: any) => e._date && e._date >= now)
+  .sort((a: any, b: any) => a._date - b._date);
+const nextEvent = upcomingEvents[0];
+const nextEventStr = nextEvent ? `${nextEvent.title} (${nextEvent.when})` : 'No upcoming events';
+
+// Build MOTD with fixed-width lines (40 inner chars between ║ and ║)
+const W = 40;
+function pad(text: string, width: number): string {
+  // Strip emojis to count only ASCII/box-drawing display width
+  const stripped = text.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, '');
+  // Each emoji we removed takes 2 display columns
+  const emojiCount = (text.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu) || []).length;
+  const displayLen = stripped.length + (emojiCount * 2);
+  const needed = width - displayLen;
+  return needed > 0 ? text + ' '.repeat(needed) : text;
+}
+function line(text: string): string {
+  return `║${pad(text, W)}║`;
+}
+const bountyLine = `  * ${openCount} open bounties - ${formattedPrize} in prizes`;
+const eventLine = `  > Next: ${nextEventStr}`;
+const motdContent = [
+  `╔${'═'.repeat(W)}╗`,
+  line('  Welcome to HackBU OS v1.0'),
+  line('  Message of the Day'),
+  `╠${'═'.repeat(W)}╣`,
+  line(''),
+  line(bountyLine),
+  line(eventLine),
+  line(''),
+  line('  Tip: Windows are draggable!'),
+  line(''),
+  line('  Type `apps` or use dock below'),
+  `╚${'═'.repeat(W)}╝`,
+].join('\n');
 ---
 
 <!doctype html>

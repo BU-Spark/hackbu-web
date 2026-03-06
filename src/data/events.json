@@ -1,6 +1,8 @@
 [
-  { "title": "Syntax & Snax", "when": "Thursday 4pm", "where": "Spark! Space, 2nd Floor CDS" },
-  { "title": "Code & Tell", "when": "Last Wednesday 6:30pm", "where": "Spark! Space, 2nd Floor CDS" },
-  { "title": "HackBU Office Hours", "when": "Thursdays 5-6:30pm", "where": "Spark! Space, 2nd Floor CDS" },
-  { "title": "HackBU Live", "when": "Thursday 4pm", "where": "Online - YouTube Live", "streamUrl": "https://youtube.com/@buspark" }
+  { "title": "Code & Tell", "when": "March 18", "where": "Spark! Space, 2nd Floor CDS" },
+  { "title": "TechTalk", "when": "March 25", "where": "Spark! Space, 2nd Floor CDS" },
+  { "title": "TechTalk", "when": "April 1", "where": "Spark! Space, 2nd Floor CDS" },
+  { "title": "TechTalk", "when": "April 8", "where": "Spark! Space, 2nd Floor CDS" },
+  { "title": "Code & Tell", "when": "April 15", "where": "Spark! Space, 2nd Floor CDS" },
+  { "title": "TechTalk", "when": "April 22", "where": "Spark! Space, 2nd Floor CDS" }
 ]
