@@ -24,6 +24,20 @@ export function TableRow({ columns, data, renderCell, onRowClick }: TableRowProp
       );
     }
 
+    if (key === 'status' && typeof value === 'string') {
+      const statusColors: Record<string, string> = {
+        open: 'bg-green-500/30 text-green-300',
+        claimed: 'bg-yellow-500/30 text-yellow-300',
+        completed: 'bg-purple-500/30 text-purple-300',
+        closed: 'bg-gray-500/30 text-gray-400',
+      };
+      return (
+        <span className={`px-2 py-0.5 rounded text-xs font-mono ${statusColors[value.toLowerCase()] || ''}`}>
+          {value}
+        </span>
+      );
+    }
+
     if (key === 'difficulty' && typeof value === 'string') {
       const colors: Record<string, string> = {
         Beginner: 'bg-green-500/30 text-green-300',

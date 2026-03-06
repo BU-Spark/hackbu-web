@@ -27,6 +27,8 @@ export function WindowManager({
   });
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [nextZ, setNextZ] = useState(11);
+  const [bountySearch, setBountySearch] = useState('');
+  const [bountyFilter, setBountyFilter] = useState('');
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
@@ -99,6 +101,7 @@ export function WindowManager({
     }
     return {
       title: b.title,
+      status: b.status || 'open',
       difficulty: b.difficulty || '',
       prize: b.prize,
       deadline: b.deadline || 'TBD',
@@ -161,9 +164,35 @@ export function WindowManager({
               <span className="text-xl group-hover:scale-110 transition-transform duration-200">✦</span>
             </a>
           </div>
+          <div className="mb-3 flex gap-2">
+            <input
+              type="text"
+              placeholder="Search bounties..."
+              value={bountySearch}
+              onChange={(e) => setBountySearch(e.target.value)}
+              className="flex-1 px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white placeholder-gray-500 font-mono focus:outline-none focus:border-spark-chartreuse"
+            />
+            <select
+              value={bountyFilter}
+              onChange={(e) => setBountyFilter(e.target.value)}
+              className="px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
+            >
+              <option value="">All Difficulties</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
           <TableRow
-            columns={['Title', 'Difficulty', 'Prize', 'Deadline', 'Tags']}
-            data={bountiesData}
+            columns={['Title', 'Status', 'Difficulty', 'Prize', 'Deadline', 'Tags']}
+            data={bountiesData.filter((b) => {
+              const search = bountySearch.toLowerCase();
+              const matchesSearch = !search ||
+                b.title.toLowerCase().includes(search) ||
+                (Array.isArray(b.tags) && b.tags.some((t: string) => t.toLowerCase().includes(search)));
+              const matchesDifficulty = !bountyFilter || b.difficulty === bountyFilter;
+              return matchesSearch && matchesDifficulty;
+            })}
             onRowClick={(row) => {
               if (row.slug) {
                 window.location.href = `/bounties/${row.slug}`;
