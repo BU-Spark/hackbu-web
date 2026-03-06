@@ -149,6 +149,18 @@ export function WindowManager({
           zIndex={zIndices.bounties}
           isFocused={focusedWindow === 'bounties'}
         >
+          <div className="mb-4">
+            <a
+              href="https://airtable.com/app7XHhDfsNPzR7YD/shrtyXeNrcRyH0qG4"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-center gap-2 w-full px-5 py-3 bg-gradient-to-r from-spark-chartreuse/20 to-spark-teal/20 border-2 border-dashed border-spark-chartreuse/60 rounded-lg text-spark-chartreuse font-display text-base hover:border-solid hover:border-spark-chartreuse hover:from-spark-chartreuse/30 hover:to-spark-teal/30 hover:shadow-[0_0_20px_rgba(168,230,29,0.15)] transition-all duration-200"
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform duration-200">✦</span>
+              <span>Submit a Bounty</span>
+              <span className="text-xl group-hover:scale-110 transition-transform duration-200">✦</span>
+            </a>
+          </div>
           <TableRow
             columns={['Title', 'Difficulty', 'Prize', 'Deadline', 'Tags']}
             data={bountiesData}
