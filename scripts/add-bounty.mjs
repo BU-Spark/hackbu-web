@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const BOUNTIES_PATH = join(__dirname, '..', 'src', 'data', 'bounties.json');
+const BOUNTIES_DIR = join(__dirname, '..', 'src', 'content', 'bounties');
 
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 const ask = (q) => new Promise((res) => rl.question(q, res));
@@ -28,32 +28,35 @@ async function main() {
 
   const deadline = await ask('Deadline (YYYY-MM-DD): ');
   const tagsRaw = await ask('Tags (comma-separated): ');
-  const tags = JSON.stringify(tagsRaw.split(',').map(t => t.trim()).filter(Boolean));
+  const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
   const description = await ask('Description: ');
   const docLink = await ask('Google Doc link (or leave blank): ');
 
-  const bounties = JSON.parse(readFileSync(BOUNTIES_PATH, 'utf-8'));
+  const filePath = join(BOUNTIES_DIR, `${slug}.md`);
 
-  if (bounties.some(b => b.slug === slug)) {
+  if (existsSync(filePath)) {
     console.log(`\n❌ A bounty with slug "${slug}" already exists.`);
     process.exit(1);
   }
 
-  bounties.push({
-    title: title.trim(),
-    slug,
-    difficulty,
-    prize,
-    deadline: deadline.trim() || 'TBD',
-    tags,
-    status: 'open',
-    description: description.trim(),
-    docLink: docLink.trim(),
-  });
+  const frontmatter = [
+    '---',
+    `title: "${title.trim()}"`,
+    `difficulty: ${difficulty}`,
+    `prize: ${prize}`,
+    `deadline: "${deadline.trim() || 'TBD'}"`,
+    `tags: ${JSON.stringify(tags)}`,
+    `status: open`,
+    docLink.trim() ? `docLink: ${docLink.trim()}` : null,
+    '---',
+    '',
+    description.trim(),
+    '',
+  ].filter(line => line !== null).join('\n');
 
-  writeFileSync(BOUNTIES_PATH, JSON.stringify(bounties, null, 2) + '\n');
-  console.log(`\n✅ Added "${title.trim()}" (${bounties.length} total bounties)`);
-  console.log('Run `npm run build` or `npm run dev` to see it live.\n');
+  writeFileSync(filePath, frontmatter);
+  console.log(`\n✅ Created ${filePath}`);
+  console.log('Run `npm run dev` to see it live.\n');
 
   rl.close();
 }

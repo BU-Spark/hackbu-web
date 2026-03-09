@@ -3,7 +3,7 @@ import events from "../data/events.json";
 import "../styles/global.css";
 
 // Use static events to compute stream time at build time
-const streamEvent = events.find((e) => e.streamUrl);
+const streamEvent = (events as any[]).find((e) => e.streamUrl);
 const streamTime: string = streamEvent?.when || "Check Discord for schedule";
 ---
 
