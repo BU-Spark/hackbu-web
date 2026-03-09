@@ -6,7 +6,9 @@ import { CardList } from './CardList';
 import { About } from './About';
 import { Live } from './Live';
 import { BountyDetail } from './BountyDetail';
+import { BountyCard } from './BountyCard';
 import { playOpen, playClose, playClick } from '../lib/sounds';
+import { daysUntil } from '../lib/deadline';
 
 interface WindowManagerProps {
   bounties: any[];
@@ -30,7 +32,9 @@ export function WindowManager({
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [nextZ, setNextZ] = useState(11);
   const [bountySearch, setBountySearch] = useState('');
-  const [bountyFilter, setBountyFilter] = useState('');
+  const [bountyDiffFilter, setBountyDiffFilter] = useState('');
+  const [bountyStatusFilter, setBountyStatusFilter] = useState('');
+  const [bountySort, setBountySort] = useState('newest');
   const [selectedBounty, setSelectedBounty] = useState<any>(null);
 
   const openWindow = useCallback((id: string) => {
@@ -169,17 +173,27 @@ export function WindowManager({
               <span className="text-xl group-hover:scale-110 transition-transform duration-200">✦</span>
             </a>
           </div>
-          <div className="mb-3 flex gap-2">
+          <div className="mb-3 flex flex-wrap gap-2">
             <input
               type="text"
               placeholder="Search bounties..."
               value={bountySearch}
               onChange={(e) => setBountySearch(e.target.value)}
-              className="flex-1 px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white placeholder-gray-500 font-mono focus:outline-none focus:border-spark-chartreuse"
+              className="flex-1 min-w-[140px] px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white placeholder-gray-500 font-mono focus:outline-none focus:border-spark-chartreuse"
             />
             <select
-              value={bountyFilter}
-              onChange={(e) => setBountyFilter(e.target.value)}
+              value={bountyStatusFilter}
+              onChange={(e) => setBountyStatusFilter(e.target.value)}
+              className="px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
+            >
+              <option value="">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="completed">Completed</option>
+              <option value="closed">Closed</option>
+            </select>
+            <select
+              value={bountyDiffFilter}
+              onChange={(e) => setBountyDiffFilter(e.target.value)}
               className="px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
             >
               <option value="">All Difficulties</option>
@@ -187,30 +201,67 @@ export function WindowManager({
               <option value="Intermediate">Intermediate</option>
               <option value="Advanced">Advanced</option>
             </select>
+            <select
+              value={bountySort}
+              onChange={(e) => setBountySort(e.target.value)}
+              className="px-3 py-1.5 bg-spark-black/50 border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
+            >
+              <option value="newest">Newest</option>
+              <option value="prize-desc">Highest Prize</option>
+              <option value="deadline-asc">Closest Deadline</option>
+            </select>
           </div>
-          <TableRow
-            columns={['Title', 'Status', 'Difficulty', 'Prize', 'Deadline', 'Tags']}
-            data={bountiesData.filter((b) => {
-              const search = bountySearch.toLowerCase();
-              const matchesSearch = !search ||
-                b.title.toLowerCase().includes(search) ||
-                (Array.isArray(b.tags) && b.tags.some((t: string) => t.toLowerCase().includes(search)));
-              const matchesDifficulty = !bountyFilter || b.difficulty === bountyFilter;
-              return matchesSearch && matchesDifficulty;
-            })}
-            onRowClick={(row) => {
-              playClick();
-              const full = bounties.find((b: any) => b.slug === row.slug);
-              if (full) {
-                let tags: string[] = [];
-                try {
-                  tags = typeof full.tags === 'string' ? JSON.parse(full.tags) : full.tags;
-                } catch { tags = []; }
-                setSelectedBounty({ ...full, tags });
-                openWindow('bounty-detail');
-              }
-            }}
-          />
+          {(() => {
+            const search = bountySearch.toLowerCase();
+            const filtered = bountiesData
+              .filter((b) => {
+                const matchesSearch = !search ||
+                  b.title.toLowerCase().includes(search) ||
+                  (Array.isArray(b.tags) && b.tags.some((t: string) => t.toLowerCase().includes(search)));
+                const matchesDiff = !bountyDiffFilter || b.difficulty === bountyDiffFilter;
+                const matchesStatus = !bountyStatusFilter || b.status === bountyStatusFilter;
+                return matchesSearch && matchesDiff && matchesStatus;
+              })
+              .sort((a, b) => {
+                if (bountySort === 'prize-desc') return (b.prize || 0) - (a.prize || 0);
+                if (bountySort === 'deadline-asc') {
+                  const da = daysUntil(a.deadline) ?? 9999;
+                  const db = daysUntil(b.deadline) ?? 9999;
+                  return da - db;
+                }
+                return 0; // newest = original order
+              });
+
+            if (filtered.length === 0) {
+              return (
+                <p className="py-8 text-center text-sm text-spark-eggshell/40 font-mono">
+                  No bounties match your search.
+                </p>
+              );
+            }
+
+            return (
+              <div className="grid grid-cols-2 gap-3">
+                {filtered.map((b) => (
+                  <BountyCard
+                    key={b.slug}
+                    bounty={b}
+                    onClick={() => {
+                      playClick();
+                      const full = bounties.find((bx: any) => bx.slug === b.slug);
+                      if (full) {
+                        let tags: string[] = [];
+                        try { tags = typeof full.tags === 'string' ? JSON.parse(full.tags) : full.tags; }
+                        catch { tags = []; }
+                        setSelectedBounty({ ...full, tags });
+                        openWindow('bounty-detail');
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            );
+          })()}
         </Window>
       )}
 

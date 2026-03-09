@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { marked } from "marked";
 const bountyEntries = await getCollection("bounties");
 const bounties = bountyEntries.map((entry) => ({
   title: entry.data.title,
@@ -9,7 +10,7 @@ const bounties = bountyEntries.map((entry) => ({
   deadline: entry.data.deadline,
   tags: entry.data.tags,
   status: entry.data.status,
-  description: entry.body,
+  descriptionHtml: marked.parse(entry.body || '') as string,
   docLink: entry.data.docLink || "",
 }));
 import projects from "../data/projects.json";

@@ -27,7 +27,6 @@ export function TableRow({ columns, data, renderCell, onRowClick }: TableRowProp
     if (key === 'status' && typeof value === 'string') {
       const statusColors: Record<string, string> = {
         open: 'bg-green-500/30 text-green-300',
-        claimed: 'bg-yellow-500/30 text-yellow-300',
         completed: 'bg-purple-500/30 text-purple-300',
         closed: 'bg-gray-500/30 text-gray-400',
       };

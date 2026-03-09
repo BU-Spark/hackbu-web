@@ -8,7 +8,7 @@ const bounties = defineCollection({
     prize: z.number(),
     deadline: z.string(),
     tags: z.array(z.string()),
-    status: z.enum(['open', 'claimed', 'completed', 'closed']),
+    status: z.enum(['open', 'completed', 'closed']),
     docLink: z.string().url().optional(),
   }),
 });

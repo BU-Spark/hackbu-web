@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { deadlineLabel } from '../lib/deadline';
 
 interface BountyDetailProps {
   bounty: {
@@ -9,7 +10,7 @@ interface BountyDetailProps {
     deadline: string;
     tags: string[];
     slug: string;
-    description?: string;
+    descriptionHtml?: string;
     docLink?: string;
   };
 }
@@ -91,7 +92,6 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
 
   const statusColors: Record<string, string> = {
     open: 'bg-green-500/30 text-green-300',
-    claimed: 'bg-yellow-500/30 text-yellow-300',
     completed: 'bg-purple-500/30 text-purple-300',
     closed: 'bg-gray-500/30 text-gray-400',
   };
@@ -217,7 +217,14 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
 
       <div className="flex flex-wrap gap-3 text-sm">
         <span className="px-3 py-1 bg-spark-orange text-spark-black rounded-lg font-semibold">${bounty.prize}</span>
-        <span className="px-3 py-1 border border-spark-teal/50 rounded-lg text-spark-eggshell/80 font-mono">Deadline: {bounty.deadline}</span>
+        {(() => {
+          const dl = deadlineLabel(bounty.deadline);
+          return (
+            <span className={`px-3 py-1 border border-spark-teal/50 rounded-lg font-mono ${dl.cls}`}>
+              {dl.text}
+            </span>
+          );
+        })()}
         {bounty.difficulty && (
           <span className={`px-3 py-1 rounded-lg font-semibold text-sm ${difficultyColors[bounty.difficulty] || ''}`}>
             {bounty.difficulty}
@@ -235,10 +242,13 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
         </div>
       )}
 
-      {bounty.description && (
+      {bounty.descriptionHtml && (
         <div className="border-t border-spark-teal/20 pt-4">
           <h3 className="font-display text-lg text-spark-chartreuse mb-2">Description</h3>
-          <p className="text-sm text-spark-eggshell/80 leading-relaxed">{bounty.description}</p>
+          <div
+            className="text-sm text-spark-eggshell/80 leading-relaxed prose prose-invert prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: bounty.descriptionHtml }}
+          />
         </div>
       )}
 
