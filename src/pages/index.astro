@@ -1,9 +1,21 @@
 ---
-import bounties from "../data/bounties.json";
+import { getCollection } from "astro:content";
+const bountyEntries = await getCollection("bounties");
+const bounties = bountyEntries.map((entry) => ({
+  title: entry.data.title,
+  slug: entry.slug,
+  difficulty: entry.data.difficulty,
+  prize: entry.data.prize,
+  deadline: entry.data.deadline,
+  tags: entry.data.tags,
+  status: entry.data.status,
+  description: entry.body,
+  docLink: entry.data.docLink || "",
+}));
 import projects from "../data/projects.json";
 import leaderboard from "../data/leaderboard.json";
 import events from "../data/events.json";
-import motd from "../data/motd.json";
+
 import Desktop from "../components/Desktop.astro";
 import Topbar from "../components/Topbar.astro";
 import Dock from "../components/Dock.astro";

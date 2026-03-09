@@ -1,16 +1,20 @@
 ---
 import '../../styles/global.css';
-import bounties from '../../data/bounties.json';
-export function getStaticPaths() {
-  return bounties.map((b: any) => ({
-    params: { slug: b.slug },
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('bounties');
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
   }));
 }
 
-const { slug } = Astro.params;
-const bounty = bounties.find((b: any) => b.slug === slug)!;
-const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags) : bounty.tags;
-
+const { entry } = Astro.props;
+const bounty = entry.data;
+const bountySlug = entry.slug;
+const tags: string[] = bounty.tags;
+const { Content } = await entry.render();
 ---
 
 <!doctype html>
@@ -21,7 +25,19 @@ const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags)
     <title>{bounty.title} - HackBU Bounties</title>
   </head>
   <body class="min-h-screen flex items-center justify-center p-4 bg-spark-black">
-    <div class="max-w-3xl w-full bg-spark-black/80 border border-spark-teal/30 rounded-xl p-6 lg:p-8 shadow-2xl">
+    <div class="max-w-3xl w-full bg-spark-black/80 border border-spark-teal/30 rounded-xl p-6 lg:p-8 shadow-2xl relative">
+      <!-- Live Counters -->
+      <div class="absolute top-4 right-4 flex gap-2" id="counters">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-spark-chartreuse/10 border border-spark-chartreuse/30 rounded-full text-xs font-mono text-spark-chartreuse" title="Interested">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span id="count-interested">0</span>
+        </span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-spark-orange/10 border border-spark-orange/30 rounded-full text-xs font-mono text-spark-orange" title="Looking for Teammates">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span id="count-team">0</span>
+        </span>
+      </div>
+
       <div class="mb-4">
         <span class="inline-block px-3 py-1 bg-spark-teal/20 border border-spark-teal/40 rounded text-xs font-mono uppercase tracking-wider text-spark-teal mb-3">
           {bounty.status}
@@ -59,9 +75,9 @@ const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags)
 
         <div class="border-t border-spark-teal/20 pt-4 mb-4">
           <h2 class="font-display text-lg text-spark-chartreuse mb-2">Description</h2>
-          <p class="text-spark-eggshell/80 leading-relaxed text-sm">
-            {bounty.description}
-          </p>
+          <div class="text-spark-eggshell/80 leading-relaxed text-sm prose prose-invert prose-sm max-w-none">
+            <Content />
+          </div>
         </div>
 
         <div class="border-t border-spark-teal/20 pt-4 mb-4">
@@ -86,19 +102,55 @@ const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags)
           </div>
         </div>
 
-        <!-- Email Modal -->
-        <div id="email-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <!-- Toast notification -->
+        <div id="toast" class="hidden fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-lg font-mono text-sm shadow-xl border"></div>
+
+        <!-- Full Form Modal -->
+        <div id="form-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div class="bg-spark-black border border-spark-teal/40 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
             <h3 id="modal-title" class="font-display text-xl text-spark-chartreuse mb-2"></h3>
-            <p class="text-spark-eggshell/60 text-sm mb-6">Enter your email so the organizers can reach out to you.</p>
-            <input
-              id="email-input"
-              type="email"
-              placeholder="you@example.com"
-              class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors mb-2"
-            />
-            <p id="email-error" class="text-red-400 text-sm mb-4 hidden">Please enter a valid email address.</p>
-            <div class="flex gap-3 justify-end">
+            <p class="text-spark-eggshell/60 text-sm mb-6">Fill in your details so the organizers can reach out to you.</p>
+            <div class="space-y-3">
+              <input
+                id="input-fname"
+                type="text"
+                placeholder="First Name"
+                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
+              />
+              <input
+                id="input-lname"
+                type="text"
+                placeholder="Last Name"
+                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
+              />
+              <input
+                id="input-email"
+                type="email"
+                placeholder="you@example.com"
+                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
+              />
+              <select
+                id="input-year"
+                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
+              >
+                <option value="">Select Year</option>
+                <option value="Freshman">Freshman</option>
+                <option value="Sophomore">Sophomore</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="Masters">Masters</option>
+                <option value="PhD">PhD</option>
+                <option value="Other">Other</option>
+              </select>
+              <input
+                id="input-year-other"
+                type="text"
+                placeholder="Specify your year..."
+                class="hidden w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
+              />
+            </div>
+            <p id="form-error" class="text-red-400 text-sm mt-2 hidden"></p>
+            <div class="flex gap-3 justify-end mt-4">
               <button id="modal-cancel" class="px-4 py-2 border border-spark-teal/40 text-spark-eggshell/70 rounded-lg hover:bg-spark-teal/10 transition-colors text-sm">
                 Cancel
               </button>
@@ -136,38 +188,92 @@ const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags)
         &larr; Back to HackBU OS
       </a>
     </div>
-    <script define:vars={{ slug: bounty.slug }}>
+    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || '' }}>
       const STORAGE_KEY = 'hackbu-bounty-responses';
-      const modal = document.getElementById('email-modal');
+      const toast = document.getElementById('toast');
+      let toastTimer;
+      function showToast(msg, isError = false) {
+        clearTimeout(toastTimer);
+        toast.textContent = msg;
+        toast.className = `fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-lg font-mono text-sm shadow-xl border ${
+          isError
+            ? 'bg-red-900/90 border-red-500/60 text-red-200'
+            : 'bg-spark-black/95 border-spark-chartreuse/60 text-spark-chartreuse'
+        }`;
+        toastTimer = setTimeout(() => { toast.className = 'hidden'; }, 4000);
+      }
+      const modal = document.getElementById('form-modal');
       const modalTitle = document.getElementById('modal-title');
-      const emailInput = document.getElementById('email-input');
-      const emailError = document.getElementById('email-error');
+      const inputFname = document.getElementById('input-fname');
+      const inputLname = document.getElementById('input-lname');
+      const inputEmail = document.getElementById('input-email');
+      const inputYear = document.getElementById('input-year');
+      const inputYearOther = document.getElementById('input-year-other');
+      const formError = document.getElementById('form-error');
       const btnInterest = document.getElementById('btn-interest');
       const btnTeam = document.getElementById('btn-team');
+      const countInterested = document.getElementById('count-interested');
+      const countTeam = document.getElementById('count-team');
       let currentType = '';
+
+      // Show/hide "Other" year input
+      inputYear.addEventListener('change', () => {
+        if (inputYear.value === 'Other') {
+          inputYearOther.classList.remove('hidden');
+        } else {
+          inputYearOther.classList.add('hidden');
+          inputYearOther.value = '';
+        }
+      });
 
       function getResponses() {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
         catch { return {}; }
       }
 
-      function saveResponse(bountySlug, type, email) {
+      function saveResponse(bountySlug, type, data) {
         const responses = getResponses();
-        if (!responses[bountySlug]) responses[bountySlug] = [];
-        responses[bountySlug].push({ type, email, timestamp: new Date().toISOString() });
+        if (!responses[bountySlug]) responses[bountySlug] = {};
+        responses[bountySlug][type] = { ...data, timestamp: new Date().toISOString() };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+      }
+
+      function removeResponse(bountySlug, type) {
+        const responses = getResponses();
+        if (responses[bountySlug]) {
+          delete responses[bountySlug][type];
+        }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
       }
 
       function hasResponded(bountySlug, type) {
         const responses = getResponses();
-        return (responses[bountySlug] || []).some(r => r.type === type);
+        return !!(responses[bountySlug] && responses[bountySlug][type]);
       }
 
-      function updateButtonState(btn, type, label) {
-        if (hasResponded(slug, type)) {
-          btn.querySelector('span').textContent = label + ' - Submitted!';
-          btn.classList.add('opacity-70');
-          btn.disabled = true;
+      function getStoredData() {
+        try { return JSON.parse(localStorage.getItem('hackbu-user-data') || '{}'); }
+        catch { return {}; }
+      }
+
+      function updateButtonStates() {
+        if (hasResponded(slug, 'interested')) {
+          btnInterest.querySelector('span').textContent = 'Withdraw Interest';
+          btnInterest.classList.remove('bg-spark-chartreuse', 'hover:bg-spark-chartreuse/80');
+          btnInterest.classList.add('bg-red-500/20', 'border', 'border-red-500/40', 'text-red-300');
+        } else {
+          btnInterest.querySelector('span').textContent = "I'm Interested";
+          btnInterest.classList.add('bg-spark-chartreuse', 'hover:bg-spark-chartreuse/80');
+          btnInterest.classList.remove('bg-red-500/20', 'border-red-500/40', 'text-red-300');
+        }
+        if (hasResponded(slug, 'looking-for-team')) {
+          btnTeam.querySelector('span').textContent = 'Withdraw Team Request';
+          btnTeam.classList.remove('bg-spark-orange', 'hover:bg-spark-orange/80');
+          btnTeam.classList.add('bg-red-500/20', 'border', 'border-red-500/40', 'text-red-300');
+        } else {
+          btnTeam.querySelector('span').textContent = 'Looking for Teammates';
+          btnTeam.classList.add('bg-spark-orange', 'hover:bg-spark-orange/80');
+          btnTeam.classList.remove('bg-red-500/20', 'border-red-500/40', 'text-red-300');
         }
       }
 
@@ -176,12 +282,17 @@ const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags)
         modalTitle.textContent = type === 'interested'
           ? "I'm Interested"
           : 'Looking for Teammates';
-        // Pre-fill with stored email if available
-        const storedEmail = localStorage.getItem('hackbu-email') || '';
-        emailInput.value = storedEmail;
-        emailError.classList.add('hidden');
+        const stored = getStoredData();
+        inputFname.value = stored.fname || '';
+        inputLname.value = stored.lname || '';
+        inputEmail.value = stored.email || '';
+        inputYear.value = stored.year || '';
+        inputYearOther.value = stored.yearOther || '';
+        if (stored.year === 'Other') inputYearOther.classList.remove('hidden');
+        else inputYearOther.classList.add('hidden');
+        formError.classList.add('hidden');
         modal.classList.remove('hidden');
-        emailInput.focus();
+        inputFname.focus();
       }
 
       function closeModal() {
@@ -189,34 +300,135 @@ const tags: string[] = typeof bounty.tags === 'string' ? JSON.parse(bounty.tags)
         currentType = '';
       }
 
-      function submitEmail() {
-        const email = emailInput.value.trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          emailError.classList.remove('hidden');
+      async function submitForm() {
+        const fname = inputFname.value.trim();
+        const lname = inputLname.value.trim();
+        const email = inputEmail.value.trim();
+        const yearVal = inputYear.value;
+        const yearOther = inputYearOther.value.trim();
+        const year = yearVal === 'Other' ? yearOther : yearVal;
+
+        if (!fname || !lname) {
+          formError.textContent = 'Please enter your first and last name.';
+          formError.classList.remove('hidden');
           return;
         }
-        localStorage.setItem('hackbu-email', email);
-        saveResponse(slug, currentType, email);
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          formError.textContent = 'Please enter a valid email address.';
+          formError.classList.remove('hidden');
+          return;
+        }
+        if (!year) {
+          formError.textContent = 'Please select your year.';
+          formError.classList.remove('hidden');
+          return;
+        }
+
+        // Store user data for pre-fill
+        localStorage.setItem('hackbu-user-data', JSON.stringify({
+          fname, lname, email, year: yearVal, yearOther
+        }));
+
+        // Optimistic: save to localStorage immediately
+        saveResponse(slug, currentType, { fname, lname, email, year });
         closeModal();
-        updateButtonState(btnInterest, 'interested', "I'm Interested");
-        updateButtonState(btnTeam, 'looking-for-team', 'Looking for Teammates');
+        updateButtonStates();
+
+        showToast('Registered! Check your email shortly.');
+
+        // Call API
+        try {
+          const res = await fetch('/api/respond', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              first_name: fname,
+              last_name: lname,
+              email,
+              year,
+              bounty_slug: slug,
+              type: currentType,
+              bounty_title: bountyTitle,
+              doc_link: docLink,
+            }),
+          });
+          if (!res.ok) {
+            console.error('API error:', await res.text());
+            showToast('Saved locally — sync will retry on next visit.', true);
+          }
+        } catch (err) {
+          console.error('Failed to submit:', err);
+          showToast('No connection — saved locally and will sync when online.', true);
+        }
+
+        fetchCounts();
       }
 
-      // Init button states
-      updateButtonState(btnInterest, 'interested', "I'm Interested");
-      updateButtonState(btnTeam, 'looking-for-team', 'Looking for Teammates');
+      async function withdraw(type) {
+        const stored = getResponses();
+        const data = stored[slug] && stored[slug][type];
+        const email = data?.email || getStoredData().email;
+
+        removeResponse(slug, type);
+        updateButtonStates();
+
+        showToast('Withdrawn.');
+
+        try {
+          const res = await fetch('/api/withdraw', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              bounty_slug: slug,
+              type,
+            }),
+          });
+          if (!res.ok) {
+            console.error('Withdraw API error:', await res.text());
+            showToast('Could not sync withdrawal — will retry on next visit.', true);
+          }
+        } catch (err) {
+          console.error('Failed to withdraw:', err);
+          showToast('No connection — withdrawal saved locally.', true);
+        }
+
+        fetchCounts();
+      }
+
+      async function fetchCounts() {
+        try {
+          const res = await fetch(`/api/bounty-counts?slug=${encodeURIComponent(slug)}`);
+          if (res.ok) {
+            const data = await res.json();
+            countInterested.textContent = data.interested || 0;
+            countTeam.textContent = data.lookingForTeam || 0;
+          }
+        } catch (err) {
+          console.error('Failed to fetch counts:', err);
+        }
+      }
+
+      // Init
+      updateButtonStates();
+      fetchCounts();
 
       btnInterest.addEventListener('click', () => {
-        if (!hasResponded(slug, 'interested')) openModal('interested');
+        if (hasResponded(slug, 'interested')) {
+          withdraw('interested');
+        } else {
+          openModal('interested');
+        }
       });
       btnTeam.addEventListener('click', () => {
-        if (!hasResponded(slug, 'looking-for-team')) openModal('looking-for-team');
+        if (hasResponded(slug, 'looking-for-team')) {
+          withdraw('looking-for-team');
+        } else {
+          openModal('looking-for-team');
+        }
       });
       document.getElementById('modal-cancel').addEventListener('click', closeModal);
-      document.getElementById('modal-submit').addEventListener('click', submitEmail);
-      emailInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') submitEmail();
-      });
+      document.getElementById('modal-submit').addEventListener('click', submitForm);
       modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
       });
