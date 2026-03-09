@@ -1,0 +1,34 @@
+backend:
+  name: github
+  repo: YOUR_ORG/hackbu-web   # e.g. hackbu/hackbu-web
+  branch: main
+
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: bounties
+    label: Bounties
+    folder: src/content/bounties
+    create: true
+    slug: "{{fields.slug}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string, hint: "URL-safe identifier, e.g. plate-gallery" }
+      - label: Difficulty
+        name: difficulty
+        widget: select
+        options: [Beginner, Intermediate, Advanced]
+      - { label: "Prize ($)", name: prize, widget: number, value_type: int }
+      - { label: Deadline, name: deadline, widget: string, hint: "YYYY-MM-DD" }
+      - label: Tags
+        name: tags
+        widget: list
+        field: { label: Tag, name: tag, widget: string }
+      - label: Status
+        name: status
+        widget: select
+        options: [open, claimed, completed, closed]
+        default: open
+      - { label: "Google Doc Link", name: docLink, widget: string, required: false }
+      - { label: Description, name: body, widget: markdown }
