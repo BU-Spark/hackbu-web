@@ -24,570 +24,389 @@ const dl = deadlineLabel(bounty.deadline);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{bounty.title} - HackBU Bounties</title>
+    <title>{bounty.title} — HackBU Bounties</title>
+    <style>
+      body::before {
+        content:"";position:fixed;inset:0;
+        background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
+        pointer-events:none;z-index:100;
+      }
+      body {
+        background-image:radial-gradient(rgba(6,177,162,0.07) 1px,transparent 1px);
+        background-size:28px 28px;
+      }
+      @keyframes fadeUp {
+        from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}
+      }
+      .anim-1{opacity:0;animation:fadeUp .5s ease forwards;}
+      .anim-2{opacity:0;animation:fadeUp .5s ease .08s forwards;}
+      .anim-3{opacity:0;animation:fadeUp .5s ease .16s forwards;}
+      .anim-4{opacity:0;animation:fadeUp .5s ease .24s forwards;}
+      .section-label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(6,177,162,.5);margin-bottom:.5rem;}
+      .div-line{border:none;height:1px;background:linear-gradient(to right,transparent,rgba(6,177,162,.2),transparent);margin:1.5rem 0;}
+      .prize-hero{font-family:"Bebas Neue",system-ui,sans-serif;font-size:clamp(3rem,8vw,5rem);line-height:1;color:#FF572D;letter-spacing:.02em;text-shadow:0 0 40px rgba(255,87,45,.2);}
+      .sidebar{position:sticky;top:2rem;align-self:flex-start;}
+      .action-panel{background:linear-gradient(145deg,#161510,#0d0c09);border-top:1px solid rgba(191,241,60,.25);border-left:1px solid rgba(191,241,60,.12);border-right:1px solid rgba(191,241,60,.06);border-bottom:1px solid rgba(191,241,60,.08);}
+      @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(191,241,60,.2);}50%{box-shadow:0 0 0 6px rgba(191,241,60,0);}}
+      .btn-primary-cta{animation:pulse-glow 3s ease-in-out infinite;}
+      #form-modal{backdrop-filter:blur(6px);}
+      .field-input:focus{outline:none;border-color:rgba(191,241,60,.6);box-shadow:0 0 0 2px rgba(191,241,60,.08);}
+      @keyframes status-pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+      .status-dot{animation:status-pulse 2s ease-in-out infinite;}
+      .bracket-l{border-left:1px solid rgba(201,162,39,.2);padding-left:1rem;}
+    </style>
   </head>
-  <body class="min-h-screen flex items-center justify-center p-4 bg-spark-black">
-    <div class="max-w-3xl w-full bg-spark-black/80 border border-spark-teal/30 rounded-xl p-6 lg:p-8 shadow-2xl relative">
-      <!-- Live Counters -->
-      <div class="absolute top-4 right-4 flex gap-2" id="counters">
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-spark-chartreuse/10 border border-spark-chartreuse/30 rounded-full text-xs font-mono text-spark-chartreuse" title="Interested">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          <span id="count-interested">0</span>
-        </span>
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-spark-orange/10 border border-spark-orange/30 rounded-full text-xs font-mono text-spark-orange" title="Looking for Teammates">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span id="count-team">0</span>
-        </span>
-      </div>
+  <body class="min-h-screen bg-spark-black text-spark-eggshell">
 
-      <div class="mb-4">
+    <nav class="border-b border-white/[0.05] anim-1">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase text-spark-eggshell/30 hover:text-spark-teal transition-colors">
+          <span>&#8592;</span><span>HackBU OS</span>
+        </a>
+        <div class="flex gap-2" id="counters">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 border border-spark-chartreuse/20 text-xs font-mono text-spark-chartreuse/60" title="Interested">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span id="count-interested">0</span> interested
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 border border-spark-orange/20 text-xs font-mono text-spark-orange/60" title="Looking for Teammates">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span id="count-team">0</span> team
+          </span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-6 pt-10 pb-6 anim-2">
+      <div class="flex items-center gap-3 mb-4">
         <span class:list={[
-          'inline-block px-3 py-1 rounded text-xs font-mono uppercase tracking-wider mb-3',
-          bounty.status === 'open' && 'bg-green-500/20 text-green-300 border border-green-500/30',
-          bounty.status === 'completed' && 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
-          bounty.status === 'closed' && 'bg-gray-500/20 text-gray-400 border border-gray-500/30',
+          "inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[.2em]",
+          bounty.status === "open" && "text-green-400 border border-green-500/30",
+          bounty.status === "completed" && "text-purple-300 border border-purple-500/30",
+          bounty.status === "closed" && "text-gray-400 border border-gray-500/30",
         ]}>
+          {bounty.status === "open" && <span class="status-dot w-1.5 h-1.5 rounded-full bg-green-400 shrink-0"></span>}
           {bounty.status}
         </span>
-        <h1 class="font-display text-3xl lg:text-4xl text-spark-chartreuse mb-3">
-          {bounty.title}
-        </h1>
+        {bounty.difficulty && (
+          <span class:list={[
+            "text-[10px] font-mono uppercase tracking-[.2em] px-2.5 py-1 border",
+            bounty.difficulty === "Beginner" && "text-green-400/70 border-green-500/20",
+            bounty.difficulty === "Intermediate" && "text-yellow-400/70 border-yellow-500/20",
+            bounty.difficulty === "Advanced" && "text-red-400/70 border-red-500/20",
+          ]}>{bounty.difficulty}</span>
+        )}
+      </div>
+      <h1 class="font-display leading-none tracking-wide text-spark-chartreuse mb-4" style="font-size:clamp(3rem,8vw,6rem);">
+        {bounty.title}
+      </h1>
+      <div class="flex gap-1.5 flex-wrap">
+        {tags.map((tag: string) => (
+          <span class="px-2 py-0.5 border border-spark-teal/20 text-[9px] font-mono uppercase tracking-wide text-spark-eggshell/40">{tag}</span>
+        ))}
+      </div>
+    </div>
 
-        <div class="flex flex-wrap gap-2 mb-4">
-          <div class="px-3 py-1 bg-spark-orange text-spark-black rounded-lg font-semibold text-sm">
-            ${bounty.prize}
+    <div class="max-w-6xl mx-auto px-6 pb-16 flex flex-col lg:flex-row gap-10">
+
+      <div class="flex-1 min-w-0 space-y-8 anim-3">
+        <div class="flex items-end gap-8 flex-wrap">
+          <div>
+            <div class="section-label">Prize</div>
+            <div class="prize-hero">${bounty.prize}</div>
           </div>
-          <div class:list={['px-3 py-1 border border-spark-teal/50 rounded-lg font-mono text-sm', dl.cls]}>
-            {dl.text}
+          <div class="pb-2">
+            <div class="section-label">Deadline</div>
+            <div class:list={["font-mono text-lg", dl.cls]}>{dl.text}</div>
           </div>
-          {bounty.difficulty && (
-            <div class:list={[
-              'px-3 py-1 rounded-lg font-semibold text-sm',
-              bounty.difficulty === 'Beginner' && 'bg-green-500/20 text-green-400 border border-green-500/40',
-              bounty.difficulty === 'Intermediate' && 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40',
-              bounty.difficulty === 'Advanced' && 'bg-red-500/20 text-red-400 border border-red-500/40',
-            ]}>
-              {bounty.difficulty}
+        </div>
+
+        <hr class="div-line" />
+
+        {entry.body && (
+          <div>
+            <div class="section-label">Mission Brief</div>
+            <div class="text-spark-eggshell/70 leading-relaxed text-sm prose prose-invert prose-sm max-w-none">
+              <Content />
             </div>
-          )}
-        </div>
-
-        <div class="flex gap-1.5 flex-wrap mb-4">
-          {tags.map((tag: string) => (
-            <span class="px-2 py-0.5 bg-spark-teal/15 border border-spark-teal/30 rounded text-xs font-mono text-spark-eggshell/90">
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        <div class="border-t border-spark-teal/20 pt-4 mb-4">
-          <h2 class="font-display text-lg text-spark-chartreuse mb-2">Description</h2>
-          <div class="text-spark-eggshell/80 leading-relaxed text-sm prose prose-invert prose-sm max-w-none">
-            <Content />
           </div>
-        </div>
+        )}
 
-        {bounty.winner && bounty.status === 'completed' && (
-          <div class="border-t border-spark-teal/20 pt-4 mb-4">
-            <h2 class="font-display text-lg text-purple-300 mb-2">🏆 Winner</h2>
-            <div class="flex items-center gap-3">
-              <span class="text-spark-eggshell font-semibold">{bounty.winner}</span>
+        {bounty.winner && bounty.status === "completed" && (
+          <div class="bracket-l">
+            <div class="section-label" style="color:rgba(201,162,39,.5);">Bounty Winner</div>
+            <div class="flex items-center gap-3 mt-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2.5">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+              </svg>
+              <span class="font-mono font-semibold" style="color:#e8c848;">{bounty.winner}</span>
               {bounty.winnerSubmission && (
-                <a
-                  href={bounty.winnerSubmission}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-sm text-spark-chartreuse hover:text-spark-chartreuse/80 underline transition-colors"
-                >
-                  View Submission
+                <a href={bounty.winnerSubmission} target="_blank" rel="noopener noreferrer"
+                   class="text-spark-teal/60 text-[10px] font-mono border border-spark-teal/20 px-1.5 py-0.5 hover:text-spark-teal transition-colors">
+                  view submission &#8599;
                 </a>
               )}
             </div>
           </div>
         )}
 
-        <div class="border-t border-spark-teal/20 pt-4 mb-4">
-          <h2 class="font-display text-lg text-spark-chartreuse mb-2">Get Involved</h2>
-          <div class="flex flex-wrap gap-3" id="involve-buttons">
-            <button
-              id="btn-interest"
-              data-type="interested"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-sm cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        {bounty.docLink && (
+          <div class="lg:hidden">
+            <div class="section-label">Project Spec</div>
+            <a href={bounty.docLink} target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-2 px-4 py-2 border border-spark-chartreuse/40 text-spark-chartreuse font-mono text-sm hover:bg-spark-chartreuse hover:text-spark-black transition-all duration-200">
+              View Project Doc
+            </a>
+          </div>
+        )}
+      </div>
+
+      <div class="lg:w-72 xl:w-80 shrink-0 sidebar anim-4">
+        <div class="action-panel p-5 space-y-5">
+          <div class="section-label" style="color:rgba(191,241,60,.4);">Get Involved</div>
+          <div class="space-y-2.5" id="involve-buttons">
+            <button id="btn-interest" data-type="interested"
+              class="btn-primary-cta w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-chartreuse/85">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
               <span>I'm Interested</span>
             </button>
-            <button
-              id="btn-team"
-              data-type="looking-for-team"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-orange text-spark-black rounded-lg font-semibold hover:bg-spark-orange/80 transition-colors text-sm cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <button id="btn-team" data-type="looking-for-team"
+              class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-spark-orange text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-orange/85">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>Looking for Teammates</span>
             </button>
           </div>
-        </div>
-
-        <!-- Toast notification -->
-        <div id="toast" class="hidden fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-lg font-mono text-sm shadow-xl border"></div>
-
-        <!-- Full Form Modal -->
-        <div id="form-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div class="bg-spark-black border border-spark-teal/40 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl max-h-[85vh] overflow-y-auto">
-            <h3 id="modal-title" class="font-display text-xl text-spark-chartreuse mb-2"></h3>
-            <p class="text-spark-eggshell/60 text-sm mb-6">Fill in your details so the organizers can reach out to you.</p>
-            <div class="space-y-3" id="form-fields">
-              <input
-                id="input-fname"
-                type="text"
-                placeholder="First Name"
-                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
-              />
-              <input
-                id="input-lname"
-                type="text"
-                placeholder="Last Name"
-                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
-              />
-              <input
-                id="input-email"
-                type="email"
-                placeholder="you@example.com"
-                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
-              />
-              <p id="bu-email-warning" class="hidden text-yellow-400/80 text-xs font-mono">Heads up: this program is for BU students. Make sure this is your BU email.</p>
-              <!-- Team composition — shown for both interested and looking-for-team -->
-              <div id="team-section" class="hidden space-y-2 pt-1">
-                <p class="text-spark-eggshell/60 text-xs font-mono">Working arrangement</p>
-                <div class="flex gap-2">
-                  <button type="button" id="btn-solo"
-                    class="flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-chartreuse text-spark-black transition-colors">
-                    Solo
-                  </button>
-                  <button type="button" id="btn-has-team"
-                    class="flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors">
-                    Already have a team
-                  </button>
-                </div>
-                <div id="teammates-area" class="hidden space-y-2 pt-1">
-                  <p class="text-spark-eggshell/60 text-xs font-mono">Teammate details</p>
-                  <div id="teammates-list" class="space-y-2"></div>
-                  <button type="button" id="add-teammate"
-                    class="text-spark-chartreuse/70 text-xs font-mono hover:text-spark-chartreuse transition-colors">
-                    + Add teammate
-                  </button>
-                </div>
-              </div>
-              <!-- Acknowledgement checkboxes — shown only for "interested" type -->
-              <div id="ack-section" class="hidden space-y-2 pt-1">
-                <label class="flex items-start gap-2 cursor-pointer group">
-                  <input type="checkbox" id="ack-notify" class="mt-0.5 accent-spark-chartreuse shrink-0" />
-                  <span class="text-xs font-mono text-spark-eggshell/70 group-hover:text-spark-eggshell/90 transition-colors">
-                    I agree to be notified when new bounties are released.
-                  </span>
-                </label>
-                <label class="flex items-start gap-2 cursor-pointer group">
-                  <input type="checkbox" id="ack-hours" class="mt-0.5 accent-spark-chartreuse shrink-0" />
-                  <span class="text-xs font-mono text-spark-eggshell/70 group-hover:text-spark-eggshell/90 transition-colors">
-                    I acknowledge that Spark!'s Innovation Hours (Wed 4–6pm) are available for assistance, guidance, resources, or a place to build.
-                  </span>
-                </label>
-              </div>
+          <div class="h-px" style="background:linear-gradient(to right,transparent,rgba(6,177,162,.15),transparent);"></div>
+          {bounty.docLink ? (
+            <div>
+              <div class="section-label">Project Spec</div>
+              <a href={bounty.docLink} target="_blank" rel="noopener noreferrer"
+                 class="flex items-center gap-2 px-3 py-2 border border-spark-teal/20 text-spark-teal/70 font-mono text-xs hover:border-spark-teal/50 hover:text-spark-teal transition-all">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                View Project Description Doc &#8599;
+              </a>
             </div>
-            <p id="form-error" class="text-red-400 text-sm mt-2 hidden"></p>
-            <div class="flex gap-3 justify-end mt-4">
-              <button id="modal-cancel" class="px-4 py-2 border border-spark-teal/40 text-spark-eggshell/70 rounded-lg hover:bg-spark-teal/10 transition-colors text-sm">
-                Cancel
-              </button>
-              <button id="modal-submit" class="px-4 py-2 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-sm">
-                Submit
-              </button>
-            </div>
+          ) : (
+            <p class="font-mono text-xs text-spark-eggshell/20 italic">No project doc linked yet.</p>
+          )}
+          <div class="h-px" style="background:linear-gradient(to right,transparent,rgba(6,177,162,.15),transparent);"></div>
+          <div class="flex items-baseline gap-2">
+            <span class="font-display text-3xl text-spark-orange leading-none">${bounty.prize}</span>
+            <span class="font-mono text-[9px] text-spark-orange/40 uppercase tracking-widest">prize pool</span>
           </div>
         </div>
-
-        <div class="border-t border-spark-teal/20 pt-4 mb-4">
-          <h2 class="font-display text-lg text-spark-chartreuse mb-2">Project Description</h2>
-          {bounty.docLink ? (
-            <a
-              href={bounty.docLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-sm"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              View Project Description Doc
-            </a>
-          ) : (
-            <p class="text-spark-eggshell/40 italic text-sm">
-              No project description document linked yet.
-            </p>
-          )}
+        <div class="mt-4">
+          <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.2em] uppercase text-spark-eggshell/20 hover:text-spark-teal transition-colors">
+            <span>&#8592;</span><span>Back to HackBU OS</span>
+          </a>
         </div>
       </div>
-
-      <a
-        href="/"
-        class="inline-block px-4 py-2 border-2 border-spark-teal text-spark-eggshell rounded-lg font-semibold hover:bg-spark-teal/20 transition-colors text-sm"
-      >
-        &larr; Back to HackBU OS
-      </a>
     </div>
-    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || '', repoLink: bounty.repoLink || '', instructionsLink: bounty.instructionsLink || '' }}>
-      const STORAGE_KEY = 'hackbu-bounty-responses';
-      const toast = document.getElementById('toast');
+
+    <div id="toast" class="hidden fixed bottom-6 right-6 z-[100] px-4 py-3 font-mono text-sm shadow-xl border"></div>
+
+    <div id="form-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div class="bg-spark-black border border-spark-teal/30 p-8 max-w-md w-full mx-4 shadow-2xl max-h-[85vh] overflow-y-auto" style="border-top-color:rgba(191,241,60,.3);">
+        <div class="section-label mb-1">Registration</div>
+        <h3 id="modal-title" class="font-display text-2xl text-spark-chartreuse mb-1"></h3>
+        <p class="text-spark-eggshell/40 text-xs font-mono mb-6">Fill in your details so the organizers can reach out to you.</p>
+        <div class="space-y-3" id="form-fields">
+          <input id="input-fname" type="text" placeholder="First Name" class="field-input w-full px-4 py-3 bg-spark-black border border-spark-teal/30 text-spark-eggshell font-mono text-sm transition-all" />
+          <input id="input-lname" type="text" placeholder="Last Name" class="field-input w-full px-4 py-3 bg-spark-black border border-spark-teal/30 text-spark-eggshell font-mono text-sm transition-all" />
+          <input id="input-email" type="email" placeholder="you@bu.edu" class="field-input w-full px-4 py-3 bg-spark-black border border-spark-teal/30 text-spark-eggshell font-mono text-sm transition-all" />
+          <p id="bu-email-warning" class="hidden text-yellow-400/70 text-xs font-mono">Heads up: this program is for BU students. Make sure this is your BU email.</p>
+          <div id="team-section" class="hidden space-y-2 pt-2">
+            <p class="section-label">Working arrangement</p>
+            <div class="flex gap-2">
+              <button type="button" id="btn-solo" class="flex-1 px-3 py-2 font-mono text-sm bg-spark-chartreuse text-spark-black transition-colors">Solo</button>
+              <button type="button" id="btn-has-team" class="flex-1 px-3 py-2 font-mono text-sm border border-spark-teal/30 text-spark-eggshell/50 hover:bg-spark-teal/10 transition-colors">Already have a team</button>
+            </div>
+            <div id="teammates-area" class="hidden space-y-2 pt-1">
+              <p class="section-label">Teammate details</p>
+              <div id="teammates-list" class="space-y-2"></div>
+              <button type="button" id="add-teammate" class="text-spark-chartreuse/60 text-xs font-mono hover:text-spark-chartreuse transition-colors">+ Add teammate</button>
+            </div>
+          </div>
+          <div id="ack-section" class="hidden space-y-2 pt-2">
+            <label class="flex items-start gap-2 cursor-pointer group">
+              <input type="checkbox" id="ack-notify" class="mt-0.5 accent-spark-chartreuse shrink-0" />
+              <span class="text-xs font-mono text-spark-eggshell/50 group-hover:text-spark-eggshell/80 transition-colors">I agree to be notified when new bounties are released.</span>
+            </label>
+            <label class="flex items-start gap-2 cursor-pointer group">
+              <input type="checkbox" id="ack-hours" class="mt-0.5 accent-spark-chartreuse shrink-0" />
+              <span class="text-xs font-mono text-spark-eggshell/50 group-hover:text-spark-eggshell/80 transition-colors">I acknowledge that Spark!\'s Innovation Hours (Wed 4-6pm) are available for assistance, guidance, resources, or a place to build.</span>
+            </label>
+          </div>
+        </div>
+        <p id="form-error" class="text-red-400 text-xs font-mono mt-3 hidden"></p>
+        <div class="flex gap-3 justify-end mt-5">
+          <button id="modal-cancel" class="px-4 py-2 border border-spark-teal/30 text-spark-eggshell/50 font-mono text-sm hover:bg-spark-teal/10 transition-colors">Cancel</button>
+          <button id="modal-submit" class="px-4 py-2 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm hover:bg-spark-chartreuse/85 transition-colors">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || "", repoLink: bounty.repoLink || "", instructionsLink: bounty.instructionsLink || "" }}>
+      const STORAGE_KEY = "hackbu-bounty-responses";
+      const toast = document.getElementById("toast");
       let toastTimer;
       function showToast(msg, isError = false) {
         clearTimeout(toastTimer);
         toast.textContent = msg;
-        toast.className = `fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-lg font-mono text-sm shadow-xl border ${
-          isError
-            ? 'bg-red-900/90 border-red-500/60 text-red-200'
-            : 'bg-spark-black/95 border-spark-chartreuse/60 text-spark-chartreuse'
-        }`;
-        toastTimer = setTimeout(() => { toast.className = 'hidden'; }, 4000);
+        toast.className = `fixed bottom-6 right-6 z-[100] px-4 py-3 font-mono text-sm shadow-xl border ${isError ? "bg-red-900/90 border-red-500/60 text-red-200" : "bg-spark-black/95 border-spark-chartreuse/60 text-spark-chartreuse"}`;
+        toastTimer = setTimeout(() => { toast.className = "hidden"; }, 4000);
       }
-      const modal = document.getElementById('form-modal');
-      const modalTitle = document.getElementById('modal-title');
-      const inputFname = document.getElementById('input-fname');
-      const inputLname = document.getElementById('input-lname');
-      const inputEmail = document.getElementById('input-email');
-      const formError = document.getElementById('form-error');
-      const btnInterest = document.getElementById('btn-interest');
-      const btnTeam = document.getElementById('btn-team');
-      const countInterested = document.getElementById('count-interested');
-      const countTeam = document.getElementById('count-team');
-      const teamSection = document.getElementById('team-section');
-      const btnSolo = document.getElementById('btn-solo');
-      const btnHasTeam = document.getElementById('btn-has-team');
-      const teammatesArea = document.getElementById('teammates-area');
-      const teammatesList = document.getElementById('teammates-list');
-      const addTeammateBtn = document.getElementById('add-teammate');
-      const ackSection = document.getElementById('ack-section');
-      const ackNotify = document.getElementById('ack-notify');
-      const ackHours = document.getElementById('ack-hours');
-      const buEmailWarning = document.getElementById('bu-email-warning');
-      let currentType = '';
-      let workingMode = 'solo'; // 'solo' | 'team'
-
-      // BU email warning on input
-      inputEmail.addEventListener('input', () => {
+      const modal = document.getElementById("form-modal");
+      const modalTitle = document.getElementById("modal-title");
+      const inputFname = document.getElementById("input-fname");
+      const inputLname = document.getElementById("input-lname");
+      const inputEmail = document.getElementById("input-email");
+      const formError = document.getElementById("form-error");
+      const btnInterest = document.getElementById("btn-interest");
+      const btnTeam = document.getElementById("btn-team");
+      const countInterested = document.getElementById("count-interested");
+      const countTeam = document.getElementById("count-team");
+      const teamSection = document.getElementById("team-section");
+      const btnSolo = document.getElementById("btn-solo");
+      const btnHasTeam = document.getElementById("btn-has-team");
+      const teammatesArea = document.getElementById("teammates-area");
+      const teammatesList = document.getElementById("teammates-list");
+      const addTeammateBtn = document.getElementById("add-teammate");
+      const ackSection = document.getElementById("ack-section");
+      const ackNotify = document.getElementById("ack-notify");
+      const ackHours = document.getElementById("ack-hours");
+      const buEmailWarning = document.getElementById("bu-email-warning");
+      let currentType = "";
+      let workingMode = "solo";
+      inputEmail.addEventListener("input", () => {
         const val = inputEmail.value.trim();
-        if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && !val.toLowerCase().endsWith('@bu.edu')) {
-          buEmailWarning.classList.remove('hidden');
-        } else {
-          buEmailWarning.classList.add('hidden');
-        }
+        if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && !val.toLowerCase().endsWith("@bu.edu")) buEmailWarning.classList.remove("hidden");
+        else buEmailWarning.classList.add("hidden");
       });
-
       function setWorkingMode(mode) {
         workingMode = mode;
-        if (mode === 'solo') {
-          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-chartreuse text-spark-black transition-colors';
-          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
-          teammatesArea.classList.add('hidden');
+        if (mode === "solo") {
+          btnSolo.className = "flex-1 px-3 py-2 font-mono text-sm bg-spark-chartreuse text-spark-black transition-colors";
+          btnHasTeam.className = "flex-1 px-3 py-2 font-mono text-sm border border-spark-teal/30 text-spark-eggshell/50 hover:bg-spark-teal/10 transition-colors";
+          teammatesArea.classList.add("hidden");
         } else {
-          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
-          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-orange text-spark-black transition-colors';
-          teammatesArea.classList.remove('hidden');
+          btnSolo.className = "flex-1 px-3 py-2 font-mono text-sm border border-spark-teal/30 text-spark-eggshell/50 hover:bg-spark-teal/10 transition-colors";
+          btnHasTeam.className = "flex-1 px-3 py-2 font-mono text-sm bg-spark-orange text-spark-black transition-colors";
+          teammatesArea.classList.remove("hidden");
           if (teammatesList.children.length === 0) addTeammateRow();
         }
       }
-
       function addTeammateRow() {
         if (teammatesList.children.length >= 5) return;
         const idx = teammatesList.children.length;
-        const row = document.createElement('div');
-        row.className = 'flex gap-2 items-center teammate-row';
-        row.innerHTML = `
-          <input type="text" placeholder="Teammate ${idx + 1} Name"
-            class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse teammate-name" />
-          <input type="email" placeholder="email@bu.edu"
-            class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse teammate-email" />
-          <button type="button" class="remove-teammate text-spark-eggshell/40 hover:text-red-400 transition-colors text-lg leading-none px-1" title="Remove">×</button>
-        `;
-        row.querySelector('.remove-teammate').addEventListener('click', () => {
-          row.remove();
-          updateAddTeammateBtn();
-        });
+        const row = document.createElement("div");
+        row.className = "flex gap-2 items-center teammate-row";
+        row.innerHTML = `<input type="text" placeholder="Teammate ${idx+1} Name" class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/30 text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse teammate-name" /><input type="email" placeholder="email@bu.edu" class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/30 text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse teammate-email" /><button type="button" class="remove-teammate text-spark-eggshell/30 hover:text-red-400 transition-colors text-lg leading-none px-1">×</button>`;
+        row.querySelector(".remove-teammate").addEventListener("click", () => { row.remove(); updateAddTeammateBtn(); });
         teammatesList.appendChild(row);
         updateAddTeammateBtn();
       }
-
-      function updateAddTeammateBtn() {
-        addTeammateBtn.style.display = teammatesList.children.length >= 5 ? 'none' : '';
-      }
-
+      function updateAddTeammateBtn() { addTeammateBtn.style.display = teammatesList.children.length >= 5 ? "none" : ""; }
       function getTeammates() {
-        const rows = teammatesList.querySelectorAll('.teammate-row');
-        return Array.from(rows).map(row => ({
-          name: row.querySelector('.teammate-name').value.trim(),
-          email: row.querySelector('.teammate-email').value.trim(),
+        return Array.from(teammatesList.querySelectorAll(".teammate-row")).map(row => ({
+          name: row.querySelector(".teammate-name").value.trim(),
+          email: row.querySelector(".teammate-email").value.trim(),
         })).filter(t => t.name || t.email);
       }
-
-      btnSolo.addEventListener('click', () => setWorkingMode('solo'));
-      btnHasTeam.addEventListener('click', () => setWorkingMode('team'));
-      addTeammateBtn.addEventListener('click', addTeammateRow);
-
-      function getResponses() {
-        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-        catch { return {}; }
-      }
-
-      function saveResponse(bountySlug, type, data) {
-        const responses = getResponses();
-        if (!responses[bountySlug]) responses[bountySlug] = {};
-        responses[bountySlug][type] = { ...data, timestamp: new Date().toISOString() };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
-      }
-
-      function removeResponse(bountySlug, type) {
-        const responses = getResponses();
-        if (responses[bountySlug]) {
-          delete responses[bountySlug][type];
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
-      }
-
-      function hasResponded(bountySlug, type) {
-        const responses = getResponses();
-        return !!(responses[bountySlug] && responses[bountySlug][type]);
-      }
-
-      function getStoredData() {
-        try { return JSON.parse(localStorage.getItem('hackbu-user-data') || '{}'); }
-        catch { return {}; }
-      }
-
+      btnSolo.addEventListener("click", () => setWorkingMode("solo"));
+      btnHasTeam.addEventListener("click", () => setWorkingMode("team"));
+      addTeammateBtn.addEventListener("click", addTeammateRow);
+      function getResponses() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; } }
+      function saveResponse(bountySlug, type, data) { const r = getResponses(); if (!r[bountySlug]) r[bountySlug] = {}; r[bountySlug][type] = {...data, timestamp: new Date().toISOString()}; localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
+      function removeResponse(bountySlug, type) { const r = getResponses(); if (r[bountySlug]) delete r[bountySlug][type]; localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
+      function hasResponded(bountySlug, type) { const r = getResponses(); return !!(r[bountySlug] && r[bountySlug][type]); }
+      function getStoredData() { try { return JSON.parse(localStorage.getItem("hackbu-user-data") || "{}"); } catch { return {}; } }
       function updateButtonStates() {
-        if (hasResponded(slug, 'interested')) {
-          btnInterest.querySelector('span').textContent = 'Withdraw Interest';
-          btnInterest.classList.remove('bg-spark-chartreuse', 'hover:bg-spark-chartreuse/80');
-          btnInterest.classList.add('bg-red-500/20', 'border', 'border-red-500/40', 'text-red-300');
+        if (hasResponded(slug, "interested")) {
+          btnInterest.querySelector("span").textContent = "Withdraw Interest";
+          btnInterest.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 border border-red-500/40 text-red-300 font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-red-500/30";
         } else {
-          btnInterest.querySelector('span').textContent = "I'm Interested";
-          btnInterest.classList.add('bg-spark-chartreuse', 'hover:bg-spark-chartreuse/80');
-          btnInterest.classList.remove('bg-red-500/20', 'border-red-500/40', 'text-red-300');
+          btnInterest.querySelector("span").textContent = "I'm Interested";
+          btnInterest.className = "btn-primary-cta w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-chartreuse/85";
         }
-        if (hasResponded(slug, 'looking-for-team')) {
-          btnTeam.querySelector('span').textContent = 'Withdraw Team Request';
-          btnTeam.classList.remove('bg-spark-orange', 'hover:bg-spark-orange/80');
-          btnTeam.classList.add('bg-red-500/20', 'border', 'border-red-500/40', 'text-red-300');
+        if (hasResponded(slug, "looking-for-team")) {
+          btnTeam.querySelector("span").textContent = "Withdraw Team Request";
+          btnTeam.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 border border-red-500/40 text-red-300 font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-red-500/30";
         } else {
-          btnTeam.querySelector('span').textContent = 'Looking for Teammates';
-          btnTeam.classList.add('bg-spark-orange', 'hover:bg-spark-orange/80');
-          btnTeam.classList.remove('bg-red-500/20', 'border-red-500/40', 'text-red-300');
+          btnTeam.querySelector("span").textContent = "Looking for Teammates";
+          btnTeam.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-spark-orange text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-orange/85";
         }
       }
-
       function openModal(type) {
         currentType = type;
-        modalTitle.textContent = type === 'interested'
-          ? "I'm Interested"
-          : 'Looking for Teammates';
+        modalTitle.textContent = type === "interested" ? "I'm Interested" : "Looking for Teammates";
         const stored = getStoredData();
-        inputFname.value = stored.fname || '';
-        inputLname.value = stored.lname || '';
-        inputEmail.value = stored.email || '';
-        formError.classList.add('hidden');
-        buEmailWarning.classList.add('hidden');
-        // Team section: show for both types; ack only for interested
-        teamSection.classList.remove('hidden');
-        const stored2 = getStoredData();
-        workingMode = stored2.workingMode || 'solo';
-        // Update button labels based on type
-        btnSolo.textContent = type === 'looking-for-team' ? 'Just me' : 'Solo / looking for team';
-        btnHasTeam.textContent = type === 'looking-for-team' ? 'Partial team, need more' : 'Already have a team';
-        // Reset teammates list then apply active styling to match workingMode
-        teammatesList.innerHTML = '';
-        if (workingMode === 'solo') {
-          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-chartreuse text-spark-black transition-colors';
-          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
-          teammatesArea.classList.add('hidden');
-        } else {
-          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
-          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-orange text-spark-black transition-colors';
-          teammatesArea.classList.remove('hidden');
-          addTeammateRow();
-        }
-        if (type === 'interested') {
-          ackSection.classList.remove('hidden');
-          ackNotify.checked = false;
-          ackHours.checked = false;
-        } else {
-          ackSection.classList.add('hidden');
-        }
-        modal.classList.remove('hidden');
-        inputFname.focus();
+        inputFname.value = stored.fname || ""; inputLname.value = stored.lname || ""; inputEmail.value = stored.email || "";
+        formError.classList.add("hidden"); buEmailWarning.classList.add("hidden");
+        teamSection.classList.remove("hidden");
+        workingMode = stored.workingMode || "solo";
+        btnSolo.textContent = type === "looking-for-team" ? "Just me" : "Solo / looking for team";
+        btnHasTeam.textContent = type === "looking-for-team" ? "Partial team, need more" : "Already have a team";
+        teammatesList.innerHTML = "";
+        setWorkingMode(workingMode);
+        if (type === "interested") { ackSection.classList.remove("hidden"); ackNotify.checked = false; ackHours.checked = false; }
+        else ackSection.classList.add("hidden");
+        modal.classList.remove("hidden"); inputFname.focus();
       }
-
-      function closeModal() {
-        modal.classList.add('hidden');
-        currentType = '';
-      }
-
+      function closeModal() { modal.classList.add("hidden"); currentType = ""; }
       async function submitForm() {
-        const fname = inputFname.value.trim();
-        const lname = inputLname.value.trim();
-        const email = inputEmail.value.trim();
-
-        if (!fname || !lname) {
-          formError.textContent = 'Please enter your first and last name.';
-          formError.classList.remove('hidden');
-          return;
+        const fname = inputFname.value.trim(), lname = inputLname.value.trim(), email = inputEmail.value.trim();
+        if (!fname || !lname) { formError.textContent = "Please enter your first and last name."; formError.classList.remove("hidden"); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { formError.textContent = "Please enter a valid email address."; formError.classList.remove("hidden"); return; }
+        if (currentType === "interested") {
+          if (!ackNotify.checked) { formError.textContent = "Please agree to bounty notifications."; formError.classList.remove("hidden"); return; }
+          if (!ackHours.checked) { formError.textContent = "Please acknowledge Innovation Hours."; formError.classList.remove("hidden"); return; }
         }
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          formError.textContent = 'Please enter a valid email address.';
-          formError.classList.remove('hidden');
-          return;
-        }
-
-        // Require acknowledgements on interested form
-        if (currentType === 'interested') {
-          if (!ackNotify.checked) { formError.textContent = 'Please agree to bounty notifications.'; formError.classList.remove('hidden'); return; }
-          if (!ackHours.checked) { formError.textContent = 'Please acknowledge Innovation Hours.'; formError.classList.remove('hidden'); return; }
-        }
-
-        // Validate teammates
         let validTeammates = [];
-        if (currentType === 'interested' && workingMode === 'team') {
+        if (currentType === "interested" && workingMode === "team") {
           validTeammates = getTeammates();
           for (const t of validTeammates) {
-            if (!t.name) { formError.textContent = 'Please enter a name for each teammate.'; formError.classList.remove('hidden'); return; }
-            if (!t.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) { formError.textContent = 'Please enter a valid email for each teammate.'; formError.classList.remove('hidden'); return; }
+            if (!t.name) { formError.textContent = "Please enter a name for each teammate."; formError.classList.remove("hidden"); return; }
+            if (!t.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) { formError.textContent = "Please enter a valid email for each teammate."; formError.classList.remove("hidden"); return; }
           }
         }
-
-        // Store user data for pre-fill (including workingMode)
-        localStorage.setItem('hackbu-user-data', JSON.stringify({ fname, lname, email, workingMode }));
-
-        // Optimistic: save to localStorage immediately
+        localStorage.setItem("hackbu-user-data", JSON.stringify({ fname, lname, email, workingMode }));
         saveResponse(slug, currentType, { fname, lname, email });
-        closeModal();
-        updateButtonStates();
-
-        showToast('Registered! Check your email shortly.');
-
-        // Call API
+        closeModal(); updateButtonStates();
+        showToast("Registered! Check your email shortly.");
         try {
-          const res = await fetch('/api/respond', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              first_name: fname,
-              last_name: lname,
-              email,
-              bounty_slug: slug,
-              type: currentType,
-              bounty_title: bountyTitle,
-              doc_link: docLink,
-              teammates: validTeammates,
-              working_mode: currentType === 'interested' ? workingMode : undefined,
-              repo_link: repoLink,
-              instructions_link: instructionsLink,
-            }),
-          });
-          if (!res.ok) {
-            console.error('API error:', await res.text());
-            showToast('Saved locally — sync will retry on next visit.', true);
-          }
-        } catch (err) {
-          console.error('Failed to submit:', err);
-          showToast('No connection — saved locally and will sync when online.', true);
-        }
-
+          const res = await fetch("/api/respond", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ first_name: fname, last_name: lname, email, bounty_slug: slug, type: currentType, bounty_title: bountyTitle, doc_link: docLink, teammates: validTeammates, working_mode: currentType === "interested" ? workingMode : undefined, repo_link: repoLink, instructions_link: instructionsLink }) });
+          if (!res.ok) { console.error("API error:", await res.text()); showToast("Saved locally — sync will retry on next visit.", true); }
+        } catch (err) { console.error("Failed to submit:", err); showToast("No connection — saved locally and will sync when online.", true); }
         fetchCounts();
       }
-
       async function withdraw(type) {
-        const stored = getResponses();
-        const data = stored[slug] && stored[slug][type];
-        const email = data?.email || getStoredData().email;
-
-        removeResponse(slug, type);
-        updateButtonStates();
-
-        showToast('Withdrawn.');
-
-        try {
-          const res = await fetch('/api/withdraw', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email,
-              bounty_slug: slug,
-              type,
-            }),
-          });
-          if (!res.ok) {
-            console.error('Withdraw API error:', await res.text());
-            showToast('Could not sync withdrawal — will retry on next visit.', true);
-          }
-        } catch (err) {
-          console.error('Failed to withdraw:', err);
-          showToast('No connection — withdrawal saved locally.', true);
-        }
-
+        const stored = getResponses(); const data = stored[slug] && stored[slug][type]; const email = data?.email || getStoredData().email;
+        removeResponse(slug, type); updateButtonStates(); showToast("Withdrawn.");
+        try { const res = await fetch("/api/withdraw", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ email, bounty_slug: slug, type }) }); if (!res.ok) showToast("Could not sync withdrawal.", true); }
+        catch { showToast("No connection — withdrawal saved locally.", true); }
         fetchCounts();
       }
-
       async function fetchCounts() {
-        try {
-          const res = await fetch(`/api/bounty-counts?slug=${encodeURIComponent(slug)}`);
-          if (res.ok) {
-            const data = await res.json();
-            countInterested.textContent = data.interested || 0;
-            countTeam.textContent = data.lookingForTeam || 0;
-          }
-        } catch (err) {
-          console.error('Failed to fetch counts:', err);
-        }
+        try { const res = await fetch(`/api/bounty-counts?slug=${encodeURIComponent(slug)}`); if (res.ok) { const d = await res.json(); countInterested.textContent = d.interested || 0; countTeam.textContent = d.lookingForTeam || 0; } } catch {}
       }
-
-      // Init
-      updateButtonStates();
-      fetchCounts();
-
+      updateButtonStates(); fetchCounts();
       function showWithdrawConfirm(btn, type) {
-        // Remove any existing confirm UI
         const existing = document.getElementById(`confirm-${type}`);
         if (existing) { existing.remove(); return; }
-        const div = document.createElement('div');
-        div.id = `confirm-${type}`;
-        div.className = 'flex items-center gap-2 mt-1 text-sm font-mono';
-        div.innerHTML = `
-          <span class="text-spark-eggshell/70">Confirm withdraw?</span>
-          <button class="px-2 py-0.5 bg-red-500/80 text-white rounded hover:bg-red-500 transition-colors confirm-yes">Yes</button>
-          <button class="px-2 py-0.5 border border-spark-teal/40 text-spark-eggshell/60 rounded hover:bg-spark-teal/10 transition-colors confirm-no">Cancel</button>
-        `;
-        div.querySelector('.confirm-yes').addEventListener('click', () => {
-          div.remove();
-          withdraw(type);
-        });
-        div.querySelector('.confirm-no').addEventListener('click', () => div.remove());
-        btn.insertAdjacentElement('afterend', div);
+        const div = document.createElement("div"); div.id = `confirm-${type}`; div.className = "flex items-center gap-2 mt-1 text-xs font-mono";
+        div.innerHTML = `<span class="text-spark-eggshell/50">Confirm withdraw?</span><button class="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 confirm-yes">Yes</button><button class="px-2 py-0.5 border border-spark-teal/30 text-spark-eggshell/40 hover:bg-spark-teal/10 confirm-no">Cancel</button>`;
+        div.querySelector(".confirm-yes").addEventListener("click", () => { div.remove(); withdraw(type); });
+        div.querySelector(".confirm-no").addEventListener("click", () => div.remove());
+        btn.insertAdjacentElement("afterend", div);
       }
-
-      btnInterest.addEventListener('click', () => {
-        if (hasResponded(slug, 'interested')) {
-          showWithdrawConfirm(btnInterest, 'interested');
-        } else {
-          openModal('interested');
-        }
-      });
-      btnTeam.addEventListener('click', () => {
-        if (hasResponded(slug, 'looking-for-team')) {
-          showWithdrawConfirm(btnTeam, 'looking-for-team');
-        } else {
-          openModal('looking-for-team');
-        }
-      });
-      document.getElementById('modal-cancel').addEventListener('click', closeModal);
-      document.getElementById('modal-submit').addEventListener('click', submitForm);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-      });
+      btnInterest.addEventListener("click", () => { if (hasResponded(slug, "interested")) showWithdrawConfirm(btnInterest, "interested"); else openModal("interested"); });
+      btnTeam.addEventListener("click", () => { if (hasResponded(slug, "looking-for-team")) showWithdrawConfirm(btnTeam, "looking-for-team"); else openModal("looking-for-team"); });
+      document.getElementById("modal-cancel").addEventListener("click", closeModal);
+      document.getElementById("modal-submit").addEventListener("click", submitForm);
+      modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
     </script>
   </body>
 </html>

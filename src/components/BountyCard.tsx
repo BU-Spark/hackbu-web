@@ -48,7 +48,7 @@ export function BountyCard({ bounty, onClick }: BountyCardProps) {
 
   return (
     <div
-      onClick={onClick}
+      onClick={() => { window.location.href = `/bounties/${bounty.slug}`; }}
       className={`group relative flex flex-col gap-3 p-4 bg-spark-black border rounded-xl cursor-pointer hover:border-spark-chartreuse/60 hover:bg-spark-teal/5 transition-all duration-200 hover:shadow-[0_0_16px_rgba(168,230,29,0.08)] ${bounty.featured ? 'border-spark-chartreuse/50 ring-1 ring-spark-chartreuse/20' : 'border-spark-teal/30'}`}
     >
       {bounty.featured && (
