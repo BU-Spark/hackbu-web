@@ -114,10 +114,10 @@ const dl = deadlineLabel(bounty.deadline);
 
         <!-- Full Form Modal -->
         <div id="form-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div class="bg-spark-black border border-spark-teal/40 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+          <div class="bg-spark-black border border-spark-teal/40 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <h3 id="modal-title" class="font-display text-xl text-spark-chartreuse mb-2"></h3>
             <p class="text-spark-eggshell/60 text-sm mb-6">Fill in your details so the organizers can reach out to you.</p>
-            <div class="space-y-3">
+            <div class="space-y-3" id="form-fields">
               <input
                 id="input-fname"
                 type="text"
@@ -136,25 +136,44 @@ const dl = deadlineLabel(bounty.deadline);
                 placeholder="you@example.com"
                 class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
               />
-              <select
-                id="input-year"
-                class="w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
-              >
-                <option value="">Select Year</option>
-                <option value="Freshman">Freshman</option>
-                <option value="Sophomore">Sophomore</option>
-                <option value="Junior">Junior</option>
-                <option value="Senior">Senior</option>
-                <option value="Masters">Masters</option>
-                <option value="PhD">PhD</option>
-                <option value="Other">Other</option>
-              </select>
-              <input
-                id="input-year-other"
-                type="text"
-                placeholder="Specify your year..."
-                class="hidden w-full px-4 py-3 bg-spark-black border border-spark-teal/40 rounded-lg text-spark-eggshell font-mono text-base focus:outline-none focus:border-spark-chartreuse transition-colors"
-              />
+              <p id="bu-email-warning" class="hidden text-yellow-400/80 text-xs font-mono">Heads up: this program is for BU students. Make sure this is your BU email.</p>
+              <!-- Team composition — shown for both interested and looking-for-team -->
+              <div id="team-section" class="hidden space-y-2 pt-1">
+                <p class="text-spark-eggshell/60 text-xs font-mono">Working arrangement</p>
+                <div class="flex gap-2">
+                  <button type="button" id="btn-solo"
+                    class="flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-chartreuse text-spark-black transition-colors">
+                    Solo
+                  </button>
+                  <button type="button" id="btn-has-team"
+                    class="flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors">
+                    Already have a team
+                  </button>
+                </div>
+                <div id="teammates-area" class="hidden space-y-2 pt-1">
+                  <p class="text-spark-eggshell/60 text-xs font-mono">Teammate details</p>
+                  <div id="teammates-list" class="space-y-2"></div>
+                  <button type="button" id="add-teammate"
+                    class="text-spark-chartreuse/70 text-xs font-mono hover:text-spark-chartreuse transition-colors">
+                    + Add teammate
+                  </button>
+                </div>
+              </div>
+              <!-- Acknowledgement checkboxes — shown only for "interested" type -->
+              <div id="ack-section" class="hidden space-y-2 pt-1">
+                <label class="flex items-start gap-2 cursor-pointer group">
+                  <input type="checkbox" id="ack-notify" class="mt-0.5 accent-spark-chartreuse shrink-0" />
+                  <span class="text-xs font-mono text-spark-eggshell/70 group-hover:text-spark-eggshell/90 transition-colors">
+                    I agree to be notified when new bounties are released.
+                  </span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer group">
+                  <input type="checkbox" id="ack-hours" class="mt-0.5 accent-spark-chartreuse shrink-0" />
+                  <span class="text-xs font-mono text-spark-eggshell/70 group-hover:text-spark-eggshell/90 transition-colors">
+                    I acknowledge that Spark!'s Innovation Hours (Wed 4–6pm) are available for assistance, guidance, resources, or a place to build.
+                  </span>
+                </label>
+              </div>
             </div>
             <p id="form-error" class="text-red-400 text-sm mt-2 hidden"></p>
             <div class="flex gap-3 justify-end mt-4">
@@ -214,24 +233,83 @@ const dl = deadlineLabel(bounty.deadline);
       const inputFname = document.getElementById('input-fname');
       const inputLname = document.getElementById('input-lname');
       const inputEmail = document.getElementById('input-email');
-      const inputYear = document.getElementById('input-year');
-      const inputYearOther = document.getElementById('input-year-other');
       const formError = document.getElementById('form-error');
       const btnInterest = document.getElementById('btn-interest');
       const btnTeam = document.getElementById('btn-team');
       const countInterested = document.getElementById('count-interested');
       const countTeam = document.getElementById('count-team');
+      const teamSection = document.getElementById('team-section');
+      const btnSolo = document.getElementById('btn-solo');
+      const btnHasTeam = document.getElementById('btn-has-team');
+      const teammatesArea = document.getElementById('teammates-area');
+      const teammatesList = document.getElementById('teammates-list');
+      const addTeammateBtn = document.getElementById('add-teammate');
+      const ackSection = document.getElementById('ack-section');
+      const ackNotify = document.getElementById('ack-notify');
+      const ackHours = document.getElementById('ack-hours');
+      const buEmailWarning = document.getElementById('bu-email-warning');
       let currentType = '';
+      let workingMode = 'solo'; // 'solo' | 'team'
 
-      // Show/hide "Other" year input
-      inputYear.addEventListener('change', () => {
-        if (inputYear.value === 'Other') {
-          inputYearOther.classList.remove('hidden');
+      // BU email warning on input
+      inputEmail.addEventListener('input', () => {
+        const val = inputEmail.value.trim();
+        if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && !val.toLowerCase().endsWith('@bu.edu')) {
+          buEmailWarning.classList.remove('hidden');
         } else {
-          inputYearOther.classList.add('hidden');
-          inputYearOther.value = '';
+          buEmailWarning.classList.add('hidden');
         }
       });
+
+      function setWorkingMode(mode) {
+        workingMode = mode;
+        if (mode === 'solo') {
+          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-chartreuse text-spark-black transition-colors';
+          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
+          teammatesArea.classList.add('hidden');
+        } else {
+          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
+          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-orange text-spark-black transition-colors';
+          teammatesArea.classList.remove('hidden');
+          if (teammatesList.children.length === 0) addTeammateRow();
+        }
+      }
+
+      function addTeammateRow() {
+        if (teammatesList.children.length >= 5) return;
+        const idx = teammatesList.children.length;
+        const row = document.createElement('div');
+        row.className = 'flex gap-2 items-center teammate-row';
+        row.innerHTML = `
+          <input type="text" placeholder="Teammate ${idx + 1} Name"
+            class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse teammate-name" />
+          <input type="email" placeholder="email@bu.edu"
+            class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse teammate-email" />
+          <button type="button" class="remove-teammate text-spark-eggshell/40 hover:text-red-400 transition-colors text-lg leading-none px-1" title="Remove">×</button>
+        `;
+        row.querySelector('.remove-teammate').addEventListener('click', () => {
+          row.remove();
+          updateAddTeammateBtn();
+        });
+        teammatesList.appendChild(row);
+        updateAddTeammateBtn();
+      }
+
+      function updateAddTeammateBtn() {
+        addTeammateBtn.style.display = teammatesList.children.length >= 5 ? 'none' : '';
+      }
+
+      function getTeammates() {
+        const rows = teammatesList.querySelectorAll('.teammate-row');
+        return Array.from(rows).map(row => ({
+          name: row.querySelector('.teammate-name').value.trim(),
+          email: row.querySelector('.teammate-email').value.trim(),
+        })).filter(t => t.name || t.email);
+      }
+
+      btnSolo.addEventListener('click', () => setWorkingMode('solo'));
+      btnHasTeam.addEventListener('click', () => setWorkingMode('team'));
+      addTeammateBtn.addEventListener('click', addTeammateRow);
 
       function getResponses() {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
@@ -293,11 +371,34 @@ const dl = deadlineLabel(bounty.deadline);
         inputFname.value = stored.fname || '';
         inputLname.value = stored.lname || '';
         inputEmail.value = stored.email || '';
-        inputYear.value = stored.year || '';
-        inputYearOther.value = stored.yearOther || '';
-        if (stored.year === 'Other') inputYearOther.classList.remove('hidden');
-        else inputYearOther.classList.add('hidden');
         formError.classList.add('hidden');
+        buEmailWarning.classList.add('hidden');
+        // Team section: show for both types; ack only for interested
+        teamSection.classList.remove('hidden');
+        const stored2 = getStoredData();
+        workingMode = stored2.workingMode || 'solo';
+        // Update button labels based on type
+        btnSolo.textContent = type === 'looking-for-team' ? 'Just me' : 'Solo / looking for team';
+        btnHasTeam.textContent = type === 'looking-for-team' ? 'Partial team, need more' : 'Already have a team';
+        // Reset teammates list then apply active styling to match workingMode
+        teammatesList.innerHTML = '';
+        if (workingMode === 'solo') {
+          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-chartreuse text-spark-black transition-colors';
+          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
+          teammatesArea.classList.add('hidden');
+        } else {
+          btnSolo.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10 transition-colors';
+          btnHasTeam.className = 'flex-1 px-3 py-1.5 rounded text-sm font-mono bg-spark-orange text-spark-black transition-colors';
+          teammatesArea.classList.remove('hidden');
+          addTeammateRow();
+        }
+        if (type === 'interested') {
+          ackSection.classList.remove('hidden');
+          ackNotify.checked = false;
+          ackHours.checked = false;
+        } else {
+          ackSection.classList.add('hidden');
+        }
         modal.classList.remove('hidden');
         inputFname.focus();
       }
@@ -311,9 +412,6 @@ const dl = deadlineLabel(bounty.deadline);
         const fname = inputFname.value.trim();
         const lname = inputLname.value.trim();
         const email = inputEmail.value.trim();
-        const yearVal = inputYear.value;
-        const yearOther = inputYearOther.value.trim();
-        const year = yearVal === 'Other' ? yearOther : yearVal;
 
         if (!fname || !lname) {
           formError.textContent = 'Please enter your first and last name.';
@@ -325,19 +423,28 @@ const dl = deadlineLabel(bounty.deadline);
           formError.classList.remove('hidden');
           return;
         }
-        if (!year) {
-          formError.textContent = 'Please select your year.';
-          formError.classList.remove('hidden');
-          return;
+
+        // Require acknowledgements on interested form
+        if (currentType === 'interested') {
+          if (!ackNotify.checked) { formError.textContent = 'Please agree to bounty notifications.'; formError.classList.remove('hidden'); return; }
+          if (!ackHours.checked) { formError.textContent = 'Please acknowledge Innovation Hours.'; formError.classList.remove('hidden'); return; }
         }
 
-        // Store user data for pre-fill
-        localStorage.setItem('hackbu-user-data', JSON.stringify({
-          fname, lname, email, year: yearVal, yearOther
-        }));
+        // Validate teammates
+        let validTeammates = [];
+        if (currentType === 'interested' && workingMode === 'team') {
+          validTeammates = getTeammates();
+          for (const t of validTeammates) {
+            if (!t.name) { formError.textContent = 'Please enter a name for each teammate.'; formError.classList.remove('hidden'); return; }
+            if (!t.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) { formError.textContent = 'Please enter a valid email for each teammate.'; formError.classList.remove('hidden'); return; }
+          }
+        }
+
+        // Store user data for pre-fill (including workingMode)
+        localStorage.setItem('hackbu-user-data', JSON.stringify({ fname, lname, email, workingMode }));
 
         // Optimistic: save to localStorage immediately
-        saveResponse(slug, currentType, { fname, lname, email, year });
+        saveResponse(slug, currentType, { fname, lname, email });
         closeModal();
         updateButtonStates();
 
@@ -352,11 +459,12 @@ const dl = deadlineLabel(bounty.deadline);
               first_name: fname,
               last_name: lname,
               email,
-              year,
               bounty_slug: slug,
               type: currentType,
               bounty_title: bountyTitle,
               doc_link: docLink,
+              teammates: validTeammates,
+              working_mode: currentType === 'interested' ? workingMode : undefined,
             }),
           });
           if (!res.ok) {
@@ -420,16 +528,36 @@ const dl = deadlineLabel(bounty.deadline);
       updateButtonStates();
       fetchCounts();
 
+      function showWithdrawConfirm(btn, type) {
+        // Remove any existing confirm UI
+        const existing = document.getElementById(`confirm-${type}`);
+        if (existing) { existing.remove(); return; }
+        const div = document.createElement('div');
+        div.id = `confirm-${type}`;
+        div.className = 'flex items-center gap-2 mt-1 text-sm font-mono';
+        div.innerHTML = `
+          <span class="text-spark-eggshell/70">Confirm withdraw?</span>
+          <button class="px-2 py-0.5 bg-red-500/80 text-white rounded hover:bg-red-500 transition-colors confirm-yes">Yes</button>
+          <button class="px-2 py-0.5 border border-spark-teal/40 text-spark-eggshell/60 rounded hover:bg-spark-teal/10 transition-colors confirm-no">Cancel</button>
+        `;
+        div.querySelector('.confirm-yes').addEventListener('click', () => {
+          div.remove();
+          withdraw(type);
+        });
+        div.querySelector('.confirm-no').addEventListener('click', () => div.remove());
+        btn.insertAdjacentElement('afterend', div);
+      }
+
       btnInterest.addEventListener('click', () => {
         if (hasResponded(slug, 'interested')) {
-          withdraw('interested');
+          showWithdrawConfirm(btnInterest, 'interested');
         } else {
           openModal('interested');
         }
       });
       btnTeam.addEventListener('click', () => {
         if (hasResponded(slug, 'looking-for-team')) {
-          withdraw('looking-for-team');
+          showWithdrawConfirm(btnTeam, 'looking-for-team');
         } else {
           openModal('looking-for-team');
         }

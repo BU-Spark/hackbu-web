@@ -16,9 +16,14 @@ export const POST: APIRoute = async ({ request }) => {
     const subscriberHash = crypto.createHash('md5').update(email.toLowerCase()).digest('hex');
     const tag = type === 'interested' ? `interested:${bounty_slug}` : `team:${bounty_slug}`;
 
-    // Remove the tag (don't delete the contact)
+    // Remove the primary tag + any working mode tags (don't delete the contact)
+    const tagsToRemove: { name: string; status: string }[] = [{ name: tag, status: 'inactive' }];
+    if (type === 'interested') {
+      tagsToRemove.push({ name: `solo:${bounty_slug}`, status: 'inactive' });
+      tagsToRemove.push({ name: `has-team:${bounty_slug}`, status: 'inactive' });
+    }
     await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
-      tags: [{ name: tag, status: 'inactive' }],
+      tags: tagsToRemove,
     });
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });

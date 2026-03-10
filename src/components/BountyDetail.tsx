@@ -58,11 +58,14 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   const [fname, setFname] = useState('');
   const [lname, setLname] = useState('');
   const [email, setEmail] = useState('');
-  const [year, setYear] = useState('');
-  const [yearOther, setYearOther] = useState('');
   const [formError, setFormError] = useState('');
   const [interestedDone, setInterestedDone] = useState(false);
   const [teamDone, setTeamDone] = useState(false);
+  const [workingMode, setWorkingMode] = useState<'solo' | 'team'>('solo');
+  const [teammates, setTeammates] = useState<{ name: string; email: string }[]>([{ name: '', email: '' }]);
+  const [agreeNotify, setAgreeNotify] = useState(false);
+  const [agreeHours, setAgreeHours] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState<string | null>(null);
   const [interestedCount, setInterestedCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
   const [toast, setToast] = useState<{ msg: string; error: boolean } | null>(null);
@@ -107,14 +110,16 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     setFname(stored.fname || '');
     setLname(stored.lname || '');
     setEmail(stored.email || '');
-    setYear(stored.year || '');
-    setYearOther(stored.yearOther || '');
     setFormError('');
+    setWorkingMode((stored.workingMode as 'solo' | 'team') || 'solo');
+    setTeammates([{ name: '', email: '' }]);
+    setAgreeNotify(false);
+    setAgreeHours(false);
+    setConfirmWithdraw(null);
     setModalType(type);
   }
 
   async function handleSubmit() {
-    const yearValue = year === 'Other' ? yearOther.trim() : year;
     if (!fname.trim() || !lname.trim()) {
       setFormError('Please enter your first and last name.');
       return;
@@ -123,16 +128,29 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       setFormError('Please enter a valid email address.');
       return;
     }
-    if (!yearValue) {
-      setFormError('Please select your year.');
-      return;
+
+    // Require acknowledgements on interested form
+    if (modalType === 'interested') {
+      if (!agreeNotify) { setFormError('Please agree to bounty notifications.'); return; }
+      if (!agreeHours) { setFormError('Please acknowledge Innovation Hours.'); return; }
+    }
+
+    // Validate teammates if team mode selected (on interested form)
+    const validTeammates = modalType === 'interested' && workingMode === 'team'
+      ? teammates.filter(t => t.name.trim() || t.email.trim())
+      : [];
+    for (const t of validTeammates) {
+      if (!t.name.trim()) { setFormError('Please enter a name for each teammate.'); return; }
+      if (!t.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email.trim())) {
+        setFormError('Please enter a valid email for each teammate.'); return;
+      }
     }
 
     localStorage.setItem('hackbu-user-data', JSON.stringify({
-      fname: fname.trim(), lname: lname.trim(), email: email.trim(), year, yearOther: yearOther.trim()
+      fname: fname.trim(), lname: lname.trim(), email: email.trim(), workingMode,
     }));
 
-    saveResponse(bounty.slug, modalType!, { fname: fname.trim(), lname: lname.trim(), email: email.trim(), year: yearValue });
+    saveResponse(bounty.slug, modalType!, { fname: fname.trim(), lname: lname.trim(), email: email.trim() });
     if (modalType === 'interested') setInterestedDone(true);
     if (modalType === 'looking-for-team') setTeamDone(true);
     setModalType(null);
@@ -146,11 +164,12 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
           first_name: fname.trim(),
           last_name: lname.trim(),
           email: email.trim(),
-          year: yearValue,
           bounty_slug: bounty.slug,
           type: modalType,
           bounty_title: bounty.title,
           doc_link: bounty.docLink || '',
+          teammates: validTeammates.map(t => ({ name: t.name.trim(), email: t.email.trim() })),
+          working_mode: modalType === 'interested' ? workingMode : undefined,
         }),
       });
       if (!res.ok) showToast('Saved locally — sync will retry on next visit.', true);
@@ -255,35 +274,53 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       {/* Get Involved */}
       <div className="border-t border-spark-teal/20 pt-4">
         <h3 className="font-display text-lg text-spark-chartreuse mb-2">Get Involved</h3>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => interestedDone ? handleWithdraw('interested') : openModal('interested')}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-colors cursor-pointer ${
-              interestedDone
-                ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
-                : 'bg-spark-chartreuse text-spark-black hover:bg-spark-chartreuse/80'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            {interestedDone ? 'Withdraw Interest' : "I'm Interested"}
-          </button>
-          <button
-            onClick={() => teamDone ? handleWithdraw('looking-for-team') : openModal('looking-for-team')}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-colors cursor-pointer ${
-              teamDone
-                ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
-                : 'bg-spark-orange text-spark-black hover:bg-spark-orange/80'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            {teamDone ? 'Withdraw Team Request' : 'Looking for Teammates'}
-          </button>
+        <div className="flex flex-wrap gap-3 items-start">
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => interestedDone ? setConfirmWithdraw('interested') : openModal('interested')}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-colors cursor-pointer ${
+                interestedDone
+                  ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
+                  : 'bg-spark-chartreuse text-spark-black hover:bg-spark-chartreuse/80'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              {interestedDone ? 'Withdraw Interest' : "I'm Interested"}
+            </button>
+            {confirmWithdraw === 'interested' && (
+              <div className="flex items-center gap-2 pl-1">
+                <span className="text-spark-eggshell/60 text-xs font-mono">Confirm withdraw?</span>
+                <button onClick={() => { handleWithdraw('interested'); setConfirmWithdraw(null); }} className="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-300 rounded text-xs hover:bg-red-500/30 transition-colors">Yes</button>
+                <button onClick={() => setConfirmWithdraw(null)} className="px-2 py-0.5 border border-spark-teal/40 text-spark-eggshell/60 rounded text-xs hover:bg-spark-teal/10 transition-colors">Cancel</button>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => teamDone ? setConfirmWithdraw('looking-for-team') : openModal('looking-for-team')}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-colors cursor-pointer ${
+                teamDone
+                  ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
+                  : 'bg-spark-orange text-spark-black hover:bg-spark-orange/80'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              {teamDone ? 'Withdraw Team Request' : 'Looking for Teammates'}
+            </button>
+            {confirmWithdraw === 'looking-for-team' && (
+              <div className="flex items-center gap-2 pl-1">
+                <span className="text-spark-eggshell/60 text-xs font-mono">Confirm withdraw?</span>
+                <button onClick={() => { handleWithdraw('looking-for-team'); setConfirmWithdraw(null); }} className="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-300 rounded text-xs hover:bg-red-500/30 transition-colors">Yes</button>
+                <button onClick={() => setConfirmWithdraw(null)} className="px-2 py-0.5 border border-spark-teal/40 text-spark-eggshell/60 rounded text-xs hover:bg-spark-teal/10 transition-colors">Cancel</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Form Modal (inline) */}
       {modalType && (
-        <div className="border border-spark-teal/40 rounded-lg p-4 bg-spark-black/80 space-y-3">
+        <div className="border border-spark-teal/40 rounded-lg p-4 bg-spark-black/80 space-y-3 max-h-[65vh] overflow-y-auto">
           <h3 className="font-display text-lg text-spark-chartreuse">
             {modalType === 'interested' ? "I'm Interested" : 'Looking for Teammates'}
           </h3>
@@ -307,28 +344,120 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
             placeholder="you@example.com"
             className="w-full px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
           />
-          <select
-            value={year}
-            onChange={(e) => { setYear(e.target.value); setFormError(''); }}
-            className="w-full px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
-          >
-            <option value="">Select Year</option>
-            <option value="Freshman">Freshman</option>
-            <option value="Sophomore">Sophomore</option>
-            <option value="Junior">Junior</option>
-            <option value="Senior">Senior</option>
-            <option value="Masters">Masters</option>
-            <option value="PhD">PhD</option>
-            <option value="Other">Other</option>
-          </select>
-          {year === 'Other' && (
-            <input
-              type="text" value={yearOther}
-              onChange={(e) => { setYearOther(e.target.value); setFormError(''); }}
-              placeholder="Specify your year..."
-              className="w-full px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
-            />
+          {email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && !email.trim().toLowerCase().endsWith('@bu.edu') && (
+            <p className="text-yellow-400/80 text-xs font-mono">Heads up: this program is for BU students. Make sure this is your BU email.</p>
           )}
+
+          {/* Team composition */}
+          {(modalType === 'interested' || modalType === 'looking-for-team') && (
+            <div className="space-y-2 pt-1">
+              <p className="text-spark-eggshell/60 text-xs font-mono">Working arrangement</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWorkingMode('solo')}
+                  className={`flex-1 px-3 py-1.5 rounded text-sm font-mono transition-colors ${
+                    workingMode === 'solo'
+                      ? 'bg-spark-chartreuse text-spark-black'
+                      : 'border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10'
+                  }`}
+                >
+                  {modalType === 'looking-for-team' ? 'Just me' : 'Solo / looking for team'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWorkingMode('team')}
+                  className={`flex-1 px-3 py-1.5 rounded text-sm font-mono transition-colors ${
+                    workingMode === 'team'
+                      ? 'bg-spark-orange text-spark-black'
+                      : 'border border-spark-teal/40 text-spark-eggshell/60 hover:bg-spark-teal/10'
+                  }`}
+                >
+                  {modalType === 'looking-for-team' ? 'Partial team, need more' : 'Already have a team'}
+                </button>
+              </div>
+
+              {workingMode === 'team' && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-spark-eggshell/60 text-xs font-mono">Teammate details</p>
+                  {teammates.map((tm, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={tm.name}
+                        onChange={(e) => {
+                          const updated = teammates.map((t, j) => j === i ? { ...t, name: e.target.value } : t);
+                          setTeammates(updated);
+                          setFormError('');
+                        }}
+                        placeholder={`Teammate ${i + 1} Name`}
+                        className="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
+                      />
+                      <input
+                        type="email"
+                        value={tm.email}
+                        onChange={(e) => {
+                          const updated = teammates.map((t, j) => j === i ? { ...t, email: e.target.value } : t);
+                          setTeammates(updated);
+                          setFormError('');
+                        }}
+                        placeholder="email@bu.edu"
+                        className="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-sm text-white font-mono focus:outline-none focus:border-spark-chartreuse"
+                      />
+                      {teammates.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setTeammates(teammates.filter((_, j) => j !== i))}
+                          className="text-spark-eggshell/40 hover:text-red-400 transition-colors text-lg leading-none px-1"
+                          title="Remove teammate"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {teammates.length < 5 && (
+                    <button
+                      type="button"
+                      onClick={() => setTeammates([...teammates, { name: '', email: '' }])}
+                      className="text-spark-chartreuse/70 text-xs font-mono hover:text-spark-chartreuse transition-colors"
+                    >
+                      + Add teammate
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Acknowledgement checkboxes — only on "I'm Interested" */}
+          {modalType === 'interested' && (
+            <div className="space-y-2 pt-1">
+              <label className="flex items-start gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={agreeNotify}
+                  onChange={(e) => { setAgreeNotify(e.target.checked); setFormError(''); }}
+                  className="mt-0.5 accent-spark-chartreuse shrink-0"
+                />
+                <span className="text-xs font-mono text-spark-eggshell/70 group-hover:text-spark-eggshell/90 transition-colors">
+                  I agree to be notified when new bounties are released.
+                </span>
+              </label>
+              <label className="flex items-start gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={agreeHours}
+                  onChange={(e) => { setAgreeHours(e.target.checked); setFormError(''); }}
+                  className="mt-0.5 accent-spark-chartreuse shrink-0"
+                />
+                <span className="text-xs font-mono text-spark-eggshell/70 group-hover:text-spark-eggshell/90 transition-colors">
+                  I acknowledge that Spark!'s Innovation Hours (Wed 4–6pm) are available for assistance, guidance, resources, or a place to build.
+                </span>
+              </label>
+            </div>
+          )}
+
           {formError && <p className="text-red-400 text-sm">{formError}</p>}
           <div className="flex gap-2 justify-end">
             <button

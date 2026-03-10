@@ -1,0 +1,328 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import mailchimp, { AUDIENCE_ID } from '../../lib/mailchimp';
+
+const adminKey = import.meta.env.ADMIN_KEY;
+
+let authorized = false;
+let bountyData: Record<string, { title: string; interested: any[]; lookingForTeam: any[] }> = {};
+let authError = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const provided = form.get('key')?.toString() || '';
+  if (adminKey && provided === adminKey) {
+    authorized = true;
+
+    async function getMembersWithTag(tag: string) {
+      try {
+        const res = await (mailchimp as any).searchMembers.search(`tag:${tag}`, {
+          list_id: AUDIENCE_ID,
+          count: 100,
+        });
+        return (res.exact_matches?.members || []).map((m: any) => ({
+          name: `${m.merge_fields?.FNAME || ''} ${m.merge_fields?.LNAME || ''}`.trim() || '(unknown)',
+          email: m.email_address,
+          workingMode: 'unknown',
+          teammates: m.merge_fields?.TEAMMATES || '',
+        }));
+      } catch { return []; }
+    }
+
+    async function getEmailsWithTag(tag: string): Promise<Set<string>> {
+      try {
+        const res = await (mailchimp as any).searchMembers.search(`tag:${tag}`, {
+          list_id: AUDIENCE_ID,
+          count: 100,
+        });
+        return new Set((res.exact_matches?.members || []).map((m: any) => m.email_address));
+      } catch { return new Set(); }
+    }
+
+    const entries = await getCollection('bounties');
+    await Promise.all(
+      entries.map(async (entry) => {
+        const s = entry.slug;
+        const [interested, lookingForTeam, soloSet, hasTeamSet] = await Promise.all([
+          getMembersWithTag(`interested:${s}`),
+          getMembersWithTag(`team:${s}`),
+          getEmailsWithTag(`solo:${s}`),
+          getEmailsWithTag(`has-team:${s}`),
+        ]);
+        for (const r of interested) {
+          if (soloSet.has(r.email)) r.workingMode = 'solo';
+          else if (hasTeamSet.has(r.email)) r.workingMode = 'has-team';
+        }
+        bountyData[s] = { title: entry.data.title, interested, lookingForTeam };
+      })
+    );
+  } else {
+    authError = 'Incorrect key — try again.';
+  }
+}
+
+const totalInterested = Object.values(bountyData).reduce((n, d) => n + d.interested.length, 0);
+const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTeam.length, 0);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — Bounty Responses</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --bg: #0a0a0a;
+        --surface: #111;
+        --border: #1e2e2e;
+        --border-light: #253535;
+        --text: #d8d8c8;
+        --muted: #5a6a6a;
+        --teal: #3dd6c0;
+        --chartreuse: #c8f135;
+        --orange: #f59e0b;
+        --red: #f87171;
+      }
+      html { font-size: 14px; }
+      body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+      /* ── Login gate ── */
+      .gate-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+      .gate { width: 100%; max-width: 340px; }
+      .gate-logo { color: var(--chartreuse); font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.5px; }
+      .gate-sub { color: var(--muted); font-size: 0.8rem; margin-bottom: 2rem; }
+      .gate label { display: block; color: var(--teal); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+      .gate input {
+        width: 100%; padding: 0.65rem 0.85rem;
+        background: var(--surface); border: 1px solid var(--border);
+        color: var(--text); font-family: inherit; font-size: 0.9rem;
+        border-radius: 8px; outline: none; transition: border-color 0.15s;
+        margin-bottom: 0.6rem;
+      }
+      .gate input:focus { border-color: var(--chartreuse); }
+      .gate-error { color: var(--red); font-size: 0.78rem; margin-bottom: 0.6rem; }
+      .gate button {
+        width: 100%; padding: 0.65rem;
+        background: var(--chartreuse); color: #0a0a0a;
+        font-family: inherit; font-weight: 700; font-size: 0.88rem;
+        border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s;
+      }
+      .gate button:hover { opacity: 0.88; }
+
+      /* ── Shell ── */
+      .shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+      /* ── Sidebar ── */
+      .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem 1.25rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+      .sidebar-logo { color: var(--chartreuse); font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+      .sidebar-sub { color: var(--muted); font-size: 0.72rem; margin-bottom: 1.5rem; }
+      .sidebar-stat { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+      .sidebar-stat span:last-child { color: var(--text); font-weight: 600; }
+      .sidebar-nav { margin-top: 1.5rem; }
+      .sidebar-nav-title { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; }
+      .sidebar-link { display: block; padding: 0.4rem 0.6rem; border-radius: 6px; color: var(--text); font-size: 0.78rem; text-decoration: none; margin-bottom: 0.2rem; transition: background 0.12s; }
+      .sidebar-link:hover { background: #1a2a2a; }
+      .sidebar-link .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 0.5rem; background: var(--teal); }
+
+      /* ── Main ── */
+      .main { padding: 2rem 2.5rem; overflow-y: auto; }
+      .page-title { color: var(--chartreuse); font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; }
+      .page-sub { color: var(--muted); font-size: 0.78rem; margin-bottom: 2rem; }
+
+      /* ── Stats row ── */
+      .stats { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+      .stat-card { flex: 1; min-width: 140px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+      .stat-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem; }
+      .stat-value { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+      .stat-value.green { color: var(--chartreuse); }
+      .stat-value.orange { color: var(--orange); }
+
+      /* ── Bounty section ── */
+      .bounty-section { margin-bottom: 2.5rem; scroll-margin-top: 2rem; }
+      .bounty-header { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem; }
+      .bounty-title { color: var(--chartreuse); font-size: 1rem; font-weight: 700; }
+      .bounty-slug { color: var(--muted); font-size: 0.72rem; }
+
+      /* ── Sub-section tabs ── */
+      .sub-section { margin-bottom: 1.25rem; }
+      .sub-label {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--muted); margin-bottom: 0.75rem;
+      }
+      .sub-label .pill {
+        padding: 0.15rem 0.5rem; border-radius: 99px; font-size: 0.68rem; font-weight: 700;
+      }
+      .pill-green { background: rgba(200,241,53,0.12); color: var(--chartreuse); border: 1px solid rgba(200,241,53,0.25); }
+      .pill-orange { background: rgba(245,158,11,0.12); color: var(--orange); border: 1px solid rgba(245,158,11,0.25); }
+
+      /* ── Person cards ── */
+      .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; position: relative; }
+      .card:hover { border-color: var(--border-light); }
+      .card-name { font-weight: 600; font-size: 0.88rem; color: var(--text); margin-bottom: 0.2rem; }
+      .card-email { color: var(--muted); font-size: 0.76rem; margin-bottom: 0.5rem; word-break: break-all; }
+      .card-footer { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+      .badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.15rem 0.55rem; border-radius: 99px; font-size: 0.68rem; font-weight: 600;
+      }
+      .badge-solo { background: rgba(61,214,192,0.1); color: var(--teal); border: 1px solid rgba(61,214,192,0.2); }
+      .badge-hasteam { background: rgba(245,158,11,0.1); color: var(--orange); border: 1px solid rgba(245,158,11,0.2); }
+      .badge-unknown { background: #181818; color: var(--muted); border: 1px solid var(--border); }
+      .card-teammates { margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--border); font-size: 0.74rem; color: var(--muted); line-height: 1.5; }
+      .card-teammates strong { color: var(--text); }
+
+      .empty-state { color: var(--muted); font-size: 0.8rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px dashed var(--border); border-radius: 8px; }
+
+      .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+      @media (max-width: 640px) {
+        .shell { grid-template-columns: 1fr; }
+        .sidebar { position: static; height: auto; }
+        .main { padding: 1.25rem; }
+      }
+    </style>
+  </head>
+  <body>
+
+    {!authorized ? (
+      <div class="gate-wrap">
+        <div class="gate">
+          <div class="gate-logo">HackBU Admin</div>
+          <div class="gate-sub">Bounty response dashboard</div>
+          <form method="POST">
+            <label for="key">Admin key</label>
+            {authError && <p class="gate-error">{authError}</p>}
+            <input type="password" id="key" name="key" placeholder="Enter admin key" autofocus autocomplete="current-password" />
+            <button type="submit">Unlock dashboard →</button>
+          </form>
+        </div>
+      </div>
+    ) : (
+      <div class="shell">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="sidebar-logo">HackBU Admin</div>
+          <div class="sidebar-sub">Bounty responses</div>
+
+          <div class="sidebar-stat">
+            <span>Total interested</span>
+            <span>{totalInterested}</span>
+          </div>
+          <div class="sidebar-stat">
+            <span>Looking for team</span>
+            <span>{totalTeam}</span>
+          </div>
+          <div class="sidebar-stat">
+            <span>Active bounties</span>
+            <span>{Object.keys(bountyData).length}</span>
+          </div>
+
+          <nav class="sidebar-nav">
+            <div class="sidebar-nav-title">Bounties</div>
+            {Object.entries(bountyData).map(([s, d]) => (
+              <a href={`#${s}`} class="sidebar-link">
+                <span class="dot" />
+                {d.title}
+              </a>
+            ))}
+          </nav>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main">
+          <div class="page-title">Responses</div>
+          <div class="page-sub">Live data from Mailchimp — refreshes on each page load.</div>
+
+          <!-- Summary stats -->
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-label">Total interested</div>
+              <div class="stat-value green">{totalInterested}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Looking for teammates</div>
+              <div class="stat-value orange">{totalTeam}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Active bounties</div>
+              <div class="stat-value" style="color: var(--teal)">{Object.keys(bountyData).length}</div>
+            </div>
+          </div>
+
+          {Object.entries(bountyData).map(([s, data], i) => (
+            <section class="bounty-section" id={s}>
+              {i > 0 && <hr class="divider" />}
+              <div class="bounty-header">
+                <span class="bounty-title">{data.title}</span>
+                <span class="bounty-slug">{s}</span>
+              </div>
+
+              <!-- Interested -->
+              <div class="sub-section">
+                <div class="sub-label">
+                  Interested
+                  <span class={`pill pill-green`}>{data.interested.length}</span>
+                </div>
+                {data.interested.length === 0 ? (
+                  <div class="empty-state">No responses yet.</div>
+                ) : (
+                  <div class="cards">
+                    {data.interested.map((r: any) => (
+                      <div class="card">
+                        <div class="card-name">{r.name}</div>
+                        <div class="card-email">{r.email}</div>
+                        <div class="card-footer">
+                          {r.workingMode === 'solo' && (
+                            <span class="badge badge-solo">Solo</span>
+                          )}
+                          {r.workingMode === 'has-team' && (
+                            <span class="badge badge-hasteam">Has team</span>
+                          )}
+                          {r.workingMode === 'unknown' && (
+                            <span class="badge badge-unknown">—</span>
+                          )}
+                        </div>
+                        {r.teammates && (
+                          <div class="card-teammates">
+                            <strong>Teammates:</strong> {r.teammates}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <!-- Looking for teammates -->
+              <div class="sub-section">
+                <div class="sub-label">
+                  Looking for teammates
+                  <span class="pill pill-orange">{data.lookingForTeam.length}</span>
+                </div>
+                {data.lookingForTeam.length === 0 ? (
+                  <div class="empty-state">No responses yet.</div>
+                ) : (
+                  <div class="cards">
+                    {data.lookingForTeam.map((r: any) => (
+                      <div class="card">
+                        <div class="card-name">{r.name}</div>
+                        <div class="card-email">{r.email}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          ))}
+        </main>
+      </div>
+    )}
+
+  </body>
+</html>
