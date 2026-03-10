@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { first_name, last_name, email, bounty_slug, type, bounty_title, doc_link, teammates, working_mode } = body;
+    const { first_name, last_name, email, bounty_slug, type, bounty_title, doc_link, repo_link, instructions_link, teammates, working_mode } = body;
 
     if (!first_name || !last_name || !email || !bounty_slug || !type) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
@@ -30,6 +30,8 @@ export const POST: APIRoute = async ({ request }) => {
         LNAME: last_name,
         BOUNTY: bounty_title || '',
         DOCLINK: doc_link || '',
+        REPOLINK: repo_link || '',
+        INSTRLINK: instructions_link || '',
         ...(teammatesStr ? { TEAMMATES: teammatesStr } : {}),
       },
     });

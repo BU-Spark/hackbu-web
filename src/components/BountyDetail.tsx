@@ -12,6 +12,8 @@ interface BountyDetailProps {
     slug: string;
     descriptionHtml?: string;
     docLink?: string;
+    winner?: string;
+    winnerSubmission?: string;
   };
 }
 
@@ -268,6 +270,26 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
             className="text-sm text-spark-eggshell/80 leading-relaxed prose prose-invert prose-sm max-w-none"
             dangerouslySetInnerHTML={{ __html: bounty.descriptionHtml }}
           />
+        </div>
+      )}
+
+      {/* Winner section for completed bounties */}
+      {bounty.status === 'completed' && bounty.winner && (
+        <div className="border-t border-spark-teal/20 pt-4">
+          <h3 className="font-display text-lg text-purple-300 mb-2">🏆 Winner</h3>
+          <div className="flex items-center gap-3">
+            <span className="text-spark-eggshell font-semibold">{bounty.winner}</span>
+            {bounty.winnerSubmission && (
+              <a
+                href={bounty.winnerSubmission}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-spark-chartreuse hover:text-spark-chartreuse/80 underline transition-colors"
+              >
+                View Submission
+              </a>
+            )}
+          </div>
         </div>
       )}
 

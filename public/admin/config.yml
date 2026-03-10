@@ -28,7 +28,12 @@ collections:
       - label: Status
         name: status
         widget: select
-        options: [open, claimed, completed, closed]
+        options: [open, completed, closed]
         default: open
+      - { label: Featured, name: featured, widget: boolean, default: false, required: false }
+      - { label: "Winner Name", name: winner, widget: string, required: false, hint: "Name of the bounty winner (only for completed bounties)" }
+      - { label: "Winner Submission URL", name: winnerSubmission, widget: string, required: false, hint: "Link to the winning submission" }
       - { label: "Google Doc Link", name: docLink, widget: string, required: false }
+      - { label: "Repo Link", name: repoLink, widget: string, required: false }
+      - { label: "Instructions Link", name: instructionsLink, widget: string, required: false }
       - { label: Description, name: body, widget: markdown }

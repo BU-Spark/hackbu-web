@@ -75,6 +75,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       '  bounties      💰 Browse open coding challenges',
       '  gallery       🚀 See student projects',
       '  events        📅 Upcoming meetups',
+      '  hall-of-fame  🏆 Past bounty winners',
       '',
       'Type \'open <name>\' to launch',
     ].join('\n'),
@@ -84,6 +85,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       '  bounties      💰 Browse open coding challenges',
       '  gallery       🚀 See student projects',
       '  events        📅 Upcoming meetups',
+      '  hall-of-fame  🏆 Past bounty winners',
       '',
       'Type \'open <name>\' to launch',
     ].join('\n'),
@@ -91,9 +93,14 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     open: (arg?: string) => {
       if (!arg) return 'Usage: open <app>\nRun \'apps\' to see available apps';
 
-      const validApps = ['bounties', 'gallery', 'events'];
+      const validApps = ['bounties', 'gallery', 'events', 'hall-of-fame'];
       if (!validApps.includes(arg)) {
         return `Unknown app: ${arg}\nRun \'apps\' to see available apps`;
+      }
+
+      if (arg === 'hall-of-fame') {
+        window.location.href = '/hall-of-fame';
+        return 'Navigating to Hall of Fame...';
       }
 
       onOpenWindow(arg);

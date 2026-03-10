@@ -116,6 +116,9 @@ export function WindowManager({
       deadline: b.deadline || 'TBD',
       tags,
       slug: b.slug,
+      featured: b.featured || false,
+      winner: b.winner || '',
+      winnerSubmission: b.winnerSubmission || '',
     };
   });
 
@@ -223,6 +226,8 @@ export function WindowManager({
                 return matchesSearch && matchesDiff && matchesStatus;
               })
               .sort((a, b) => {
+                // Featured bounties always come first
+                if (a.featured !== b.featured) return a.featured ? -1 : 1;
                 if (bountySort === 'prize-desc') return (b.prize || 0) - (a.prize || 0);
                 if (bountySort === 'deadline-asc') {
                   const da = daysUntil(a.deadline) ?? 9999;

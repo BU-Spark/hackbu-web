@@ -9,7 +9,12 @@ const bounties = defineCollection({
     deadline: z.string(),
     tags: z.array(z.string()),
     status: z.enum(['open', 'completed', 'closed']),
+    featured: z.boolean().optional().default(false),
+    winner: z.string().optional(),
+    winnerSubmission: z.union([z.string().url(), z.literal('')]).optional(),
     docLink: z.string().url().optional(),
+    repoLink: z.string().url().optional(),
+    instructionsLink: z.string().url().optional(),
   }),
 });
 

@@ -87,6 +87,25 @@ const dl = deadlineLabel(bounty.deadline);
           </div>
         </div>
 
+        {bounty.winner && bounty.status === 'completed' && (
+          <div class="border-t border-spark-teal/20 pt-4 mb-4">
+            <h2 class="font-display text-lg text-purple-300 mb-2">🏆 Winner</h2>
+            <div class="flex items-center gap-3">
+              <span class="text-spark-eggshell font-semibold">{bounty.winner}</span>
+              {bounty.winnerSubmission && (
+                <a
+                  href={bounty.winnerSubmission}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-spark-chartreuse hover:text-spark-chartreuse/80 underline transition-colors"
+                >
+                  View Submission
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
         <div class="border-t border-spark-teal/20 pt-4 mb-4">
           <h2 class="font-display text-lg text-spark-chartreuse mb-2">Get Involved</h2>
           <div class="flex flex-wrap gap-3" id="involve-buttons">
@@ -214,7 +233,7 @@ const dl = deadlineLabel(bounty.deadline);
         &larr; Back to HackBU OS
       </a>
     </div>
-    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || '' }}>
+    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || '', repoLink: bounty.repoLink || '', instructionsLink: bounty.instructionsLink || '' }}>
       const STORAGE_KEY = 'hackbu-bounty-responses';
       const toast = document.getElementById('toast');
       let toastTimer;
@@ -465,6 +484,8 @@ const dl = deadlineLabel(bounty.deadline);
               doc_link: docLink,
               teammates: validTeammates,
               working_mode: currentType === 'interested' ? workingMode : undefined,
+              repo_link: repoLink,
+              instructions_link: instructionsLink,
             }),
           });
           if (!res.ok) {

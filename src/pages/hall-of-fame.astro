@@ -1,0 +1,209 @@
+---
+import '../styles/global.css';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('bounties');
+const completed = entries
+  .filter((e) => e.data.status === 'completed' && e.data.winner)
+  .map((e) => ({
+    title: e.data.title,
+    slug: e.slug,
+    prize: e.data.prize,
+    winner: e.data.winner,
+    winnerSubmission: e.data.winnerSubmission || '',
+    tags: e.data.tags,
+    difficulty: e.data.difficulty,
+  }));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hall of Fame — HackBU</title>
+    <style>
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+        pointer-events: none;
+        z-index: 100;
+      }
+      @keyframes flicker {
+        0%,93%,100% { opacity:1; text-shadow:0 0 24px rgba(191,241,60,.3),0 0 60px rgba(191,241,60,.1); }
+        94% { opacity:.8; text-shadow:5px 0 0 rgba(255,87,45,.4),-5px 0 0 rgba(6,177,162,.4); }
+        95% { opacity:1; }
+        97% { opacity:.88; text-shadow:-3px 0 0 rgba(255,87,45,.25); }
+        98% { opacity:1; }
+      }
+      .title-glitch { animation: flicker 8s ease-in-out infinite; }
+      @keyframes shimmer {
+        0%   { background-position:-200% center; }
+        100% { background-position: 200% center; }
+      }
+      .placard {
+        position:relative;
+        display:block;
+        text-decoration:none;
+        background:linear-gradient(140deg,#1c1a13 0%,#0f0e0b 50%,#191710 100%);
+        border-top:1px solid rgba(201,162,39,.5);
+        border-left:1px solid rgba(201,162,39,.25);
+        border-right:1px solid rgba(201,162,39,.1);
+        border-bottom:1px solid rgba(201,162,39,.15);
+        overflow:hidden;
+        transition:transform .25s ease,box-shadow .25s ease;
+      }
+      .placard::after {
+        content:'';
+        position:absolute;
+        inset:0;
+        background:linear-gradient(110deg,transparent 35%,rgba(201,162,39,.06) 50%,transparent 65%);
+        background-size:200% 100%;
+        animation:shimmer 5s linear infinite;
+        pointer-events:none;
+      }
+      .placard:hover {
+        transform:translateY(-3px);
+        box-shadow:0 16px 48px rgba(201,162,39,.12),0 0 0 1px rgba(201,162,39,.28),inset 0 1px 0 rgba(201,162,39,.18);
+      }
+      .rank-mark {
+        position:absolute;
+        top:-1rem;
+        right:1.25rem;
+        font-family:'Bebas Neue',system-ui,sans-serif;
+        font-size:9rem;
+        line-height:1;
+        color:rgba(201,162,39,.045);
+        pointer-events:none;
+        user-select:none;
+      }
+      @keyframes slideIn {
+        from { opacity:0; transform:translateX(-18px); }
+        to   { opacity:1; transform:translateX(0); }
+      }
+      .placard-anim { opacity:0; animation:slideIn .45s ease forwards; }
+      @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0;} }
+      .cursor { animation:blink 1s step-end infinite; }
+      .divider-glow {
+        border:none;
+        height:1px;
+        background:linear-gradient(to right,transparent,rgba(201,162,39,.4),rgba(191,241,60,.25),rgba(201,162,39,.4),transparent);
+      }
+      .prize-pill {
+        background:linear-gradient(135deg,rgba(255,87,45,.14),rgba(255,87,45,.06));
+        border-top:1px solid rgba(255,87,45,.5);
+        border-left:1px solid rgba(255,87,45,.25);
+        border-right:1px solid rgba(255,87,45,.1);
+        border-bottom:1px solid rgba(255,87,45,.12);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-spark-black text-spark-eggshell">
+
+    <header class="relative border-b border-white/[0.06] overflow-hidden">
+      <div class="absolute inset-0 pointer-events-none"
+        style="background:radial-gradient(ellipse 55% 90% at 12% 50%,rgba(191,241,60,.035) 0%,transparent 70%),radial-gradient(ellipse 35% 70% at 88% 50%,rgba(6,177,162,.03) 0%,transparent 70%);">
+      </div>
+      <div class="relative max-w-5xl mx-auto px-6 pt-10 pb-0">
+        <nav class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase mb-8" style="color:rgba(217,234,223,.25);">
+          <a href="/" class="hover:text-spark-teal transition-colors">HackBU OS</a>
+          <span>/</span>
+          <span style="color:#c9a227;">Hall of Fame</span>
+        </nav>
+        <div class="flex items-end justify-between gap-8 flex-wrap pb-10">
+          <div>
+            <div class="flex items-center gap-3 font-mono text-[10px] tracking-[.4em] uppercase text-spark-teal mb-4">
+              <span class="inline-block w-6 h-px bg-spark-teal opacity-60"></span>
+              <span>Inducted Builders</span>
+              <span class="inline-block w-6 h-px bg-spark-teal opacity-60"></span>
+            </div>
+            <h1 class="font-display leading-none tracking-wide title-glitch text-spark-chartreuse"
+                style="font-size:clamp(4rem,10vw,8rem);">Hall of Fame</h1>
+            <p class="font-mono text-sm mt-5 max-w-xs leading-relaxed" style="color:rgba(217,234,223,.35);">
+              These builders shipped.<br/>They claimed the prize.<br/>Their names are permanent.
+            </p>
+          </div>
+          <div class="text-right pb-1 font-mono">
+            <div class="font-display text-5xl leading-none" style="color:#c9a227;">{completed.length}</div>
+            <div class="text-[10px] tracking-[.3em] uppercase mt-1" style="color:rgba(217,234,223,.25);">
+              {completed.length === 1 ? 'inductee' : 'inductees'}
+            </div>
+          </div>
+        </div>
+        <hr class="divider-glow" />
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+      {completed.length === 0 ? (
+        <div class="py-28 text-center">
+          <div class="font-mono text-[10px] tracking-[.3em] uppercase mb-5" style="color:rgba(217,234,223,.15);">System Output</div>
+          <div class="inline-block text-left mb-8 space-y-1">
+            <p class="font-mono text-base" style="color:rgba(191,241,60,.45);">&gt; query hall_of_fame --filter status:completed</p>
+            <p class="font-mono text-sm" style="color:rgba(217,234,223,.3);">&gt; 0 records found<span class="cursor" style="color:rgba(191,241,60,.6);">█</span></p>
+          </div>
+          <p class="font-mono text-xs uppercase tracking-[.3em] mb-10" style="color:rgba(217,234,223,.18);">─── the wall is empty. be the first. ───</p>
+          <a href="/" class="inline-flex items-center gap-2 px-8 py-3 font-mono text-sm transition-all duration-200 text-spark-chartreuse border border-spark-chartreuse/40 hover:bg-spark-chartreuse hover:text-spark-black">
+            <span>Browse Open Bounties</span>
+            <span style="opacity:.5;">→</span>
+          </a>
+        </div>
+      ) : (
+        <div class="space-y-3">
+          {completed.map((b, i) => (
+            <a href={`/bounties/${b.slug}`} class="placard placard-anim" style={`animation-delay:${i * 90}ms`}>
+              <span class="rank-mark" aria-hidden="true">#{i + 1}</span>
+              <div class="relative z-10 flex items-start p-6 gap-5">
+                <div class="shrink-0 w-12 text-center mt-0.5">
+                  <div class="font-display text-4xl leading-none" style="color:#c9a227;">{i + 1}</div>
+                  <div class="w-6 h-px mx-auto mt-2" style="background:rgba(201,162,39,.3);"></div>
+                </div>
+                <div class="shrink-0 w-px self-stretch" style="background:linear-gradient(to bottom,transparent,rgba(201,162,39,.2),transparent);"></div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-mono text-[9px] tracking-[.3em] uppercase mb-1.5" style="color:rgba(201,162,39,.5);">Completed Bounty</div>
+                  <h2 class="font-display text-2xl lg:text-3xl text-spark-eggshell leading-tight mb-3">{b.title}</h2>
+                  <div class="flex items-center gap-2.5 mb-4 flex-wrap">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2.5">
+                      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                      <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    </svg>
+                    <span class="font-mono text-sm font-semibold" style="color:#e8c848;">{b.winner}</span>
+                    {b.winnerSubmission && (
+                      <span class="font-mono text-[9px] px-1.5 py-0.5" style="color:rgba(6,177,162,.6);border:1px solid rgba(6,177,162,.2);">view submission ↗</span>
+                    )}
+                  </div>
+                  <div class="flex gap-1.5 flex-wrap">
+                    {b.tags.map((tag) => (
+                      <span class="px-2 py-0.5 font-mono text-[9px] uppercase tracking-wide"
+                            style="border:1px solid rgba(6,177,162,.15);color:rgba(217,234,223,.35);">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div class="shrink-0 text-right self-center ml-2">
+                  <div class="prize-pill inline-block px-4 py-2.5 mb-2">
+                    <div class="font-display text-2xl text-spark-orange leading-none">${b.prize}</div>
+                    <div class="font-mono text-[8px] uppercase tracking-widest mt-0.5" style="color:rgba(255,87,45,.4);">prize</div>
+                  </div>
+                  <div class="font-mono text-[9px] uppercase tracking-widest" style="color:rgba(217,234,223,.2);">{b.difficulty}</div>
+                </div>
+              </div>
+              <div class="h-px" style="background:linear-gradient(to right,transparent,rgba(201,162,39,.15),transparent);"></div>
+            </a>
+          ))}
+        </div>
+      )}
+
+      <div class="mt-14 pt-6" style="border-top:1px solid rgba(255,255,255,.04);">
+        <a href="/" class="inline-flex items-center gap-2 font-mono text-xs group" style="color:rgba(217,234,223,.3);">
+          <span>←</span>
+          <span class="tracking-wider group-hover:text-spark-teal transition-colors">cd ~</span>
+          <span style="color:rgba(217,234,223,.15);">// back to HackBU OS</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

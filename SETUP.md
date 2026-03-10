@@ -3,13 +3,19 @@
 ## Current Status
 
 - ✅ `.env` filled with Mailchimp credentials
-- ✅ Mailchimp merge fields created: `BOUNTY`, `DOCLINK`
+- ✅ Mailchimp audience created: "Spark! Bounty Board"
+- ✅ Mailchimp merge fields created: `BOUNTY`, `DOCLINK`, `TEAMMATES`
 - ✅ One bounty exists: `src/content/bounties/plate-gallery.md`
 - ✅ API routes wired: `/api/respond`, `/api/withdraw`, `/api/bounty-counts`
 - ✅ Card grid UI with filters, sort, deadline countdown, live counters
-- ⏳ Mailchimp email automation — optional, set up in dashboard
+- ✅ "I'm Interested" form — name, email, solo/team toggle, teammate rows, ack checkboxes
+- ✅ "Looking for Teammates" form — name, email, solo/team toggle
+- ✅ Withdraw confirmation dialog (inline Yes/Cancel)
+- ✅ Admin dashboard at `/admin/responses` (password-protected, POST-based)
+- ✅ Solo/team Mailchimp tagging (`solo:<slug>`, `has-team:<slug>`)
+- ⏳ Mailchimp email automation — set up in dashboard (see below)
 - ⏳ More bounties need to be added
-- ⏳ Deploy to Netlify/Vercel
+- ⏳ Deploy to Netlify/Vercel (GitHub Pages won't work — needs SSR for API routes)
 
 ---
 
@@ -19,8 +25,9 @@ Copy `.env.example` to `.env` and fill in:
 
 ```
 MAILCHIMP_API_KEY=        # Account > Extras > API Keys
-MAILCHIMP_SERVER_PREFIX=  # e.g. us21 (suffix after dash in API key)
-MAILCHIMP_AUDIENCE_ID=    # Audience > Settings > Audience name and defaults
+MAILCHIMP_SERVER_PREFIX=  # e.g. us15 (last part of API key after the dash)
+MAILCHIMP_AUDIENCE_ID=    # Audience > Settings > Audience name and defaults > Audience ID
+ADMIN_KEY=                # Any secret passphrase — used to unlock /admin/responses
 ```
 
 ---
@@ -41,22 +48,49 @@ Audience → Settings → Audience fields and *|MERGE|* tags — create these cu
 >
 > `TEAMMATES` is only populated when the user selects "Already have a team" on the I'm Interested form. Format: `Name <email>, Name <email>`.
 
-### Email Automation (optional but recommended)
+### Email Automation
 
-Sends a welcome email when a student clicks "I'm Interested":
+Sends a welcome email when a student clicks "I'm Interested". One automation per bounty slug.
 
-1. **Automations → Classic Automations → Create**
-2. Trigger: **Tag added**
-3. Tag name: `interested:plate-gallery` *(repeat for each bounty slug)*
-4. Design the email — suggested merge tags:
-   - `*|FNAME|*` — student's first name
-   - `*|BOUNTY|*` — bounty title
-   - `*|DOCLINK|*` — link to project brief doc
-5. Suggested subject: `You're in — *|BOUNTY|* awaits!`
-6. Body: welcome, mention Innovation Hours, next steps, contact buspark@bu.edu
+**Setup steps:**
+1. Mailchimp → **Automations → Create** → **Build from scratch**
+2. Name it e.g. `Bounty Welcome — plate-gallery`, select the Bounty Board audience
+3. **Trigger:** Contact tag added → tag name: `interested:plate-gallery`
+4. **Action:** Send email
+5. **Subject:** `You're in — *|BOUNTY|* awaits! 🎯`
+6. **Body** (paste and customize):
+
+---
+
+Hi *|FNAME|*,
+
+Congrats on taking on **[*|BOUNTY|*](URL)**! We're pumped to have you building with us.
+
+Here's your project brief to get started:
+👉 *|DOCLINK|*
+
+*|IF:TEAMMATES|*
+Your team:
+*|TEAMMATES|*
+*|END:IF|*
+
+**Need help or a place to work?**
+Spark!'s **Innovation Hours** are every Wednesday, 4–6pm — drop by for guidance, resources, or just a space to build.
+
+Questions? Reply here or email buspark@bu.edu.
+
+— The Spark! Team
+
+---
+
+**Merge tags used:**
+- `*|FNAME|*` — student's first name
+- `*|BOUNTY|*` — bounty title (set by API)
+- `*|DOCLINK|*` — project brief URL (set by API)
+- `*|TEAMMATES|*` — teammate list, only shown if populated (conditional block)
 
 > The `team:<slug>` tag does NOT trigger an email — intentional.
-> You need one automation per bounty slug (e.g. `interested:plate-gallery`, `interested:my-other-bounty`).
+> Repeat this setup for each new bounty slug: `interested:my-other-bounty`, etc.
 
 ### Testing the Full Flow
 
@@ -153,10 +187,11 @@ docLink: https://...        # optional — URL to Google Doc / Notion brief
    ```
 2. Install: `npm install @astrojs/netlify`
 3. Push to GitHub, connect repo in Netlify dashboard
-4. Add the three env vars in **Netlify → Site Settings → Environment Variables**:
+4. Add env vars in **Netlify → Site Settings → Environment Variables**:
    - `MAILCHIMP_API_KEY`
    - `MAILCHIMP_SERVER_PREFIX`
    - `MAILCHIMP_AUDIENCE_ID`
+   - `ADMIN_KEY`
 5. `netlify.toml` handles build command and publish dir automatically
 
 ### Vercel
@@ -168,7 +203,8 @@ docLink: https://...        # optional — URL to Google Doc / Notion brief
    ```
 2. Install: `npm install @astrojs/vercel`
 3. Push to GitHub, import repo in Vercel dashboard
-4. Add env vars in **Vercel → Project → Settings → Environment Variables**
+4. Add env vars in **Vercel → Project → Settings → Environment Variables**:
+   - `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID`, `ADMIN_KEY`
 5. `vercel.json` handles build settings
 
 ### Self-hosted / Node
@@ -214,8 +250,9 @@ npm run add-bounty   # interactive CLI to add a new bounty .md file
 
 ### High priority
 - [ ] Add remaining bounties as `.md` files in `src/content/bounties/`
-- [ ] Set up Mailchimp automations for each bounty slug (`interested:<slug>`)
-- [ ] Deploy to Netlify or Vercel with env vars configured
+- [ ] Set up Mailchimp automation for `interested:plate-gallery` (see Email Automation section above)
+- [ ] Deploy to Netlify or Vercel with all 4 env vars configured
+- [ ] Add `ADMIN_KEY` to production env vars, verify `/admin/responses` works on prod
 
 ### Medium priority (researched, not yet built)
 - [ ] `featured: true` frontmatter field — pins/highlights bounty at top of card grid

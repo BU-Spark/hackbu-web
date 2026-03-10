@@ -12,6 +12,9 @@ const bounties = bountyEntries.map((entry) => ({
   status: entry.data.status,
   descriptionHtml: marked.parse(entry.body || '') as string,
   docLink: entry.data.docLink || "",
+  featured: entry.data.featured || false,
+  winner: entry.data.winner || "",
+  winnerSubmission: entry.data.winnerSubmission || "",
 }));
 import projects from "../data/projects.json";
 import leaderboard from "../data/leaderboard.json";
