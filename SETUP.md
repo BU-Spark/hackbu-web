@@ -25,7 +25,7 @@ Copy `.env.example` to `.env` and fill in:
 
 ```
 MAILCHIMP_API_KEY=        # Account > Extras > API Keys
-MAILCHIMP_SERVER_PREFIX=  # e.g. us15 (last part of API key after the dash)
+MAILCHIMP_SERVER_PREFIX=  # e.g. us6 (last part of API key after the dash)
 MAILCHIMP_AUDIENCE_ID=    # Audience > Settings > Audience name and defaults > Audience ID
 ADMIN_KEY=                # Any secret passphrase — used to unlock /admin/responses
 ```
