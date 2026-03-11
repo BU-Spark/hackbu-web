@@ -23,8 +23,10 @@ export const POST: APIRoute = async ({ request }) => {
       ? teammates.map((t: { name: string; email: string }) => `${t.name} <${t.email}>`).join(', ')
       : '';
 
+    console.log('Mailchimp config: audience=', AUDIENCE_ID, 'hash=', subscriberHash, 'tag=', tag);
+
     // Add or update the contact
-    await (mailchimp as any).lists.setListMember(AUDIENCE_ID, subscriberHash, {
+    const memberRes = await (mailchimp as any).lists.setListMember(AUDIENCE_ID, subscriberHash, {
       email_address: email,
       status_if_new: 'subscribed',
       merge_fields: {
@@ -37,6 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
         ...(teammatesStr ? { TEAMMATES: teammatesStr } : {}),
       },
     });
+    console.log('setListMember result:', JSON.stringify(memberRes).slice(0, 200));
 
     // Add the primary tag + working mode tag (for interested submissions)
     const tagsToAdd: { name: string; status: string }[] = [{ name: tag, status: 'active' }];
@@ -44,13 +47,15 @@ export const POST: APIRoute = async ({ request }) => {
       const modeTag = working_mode === 'team' ? `has-team:${bounty_slug}` : `solo:${bounty_slug}`;
       tagsToAdd.push({ name: modeTag, status: 'active' });
     }
-    await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
+    const tagRes = await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
       tags: tagsToAdd,
     });
+    console.log('updateListMemberTags result:', JSON.stringify(tagRes));
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (err: any) {
-    console.error('Respond API error:', err?.response?.body || err);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    const detail = err?.response?.body ? JSON.stringify(err.response.body) : String(err);
+    console.error('Respond API error:', detail);
+    return new Response(JSON.stringify({ error: 'Internal server error', detail }), { status: 500 });
   }
 };
