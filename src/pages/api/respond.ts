@@ -10,7 +10,9 @@ export const POST: APIRoute = async ({ request }) => {
     const { first_name, last_name, email, bounty_slug, type, bounty_title, doc_link, repo_link, instructions_link, teammates, working_mode } = body;
 
     if (!first_name || !last_name || !email || !bounty_slug || !type) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+      const missing = { first_name: !!first_name, last_name: !!last_name, email: !!email, bounty_slug: !!bounty_slug, type: !!type };
+      console.error('Missing required fields:', missing, 'body:', body);
+      return new Response(JSON.stringify({ error: 'Missing required fields', missing }), { status: 400 });
     }
 
     const subscriberHash = crypto.createHash('md5').update(email.toLowerCase()).digest('hex');
