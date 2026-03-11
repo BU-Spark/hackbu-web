@@ -16,13 +16,23 @@ if (Astro.request.method === 'POST') {
   if (adminKey && provided === adminKey) {
     authorized = true;
 
+    async function getTagId(tagName: string): Promise<number | null> {
+      try {
+        const res = await (mailchimp as any).lists.tagSearch(AUDIENCE_ID, tagName);
+        const tag = (res.tags || []).find((t: any) => t.name === tagName);
+        return tag?.id ?? null;
+      } catch { return null; }
+    }
+
     async function getMembersWithTag(tag: string) {
       try {
-        const res = await (mailchimp as any).searchMembers.search(`tag:${tag}`, {
-          list_id: AUDIENCE_ID,
+        const tagId = await getTagId(tag);
+        if (tagId === null) return [];
+        const res = await (mailchimp as any).lists.getSegmentMembersList(AUDIENCE_ID, tagId, {
           count: 100,
+          fields: ['members.email_address', 'members.merge_fields'],
         });
-        return (res.exact_matches?.members || []).map((m: any) => ({
+        return (res.members || []).map((m: any) => ({
           name: `${m.merge_fields?.FNAME || ''} ${m.merge_fields?.LNAME || ''}`.trim() || '(unknown)',
           email: m.email_address,
           workingMode: 'unknown',
@@ -33,11 +43,13 @@ if (Astro.request.method === 'POST') {
 
     async function getEmailsWithTag(tag: string): Promise<Set<string>> {
       try {
-        const res = await (mailchimp as any).searchMembers.search(`tag:${tag}`, {
-          list_id: AUDIENCE_ID,
+        const tagId = await getTagId(tag);
+        if (tagId === null) return new Set();
+        const res = await (mailchimp as any).lists.getSegmentMembersList(AUDIENCE_ID, tagId, {
           count: 100,
+          fields: ['members.email_address'],
         });
-        return new Set((res.exact_matches?.members || []).map((m: any) => m.email_address));
+        return new Set((res.members || []).map((m: any) => m.email_address));
       } catch { return new Set(); }
     }
 
