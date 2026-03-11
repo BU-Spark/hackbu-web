@@ -373,11 +373,12 @@ const dl = deadlineLabel(bounty.deadline);
           }
         }
         localStorage.setItem("hackbu-user-data", JSON.stringify({ fname, lname, email, workingMode }));
-        saveResponse(slug, currentType, { fname, lname, email });
+        const submittedType = currentType;
+        saveResponse(slug, submittedType, { fname, lname, email });
         closeModal(); updateButtonStates();
         showToast("Registered! Check your email shortly.");
         try {
-          const res = await fetch("/api/respond", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ first_name: fname, last_name: lname, email, bounty_slug: slug, type: currentType, bounty_title: bountyTitle, doc_link: docLink, teammates: validTeammates, working_mode: currentType === "interested" ? workingMode : undefined, repo_link: repoLink, instructions_link: instructionsLink }) });
+          const res = await fetch("/api/respond", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ first_name: fname, last_name: lname, email, bounty_slug: slug, type: submittedType, bounty_title: bountyTitle, doc_link: docLink, teammates: validTeammates, working_mode: submittedType === "interested" ? workingMode : undefined, repo_link: repoLink, instructions_link: instructionsLink }) });
           if (!res.ok) { console.error("API error:", await res.text()); showToast("Saved locally — sync will retry on next visit.", true); }
         } catch (err) { console.error("Failed to submit:", err); showToast("No connection — saved locally and will sync when online.", true); }
         fetchCounts();
