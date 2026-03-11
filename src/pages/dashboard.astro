@@ -16,60 +16,49 @@ if (Astro.request.method === 'POST') {
   if (adminKey && provided === adminKey) {
     authorized = true;
 
-    async function getTagId(tagName: string): Promise<number | null> {
-      try {
-        const res = await (mailchimp as any).lists.tagSearch(AUDIENCE_ID, tagName);
-        const tag = (res.tags || []).find((t: any) => t.name === tagName);
-        return tag?.id ?? null;
-      } catch { return null; }
-    }
+    // Fetch all members once and filter by tag client-side (avoids tag ID vs segment ID mismatch)
+    let allMembers: any[] = [];
+    try {
+      const res = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
+        count: 1000,
+        status: 'subscribed',
+        fields: ['members.email_address', 'members.merge_fields', 'members.tags'],
+      });
+      allMembers = res.members || [];
+    } catch (e) { console.error('Failed to fetch members:', e); }
 
-    async function getMembersWithTag(tag: string) {
-      try {
-        const tagId = await getTagId(tag);
-        if (tagId === null) return [];
-        const res = await (mailchimp as any).lists.getSegmentMembersList(AUDIENCE_ID, tagId, {
-          count: 100,
-          fields: ['members.email_address', 'members.merge_fields'],
-        });
-        return (res.members || []).map((m: any) => ({
+    function getMembersWithTag(tag: string) {
+      return allMembers
+        .filter((m: any) => (m.tags || []).some((t: any) => t.name === tag))
+        .map((m: any) => ({
           name: `${m.merge_fields?.FNAME || ''} ${m.merge_fields?.LNAME || ''}`.trim() || '(unknown)',
           email: m.email_address,
           workingMode: 'unknown',
           teammates: m.merge_fields?.TEAMMATES || '',
         }));
-      } catch { return []; }
     }
 
-    async function getEmailsWithTag(tag: string): Promise<Set<string>> {
-      try {
-        const tagId = await getTagId(tag);
-        if (tagId === null) return new Set();
-        const res = await (mailchimp as any).lists.getSegmentMembersList(AUDIENCE_ID, tagId, {
-          count: 100,
-          fields: ['members.email_address'],
-        });
-        return new Set((res.members || []).map((m: any) => m.email_address));
-      } catch { return new Set(); }
+    function getEmailsWithTag(tag: string): Set<string> {
+      return new Set(
+        allMembers
+          .filter((m: any) => (m.tags || []).some((t: any) => t.name === tag))
+          .map((m: any) => m.email_address)
+      );
     }
 
     const entries = await getCollection('bounties');
-    await Promise.all(
-      entries.map(async (entry) => {
-        const s = entry.slug;
-        const [interested, lookingForTeam, soloSet, hasTeamSet] = await Promise.all([
-          getMembersWithTag(`interested:${s}`),
-          getMembersWithTag(`team:${s}`),
-          getEmailsWithTag(`solo:${s}`),
-          getEmailsWithTag(`has-team:${s}`),
-        ]);
-        for (const r of interested) {
-          if (soloSet.has(r.email)) r.workingMode = 'solo';
-          else if (hasTeamSet.has(r.email)) r.workingMode = 'has-team';
-        }
-        bountyData[s] = { title: entry.data.title, interested, lookingForTeam };
-      })
-    );
+    for (const entry of entries) {
+      const s = entry.slug;
+      const interested = getMembersWithTag(`interested:${s}`);
+      const lookingForTeam = getMembersWithTag(`team:${s}`);
+      const soloSet = getEmailsWithTag(`solo:${s}`);
+      const hasTeamSet = getEmailsWithTag(`has-team:${s}`);
+      for (const r of interested) {
+        if (soloSet.has(r.email)) r.workingMode = 'solo';
+        else if (hasTeamSet.has(r.email)) r.workingMode = 'has-team';
+      }
+      bountyData[s] = { title: entry.data.title, interested, lookingForTeam };
+    }
   } else {
     authError = 'Incorrect key — try again.';
   }
