@@ -29,6 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
     const memberRes = await (mailchimp as any).lists.setListMember(AUDIENCE_ID, subscriberHash, {
       email_address: email,
       status_if_new: 'subscribed',
+      status: 'subscribed',
       merge_fields: {
         FNAME: first_name,
         LNAME: last_name,
