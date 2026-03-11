@@ -299,21 +299,21 @@ export function Window({
             className="w-5 h-5 rounded-full bg-[#FFBD2E] hover:bg-[#FFBD2E]/90 transition-colors flex items-center justify-center group"
             aria-label="Minimize"
           >
-            <span className="text-[#995700] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-none pb-0.5">−</span>
+            <span className="text-[#995700] text-sm font-bold leading-none pb-0.5">−</span>
           </button>
           <button
             onClick={handleMaximize}
             className="w-5 h-5 rounded-full bg-[#28CA42] hover:bg-[#28CA42]/90 transition-colors flex items-center justify-center group"
             aria-label="Maximize"
           >
-            <span className="text-[#006500] text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-none">⛶</span>
+            <span className="text-[#006500] text-xs font-bold leading-none">⛶</span>
           </button>
           <button
             onClick={handleClose}
             className="w-5 h-5 rounded-full bg-[#FF5F57] hover:bg-[#FF5F57]/90 transition-colors flex items-center justify-center group"
             aria-label="Close"
           >
-            <span className="text-[#4D0000] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity leading-none">×</span>
+            <span className="text-[#4D0000] text-sm font-bold leading-none">×</span>
           </button>
         </div>
       </div>

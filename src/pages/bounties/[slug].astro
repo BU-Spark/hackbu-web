@@ -248,7 +248,7 @@ const dl = deadlineLabel(bounty.deadline);
       </div>
     </div>
 
-    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || "", repoLink: bounty.repoLink || "", instructionsLink: bounty.instructionsLink || "" }}>
+    <script define:vars={{ slug: bountySlug, bountyTitle: bounty.title, docLink: bounty.docLink || "", repoLink: bounty.repoLink || "", instructionsLink: bounty.instructionsLink || "https://docs.google.com/document/d/1gaKahLkqOo8qxo78omG2NSAmWRFBEsyKfCcLItngBhk/edit?usp=sharing" }}>
       const STORAGE_KEY = "hackbu-bounty-responses";
       const toast = document.getElementById("toast");
       let toastTimer;

@@ -32,3 +32,4 @@ Thumbs.db
 *.swo
 *~
 CLAUDE.md
+.netlify/
