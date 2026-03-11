@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Add the primary tag + working mode tag (for interested submissions)
     const tagsToAdd: { name: string; status: string }[] = [{ name: tag, status: 'active' }];
-    if (type === 'interested') {
+    if (working_mode) {
       const modeTag = working_mode === 'team' ? `has-team:${bounty_slug}` : `solo:${bounty_slug}`;
       tagsToAdd.push({ name: modeTag, status: 'active' });
     }

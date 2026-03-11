@@ -2,37 +2,54 @@
 // Static dock with buttons for each app
 ---
 
-<div id="dock" class="fixed bottom-6 left-6 flex gap-3 z-30">
+<div id="dock" class="fixed bottom-5 left-5 flex gap-2 z-30">
   <button
-    class="dock-btn px-4 py-2 rounded-lg bg-spark-black/90 border-2 border-spark-teal hover:border-spark-chartreuse hover:bg-spark-teal/20 text-spark-eggshell font-sans transition-all"
+    class="dock-btn group flex items-center gap-2 px-3 py-2 bg-spark-black border border-spark-teal/40 hover:border-spark-chartreuse text-spark-teal/80 hover:text-spark-chartreuse font-mono text-xs uppercase tracking-widest transition-all"
     data-open="bounties"
   >
-    💰 Bounties
+    <span class="text-spark-teal/55 group-hover:text-spark-chartreuse/50 transition-colors">[</span>
+    <span>💰 Bounties</span>
+    <span class="text-spark-teal/55 group-hover:text-spark-chartreuse/50 transition-colors">]</span>
   </button>
   <button
-    class="dock-btn px-4 py-2 rounded-lg bg-spark-black/90 border-2 border-spark-teal hover:border-spark-chartreuse hover:bg-spark-teal/20 text-spark-eggshell font-sans transition-all"
+    class="dock-btn group flex items-center gap-2 px-3 py-2 bg-spark-black border border-spark-teal/40 hover:border-spark-chartreuse text-spark-teal/80 hover:text-spark-chartreuse font-mono text-xs uppercase tracking-widest transition-all"
     data-open="about"
   >
-    ℹ️ Info
+    <span class="text-spark-teal/55 group-hover:text-spark-chartreuse/50 transition-colors">[</span>
+    <span>ℹ️ Info</span>
+    <span class="text-spark-teal/55 group-hover:text-spark-chartreuse/50 transition-colors">]</span>
   </button>
   <button
-    class="dock-btn px-4 py-2 rounded-lg bg-spark-black/90 border-2 border-spark-teal hover:border-spark-chartreuse hover:bg-spark-teal/20 text-spark-eggshell font-sans transition-all"
+    class="dock-btn group flex items-center gap-2 px-3 py-2 bg-spark-black border border-spark-teal/40 hover:border-spark-chartreuse text-spark-teal/80 hover:text-spark-chartreuse font-mono text-xs uppercase tracking-widest transition-all"
     data-open="events"
   >
-    📅 Events
+    <span class="text-spark-teal/55 group-hover:text-spark-chartreuse/50 transition-colors">[</span>
+    <span>📅 Events</span>
+    <span class="text-spark-teal/55 group-hover:text-spark-chartreuse/50 transition-colors">]</span>
   </button>
   <a
     href="/hall-of-fame"
-    class="dock-hof px-4 py-2 rounded-lg font-sans transition-all"
-    style="background:rgba(18,17,12,0.9);border:2px solid rgba(201,162,39,0.55);color:#e8c848;"
+    class="dock-hof group flex items-center gap-2 px-3 py-2 bg-spark-black border font-mono text-xs uppercase tracking-widest transition-all"
   >
-    🏆 Hall of Fame
+    <span class="dock-bracket transition-colors">[</span>
+    <span>🏆 Hall of Fame</span>
+    <span class="dock-bracket transition-colors">]</span>
   </a>
 </div>
 
 <style>
+  .dock-hof {
+    border-color: rgba(201,162,39,0.3);
+    color: rgba(201,162,39,0.8);
+  }
+  .dock-hof .dock-bracket {
+    color: rgba(201,162,39,0.25);
+  }
   .dock-hof:hover {
-    border-color: #c9a227 !important;
-    background: rgba(201,162,39,0.12) !important;
+    border-color: #c9a227;
+    color: #e8c848;
+  }
+  .dock-hof:hover .dock-bracket {
+    color: rgba(201,162,39,0.5);
   }
 </style>

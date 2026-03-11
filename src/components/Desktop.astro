@@ -10,20 +10,24 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 ---
 
 <main
-  class="fixed inset-0 pt-14 overflow-hidden bg-gray-900"
+  class="fixed inset-0 pt-12 overflow-hidden bg-spark-black"
   style={`background-image: url(${randomBg}); background-size: cover; background-position: center;`}
 >
-  <!-- Background overlay - darker to fade image more -->
-  <div class="absolute inset-0 bg-gray-900/90"></div>
+  <!-- Dark overlay -->
+  <div class="absolute inset-0 bg-spark-black/70"></div>
+
+  <!-- Grid overlay -->
+  <div class="absolute inset-0 desktop-grid opacity-70"></div>
+
+  <!-- Sweeping scanline -->
+  <div class="sweep-line" style="top: 0;"></div>
 
   <!-- Logo watermarks (bottom-right) -->
-  <div class="absolute bottom-16 right-8 flex items-end gap-4 z-0">
-    <!-- Spark logo -->
-    <div class="opacity-40">
+  <div class="absolute bottom-14 right-8 flex items-end gap-4 z-0 pointer-events-none">
+    <div class="opacity-100">
       <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48" />
     </div>
-    <!-- HackBU logo -->
-    <div class="opacity-50">
+    <div class="opacity-100">
       <img src="/hackbu-logo.png" alt="HackBU" class="h-48" />
     </div>
   </div>
@@ -34,7 +38,8 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
   </div>
 
   <!-- "Powered by" footer -->
-  <div class="absolute bottom-4 right-8 text-sm text-spark-eggshell/60 font-mono z-0">
-    Powered by BU IS&T
+  <div class="absolute bottom-2 right-6 text-[10px] text-spark-teal/50 font-mono z-0 uppercase tracking-widest">
+    Powered by BU IS&amp;T
   </div>
+
 </main>

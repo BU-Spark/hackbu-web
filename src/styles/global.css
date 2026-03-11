@@ -10,12 +10,102 @@
   }
 }
 
-/* Easter egg animations */
+/* ─── Glitch animation ─── */
+@keyframes glitch {
+  0%, 82%, 100% {
+    transform: none;
+    text-shadow: none;
+    clip-path: none;
+  }
+  83% {
+    clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+    transform: translate(-3px, 0);
+    text-shadow: 3px 0 #06B1A2;
+  }
+  85% {
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    transform: translate(3px, 0);
+    text-shadow: -3px 0 #BFF13C;
+  }
+  87% {
+    clip-path: none;
+    transform: none;
+    text-shadow: none;
+  }
+}
+
+.glitch-text {
+  animation: glitch 9s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* ─── CRT scanlines overlay ─── */
+.scanlines {
+  position: relative;
+}
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.07) 3px,
+    rgba(0, 0, 0, 0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ─── Desktop sweep scanline ─── */
+@keyframes sweep {
+  0%   { transform: translateY(-4px); opacity: 0.6; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+.sweep-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(191, 241, 60, 0.15), rgba(6, 177, 162, 0.2), transparent);
+  animation: sweep 8s linear infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ─── Desktop grid overlay ─── */
+.desktop-grid {
+  background-image:
+    linear-gradient(rgba(6, 177, 162, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 177, 162, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ─── Phosphor glow (chartreuse) ─── */
+.glow-chartreuse {
+  box-shadow:
+    0 0 0 1px rgba(191, 241, 60, 0.25),
+    0 0 20px rgba(191, 241, 60, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.85);
+}
+.glow-teal {
+  box-shadow:
+    0 0 0 1px rgba(6, 177, 162, 0.12),
+    0 8px 28px rgba(0, 0, 0, 0.7);
+}
+
+/* ─── Easter egg animations ─── */
 @keyframes barrel-roll {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ─── Boot screen cursor blink ─── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.boot-cursor {
+  animation: blink 0.8s step-end infinite;
 }

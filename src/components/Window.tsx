@@ -268,16 +268,16 @@ export function Window({
   return (
     <div
       ref={windowRef}
-      className={`absolute bg-spark-black/95 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-sm ${
+      className={`absolute bg-spark-black flex flex-col overflow-hidden ${
         isDragging || isResizing ? '' : 'transition-[border-color,box-shadow]'
       } ${
-        isFocused ? 'border-4 border-spark-chartreuse' : 'border-2 border-gray-600'
+        isFocused ? 'border border-spark-chartreuse glow-chartreuse' : 'border border-spark-teal/20 glow-teal'
       }`}
       style={{
         left: `${pos.x}px`,
         top: `${pos.y}px`,
-        width: isMinimized ? '600px' : `${size.width}px`,
-        height: isMinimized ? '52px' : `${size.height}px`,
+        width: isMinimized ? '480px' : `${size.width}px`,
+        height: isMinimized ? '44px' : `${size.height}px`,
         zIndex,
       }}
       onMouseDown={onFocus}
@@ -285,43 +285,48 @@ export function Window({
     >
       {/* Title Bar */}
       <div
-        className={`px-4 py-3 flex items-center justify-between cursor-move select-none transition-colors ${
+        className={`px-3 py-2.5 flex items-center justify-between cursor-move select-none transition-colors border-b ${
           isFocused
-            ? 'bg-spark-teal border-b-2 border-spark-chartreuse'
-            : 'bg-gray-700 border-b border-gray-600'
+            ? 'bg-spark-black border-spark-chartreuse/40'
+            : 'bg-[#0e0d09] border-spark-teal/25'
         }`}
         onMouseDown={handleMouseDown}
       >
-        <span className={`font-mono font-bold text-base ${isFocused ? 'text-spark-black' : 'text-gray-400'}`}>{title}</span>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2.5">
+          <div className={`w-px h-4 ${isFocused ? 'bg-spark-chartreuse' : 'bg-spark-teal/55'}`} />
+          <span className={`font-mono text-[11px] uppercase tracking-[0.18em] ${isFocused ? 'text-spark-chartreuse' : 'text-spark-teal/70'}`}>{title}</span>
+        </div>
+        <div className="flex gap-1.5 items-center">
           <button
             onClick={handleMinimize}
-            className="w-5 h-5 rounded-full bg-[#FFBD2E] hover:bg-[#FFBD2E]/90 transition-colors flex items-center justify-center group"
+            className="w-3.5 h-3.5 bg-[#FFBD2E] hover:brightness-110 transition-all flex items-center justify-center"
             aria-label="Minimize"
           >
-            <span className="text-[#995700] text-sm font-bold leading-none pb-0.5">−</span>
+            <span className="text-[#5C3D00] font-black leading-none" style={{fontSize:'9px'}}>−</span>
           </button>
           <button
             onClick={handleMaximize}
-            className="w-5 h-5 rounded-full bg-[#28CA42] hover:bg-[#28CA42]/90 transition-colors flex items-center justify-center group"
+            className="w-3.5 h-3.5 bg-[#28CA42] hover:brightness-110 transition-all flex items-center justify-center"
             aria-label="Maximize"
           >
-            <span className="text-[#006500] text-xs font-bold leading-none">⛶</span>
+            <span className="text-[#004400] font-black leading-none" style={{fontSize:'8px'}}>⛶</span>
           </button>
           <button
             onClick={handleClose}
-            className="w-5 h-5 rounded-full bg-[#FF5F57] hover:bg-[#FF5F57]/90 transition-colors flex items-center justify-center group"
+            className="w-3.5 h-3.5 bg-[#FF5F57] hover:brightness-110 transition-all flex items-center justify-center"
             aria-label="Close"
           >
-            <span className="text-[#4D0000] text-sm font-bold leading-none">×</span>
+            <span className="text-[#4D0000] font-black leading-none" style={{fontSize:'11px'}}>×</span>
           </button>
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content with scanline overlay */}
       {!isMinimized && (
-        <div className="flex-1 overflow-auto p-4 text-spark-eggshell">
-          {children}
+        <div className="flex-1 overflow-auto relative scanlines">
+          <div className="p-4 text-spark-eggshell">
+            {children}
+          </div>
         </div>
       )}
 

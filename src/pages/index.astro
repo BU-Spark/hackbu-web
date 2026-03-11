@@ -21,6 +21,13 @@ import leaderboard from "../data/leaderboard.json";
 import events from "../data/events.json";
 
 import Desktop from "../components/Desktop.astro";
+const bgImages = [
+  '/backgrounds/085A0479.jpg',
+  '/backgrounds/DSC04485.jpg',
+  '/backgrounds/Screen-Shot-2024-07-25-at-1.13.32-PM-700x700.png',
+  '/backgrounds/Screen-Shot-2024-07-25-at-1.29.00-PM-700x700.png',
+];
+const bootBg = bgImages[Math.floor(Math.random() * bgImages.length)];
 import Topbar from "../components/Topbar.astro";
 import Dock from "../components/Dock.astro";
 import { WindowManager } from "../components/WindowManager";
@@ -86,12 +93,31 @@ const motdContent = [
     <title>HackBU OS</title>
   </head>
   <body>
-    <!-- Boot Screen -->
+    <!-- Boot Screen (new CRT style) -->
+    <!-- To switch to classic style: change data-boot-style="new" to data-boot-style="classic" -->
     <div
       id="boot"
-      class="fixed inset-0 bg-spark-black z-50 flex items-center justify-center"
+      data-boot-style="new"
+      class="fixed inset-0 z-50 flex scanlines bg-black"
     >
-      <pre id="bootlog" class="font-mono text-spark-chartreuse text-sm"></pre>
+      <!-- CRT vignette -->
+      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);"></div>
+
+      <!-- NEW STYLE: full-screen terminal layout -->
+      <div id="boot-new" class="relative z-10 w-full h-full flex flex-col p-8 pt-10">
+        <div class="font-display text-4xl text-spark-chartreuse tracking-widest mb-1" style="text-shadow: 0 0 24px rgba(191,241,60,0.45), 0 0 48px rgba(191,241,60,0.15);">HACKBU OS</div>
+        <div class="font-mono text-spark-teal/75 text-xs uppercase tracking-[0.4em] mb-8">v1.0 — BU Spark! </div>
+        <div class="flex-1 min-h-0">
+          <pre id="bootlog" class="font-mono text-spark-chartreuse text-sm leading-relaxed whitespace-pre-wrap"></pre>
+          <span id="bootcursor" class="inline-block w-2 h-4 bg-spark-chartreuse boot-cursor align-middle ml-0.5"></span>
+        </div>
+        <div class="font-mono text-spark-teal/60 text-[10px] uppercase tracking-[0.35em]">press any key to continue</div>
+      </div>
+
+      <!-- CLASSIC STYLE (hidden by default) -->
+      <div id="boot-classic" class="relative z-10 hidden">
+        <pre id="bootlog-classic" class="font-mono text-spark-chartreuse text-sm"></pre>
+      </div>
     </div>
 
     <Topbar events={events} />
@@ -111,40 +137,55 @@ const motdContent = [
 
     <script>
       // Boot animation
-      const boot = document.getElementById("boot");
-      const bootlog = document.getElementById("bootlog");
-      const lines = [
+      const boot = document.getElementById("boot") as HTMLElement;
+      const isClassic = boot?.dataset.bootStyle === 'classic';
+
+      const newLines = [
+        "[ OK ] initializing kernel modules ...",
+        "[ OK ] mounting bu_network filesystem ...",
+        "[ OK ] loading display drivers ...",
+        "[ OK ] starting window compositor ...",
+        "[ OK ] hacking BU databases ...",
+        "[ OK ] loading bounty registry ...",
+        "",
+        "  HACKBU OS v1.0 ready.",
+        "  press \` for terminal or click below",
+      ];
+      const classicLines = [
         "> initializing HackBuOS v1.0 …",
         "> connecting to bu_network …",
         "> loading skyline assets …",
-        "> Press ` for terminal or use dock below",
+        "> Press \` for terminal or use dock below",
         "> ready.",
       ];
 
+      const lines = isClassic ? classicLines : newLines;
+      const bootlog = isClassic
+        ? document.getElementById("bootlog-classic")
+        : document.getElementById("bootlog");
+      const bootcursor = document.getElementById("bootcursor");
+
+      if (isClassic) {
+        document.getElementById("boot-new")?.classList.add("hidden");
+        document.getElementById("boot-classic")?.classList.remove("hidden");
+      }
+
       let i = 0;
+      const interval = isClassic ? 350 : 280;
       const bootInterval = setInterval(() => {
         if (i < lines.length) {
           bootlog!.textContent += lines[i] + "\n";
           i++;
         } else {
           clearInterval(bootInterval);
+          if (bootcursor) bootcursor.style.display = 'none';
         }
-      }, 350);
+      }, interval);
 
       // Skip boot on click
       boot!.addEventListener("click", () => {
-        if (boot) {
-          boot.style.display = "none";
-        }
+        if (boot) boot.style.display = "none";
       });
-
-      // Auto-hide boot after completion
-      setTimeout(
-        () => {
-          // Don't auto-hide, wait for user interaction
-        },
-        lines.length * 350 + 600
-      );
 
       // Wire up dock buttons
       document.querySelectorAll(".dock-btn").forEach((btn) => {
@@ -176,7 +217,7 @@ const motdContent = [
         }
       });
 
-      // Hide boot on any interaction
+      // Hide boot on any interaction (only after animation finishes)
       const hideBootOnInteraction = () => {
         if (boot) {
           boot.style.display = "none";
@@ -185,10 +226,22 @@ const motdContent = [
         document.removeEventListener("keydown", hideBootOnInteraction);
       };
 
+      // Request fullscreen on first user gesture
+      const requestFullscreenOnce = () => {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        document.removeEventListener("click", requestFullscreenOnce);
+        document.removeEventListener("keydown", requestFullscreenOnce);
+      };
+      document.addEventListener("click", requestFullscreenOnce);
+      document.addEventListener("keydown", requestFullscreenOnce);
+
+      const totalDuration = lines.length * interval + 300;
       setTimeout(() => {
         document.addEventListener("click", hideBootOnInteraction);
         document.addEventListener("keydown", hideBootOnInteraction);
-      }, lines.length * 350);
+      }, totalDuration);
     </script>
   </body>
 </html>
