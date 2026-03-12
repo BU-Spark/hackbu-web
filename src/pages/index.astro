@@ -243,6 +243,12 @@ const motdContent = [
         window.dispatchEvent(new CustomEvent('openWindow', { detail: autoOpen }));
       }
 
+      // Skip boot if Netlify Identity token is in the URL hash
+      if (boot && window.location.hash.match(/^#(invite_token|recovery_token|confirmation_token)=/)) {
+        boot.style.display = 'none';
+        clearInterval(bootInterval);
+      }
+
       // Skip boot on click
       let bootDismissed = false;
       const dismissBoot = (method) => {
