@@ -50,6 +50,8 @@ export const POST: APIRoute = async ({ request }) => {
         { name: `interested:${bounty_slug}`, status: 'active' },
         { name: `has-team:${bounty_slug}`, status: 'active' },
         { name: teamTag, status: 'active' },
+        { name: `solo:${bounty_slug}`, status: 'inactive' },
+        { name: `team:${bounty_slug}`, status: 'inactive' },
       ],
     });
 
