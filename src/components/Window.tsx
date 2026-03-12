@@ -268,7 +268,7 @@ export function Window({
   return (
     <div
       ref={windowRef}
-      className={`absolute bg-spark-black flex flex-col overflow-hidden ${
+      className={`absolute bg-spark-black flex flex-col overflow-visible ${
         isDragging || isResizing ? '' : 'transition-[border-color,box-shadow]'
       } ${
         isFocused ? 'border border-spark-chartreuse glow-chartreuse' : 'border border-spark-teal/20 glow-teal'
@@ -333,48 +333,48 @@ export function Window({
       {/* Resize Handles - positioned outside the window border */}
       {!isMaximized && !isMinimized && (
         <>
-          {/* Corner handles - outside corners */}
+          {/* Corner handles - outside only */}
           <div
-            className="absolute w-4 h-4 cursor-nw-resize"
+            className="absolute cursor-nw-resize"
             onMouseDown={(e) => handleResizeStart(e, 'nw')}
-            style={{ touchAction: 'none', top: '-6px', left: '-6px' }}
+            style={{ touchAction: 'none', top: '-12px', left: '-12px', width: '12px', height: '12px' }}
           />
           <div
-            className="absolute w-4 h-4 cursor-ne-resize"
+            className="absolute cursor-ne-resize"
             onMouseDown={(e) => handleResizeStart(e, 'ne')}
-            style={{ touchAction: 'none', top: '-6px', right: '-6px' }}
+            style={{ touchAction: 'none', top: '-12px', right: '-12px', width: '12px', height: '12px' }}
           />
           <div
-            className="absolute w-4 h-4 cursor-sw-resize"
+            className="absolute cursor-sw-resize"
             onMouseDown={(e) => handleResizeStart(e, 'sw')}
-            style={{ touchAction: 'none', bottom: '-6px', left: '-6px' }}
+            style={{ touchAction: 'none', bottom: '-12px', left: '-12px', width: '12px', height: '12px' }}
           />
           <div
-            className="absolute w-4 h-4 cursor-se-resize"
+            className="absolute cursor-se-resize"
             onMouseDown={(e) => handleResizeStart(e, 'se')}
-            style={{ touchAction: 'none', bottom: '-6px', right: '-6px' }}
+            style={{ touchAction: 'none', bottom: '-12px', right: '-12px', width: '12px', height: '12px' }}
           />
 
-          {/* Edge handles - positioned outside the window edges */}
+          {/* Edge handles - outside only */}
           <div
-            className="absolute left-2 right-2 h-2 cursor-n-resize"
+            className="absolute left-2 right-2 cursor-n-resize"
             onMouseDown={(e) => handleResizeStart(e, 'n')}
-            style={{ touchAction: 'none', top: '-5px' }}
+            style={{ touchAction: 'none', top: '-10px', height: '10px' }}
           />
           <div
-            className="absolute left-2 right-2 h-2 cursor-s-resize"
+            className="absolute left-2 right-2 cursor-s-resize"
             onMouseDown={(e) => handleResizeStart(e, 's')}
-            style={{ touchAction: 'none', bottom: '-5px' }}
+            style={{ touchAction: 'none', bottom: '-10px', height: '10px' }}
           />
           <div
-            className="absolute top-2 bottom-2 w-2 cursor-w-resize"
+            className="absolute top-2 bottom-2 cursor-w-resize"
             onMouseDown={(e) => handleResizeStart(e, 'w')}
-            style={{ touchAction: 'none', left: '-5px' }}
+            style={{ touchAction: 'none', left: '-10px', width: '10px' }}
           />
           <div
-            className="absolute top-2 bottom-2 w-2 cursor-e-resize"
+            className="absolute top-2 bottom-2 cursor-e-resize"
             onMouseDown={(e) => handleResizeStart(e, 'e')}
-            style={{ touchAction: 'none', right: '-5px' }}
+            style={{ touchAction: 'none', right: '-10px', width: '10px' }}
           />
         </>
       )}

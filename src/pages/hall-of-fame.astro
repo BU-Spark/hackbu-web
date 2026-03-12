@@ -222,7 +222,10 @@ const completed = entries
     </main>
     <script>
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') window.location.href = '/';
+        if (e.key === 'Escape') {
+          if (window.history.length > 1) window.history.back();
+          else window.location.href = '/';
+        }
       });
     </script>
   </body>

@@ -6,6 +6,20 @@ interface WeatherData {
   icon: string;
 }
 
+// Event types to show in the banner countdown (configurable)
+const BANNER_EVENT_TYPES = ['tech talk', 'code & tell', 'demo night', 'idea jam', 'workshop', 'speaker', 'hackathon', 'poster session'];
+
+function shouldShowInBanner(title: string): boolean {
+  const lower = title.toLowerCase();
+  return BANNER_EVENT_TYPES.some((t) => lower.includes(t));
+}
+
+interface LiveEvent {
+  title: string;
+  when: string;
+  url?: string;
+}
+
 interface StatusBarProps {
   events?: { title: string; when: string }[];
 }
@@ -15,9 +29,25 @@ export function StatusBar({ events = [] }: StatusBarProps) {
   const [bostonTime, setBostonTime] = useState('');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [countdown, setCountdown] = useState('');
+  const [countdownUrl, setCountdownUrl] = useState('');
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
+
+  // Fetch live events from Eventbrite API
+  useEffect(() => {
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.events && data.events.length > 0) {
+          setLiveEvents(data.events);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Update times and countdown every second
   useEffect(() => {
+    const activeEvents = liveEvents.length > 0 ? liveEvents : events;
+
     const updateTimes = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
@@ -39,14 +69,14 @@ export function StatusBar({ events = [] }: StatusBarProps) {
       });
       setBostonTime(bostonTimeStr);
 
-      // Countdown to next event
-      if (events.length > 0) {
-        const upcoming = events
+      // Countdown to next event (filtered by banner types)
+      if (activeEvents.length > 0) {
+        const upcoming = activeEvents
           .map((e) => {
             const d = new Date(`${e.when}, ${currentYear}`);
             return { ...e, _date: d };
           })
-          .filter((e) => !isNaN(e._date.getTime()) && e._date > now)
+          .filter((e) => !isNaN(e._date.getTime()) && e._date > now && shouldShowInBanner(e.title))
           .sort((a, b) => a._date.getTime() - b._date.getTime());
 
         if (upcoming.length > 0) {
@@ -54,8 +84,10 @@ export function StatusBar({ events = [] }: StatusBarProps) {
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
           const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           setCountdown(`Next: ${upcoming[0].title} in ${days}d ${hours}h`);
+          setCountdownUrl((upcoming[0] as any).url || '');
         } else {
           setCountdown('No upcoming events');
+          setCountdownUrl('');
         }
       }
     };
@@ -64,7 +96,7 @@ export function StatusBar({ events = [] }: StatusBarProps) {
     const interval = setInterval(updateTimes, 1000);
 
     return () => clearInterval(interval);
-  }, [events]);
+  }, [events, liveEvents]);
 
   // Fetch Boston weather
   useEffect(() => {
@@ -119,7 +151,18 @@ export function StatusBar({ events = [] }: StatusBarProps) {
       {countdown && (
         <>
           <span>•</span>
-          <span>{countdown}</span>
+          {countdownUrl ? (
+            <a
+              href={countdownUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-spark-chartreuse transition-colors underline underline-offset-2 decoration-spark-teal/30"
+            >
+              {countdown}
+            </a>
+          ) : (
+            <span>{countdown}</span>
+          )}
         </>
       )}
     </div>
