@@ -36,6 +36,7 @@ export function WindowManager({
   const [bountyStatusFilter, setBountyStatusFilter] = useState('');
   const [bountySort, setBountySort] = useState('newest');
   const [selectedBounty, setSelectedBounty] = useState<any>(null);
+  const [liveEvents, setLiveEvents] = useState<any[] | null>(null);
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
@@ -72,6 +73,18 @@ export function WindowManager({
     });
   }, []);
 
+  // Fetch live events from Eventbrite API
+  useEffect(() => {
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.events && data.events.length > 0) {
+          setLiveEvents(data.events);
+        }
+      })
+      .catch(() => {}); // Fall back to static events
+  }, []);
+
   // Listen for events from dock and buttons
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -88,16 +101,30 @@ export function WindowManager({
       setTerminalOpen((prev) => !prev);
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // Close the focused (topmost) window
+        const topWindow = Object.entries(zIndices).reduce((max, [id, z]) =>
+          z > (zIndices[max] || 0) ? id : max
+        , '');
+        if (topWindow && openWindows.includes(topWindow)) {
+          closeWindow(topWindow);
+        }
+      }
+    };
+
     window.addEventListener('openWindow' as any, handleOpenWindow);
     window.addEventListener('closeWindow' as any, handleCloseWindow);
     window.addEventListener('toggleTerminal' as any, handleToggleTerminal);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('openWindow' as any, handleOpenWindow);
       window.removeEventListener('closeWindow' as any, handleCloseWindow);
       window.removeEventListener('toggleTerminal' as any, handleToggleTerminal);
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [openWindow, closeWindow]);
+  }, [openWindow, closeWindow, openWindows, zIndices]);
 
   // Prepare data for tables
   const bountiesData = bounties.map((b) => {
@@ -314,7 +341,7 @@ export function WindowManager({
           zIndex={zIndices.events}
           isFocused={focusedWindow === 'events'}
         >
-          <CardList items={events} type="event" />
+          <CardList items={liveEvents || events} type="event" />
         </Window>
       )}
 

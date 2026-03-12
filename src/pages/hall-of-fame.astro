@@ -107,10 +107,15 @@ const completed = entries
         style="background:radial-gradient(ellipse 55% 90% at 12% 50%,rgba(191,241,60,.035) 0%,transparent 70%),radial-gradient(ellipse 35% 70% at 88% 50%,rgba(6,177,162,.03) 0%,transparent 70%);">
       </div>
       <div class="relative max-w-5xl mx-auto px-6 pt-10 pb-0">
-        <nav class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase mb-8" style="color:rgba(217,234,223,.25);">
-          <a href="/" class="hover:text-spark-teal transition-colors">HackBU OS</a>
-          <span>/</span>
-          <span style="color:#c9a227;">Hall of Fame</span>
+        <nav class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase" style="color:rgba(217,234,223,.25);">
+            <a href="/" class="hover:text-spark-teal transition-colors">HackBU OS</a>
+            <span>/</span>
+            <span style="color:#c9a227;">Hall of Fame</span>
+          </div>
+          <a href="/" class="w-7 h-7 flex items-center justify-center rounded bg-[#FF5F57] hover:brightness-110 transition-all" aria-label="Close" title="Back to HackBU OS">
+            <span class="text-[#4D0000] font-black text-sm leading-none">×</span>
+          </a>
         </nav>
         <div class="flex items-end justify-between gap-8 flex-wrap pb-10">
           <div>
@@ -205,5 +210,10 @@ const completed = entries
         </a>
       </div>
     </main>
+    <script>
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') window.location.href = '/';
+      });
+    </script>
   </body>
 </html>

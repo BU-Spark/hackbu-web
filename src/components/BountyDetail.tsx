@@ -302,7 +302,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
               onClick={() => interestedDone ? setConfirmWithdraw('interested') : openModal('interested')}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-colors cursor-pointer ${
                 interestedDone
-                  ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
+                  ? 'bg-green-500/20 border border-green-500/40 text-green-300 hover:bg-green-500/30'
                   : 'bg-spark-chartreuse text-spark-black hover:bg-spark-chartreuse/80'
               }`}
             >
@@ -312,7 +312,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
             {confirmWithdraw === 'interested' && (
               <div className="flex items-center gap-2 pl-1">
                 <span className="text-spark-eggshell/60 text-xs font-mono">Confirm withdraw?</span>
-                <button onClick={() => { handleWithdraw('interested'); setConfirmWithdraw(null); }} className="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-300 rounded text-xs hover:bg-red-500/30 transition-colors">Yes</button>
+                <button onClick={() => { handleWithdraw('interested'); setConfirmWithdraw(null); }} className="px-2 py-0.5 bg-green-500/20 border border-green-500/40 text-green-300 rounded text-xs hover:bg-green-500/30 transition-colors">Yes</button>
                 <button onClick={() => setConfirmWithdraw(null)} className="px-2 py-0.5 border border-spark-teal/40 text-spark-eggshell/60 rounded text-xs hover:bg-spark-teal/10 transition-colors">Cancel</button>
               </div>
             )}
@@ -322,7 +322,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
               onClick={() => teamDone ? setConfirmWithdraw('looking-for-team') : openModal('looking-for-team')}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm transition-colors cursor-pointer ${
                 teamDone
-                  ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30'
+                  ? 'bg-green-500/20 border border-green-500/40 text-green-300 hover:bg-green-500/30'
                   : 'bg-spark-orange text-spark-black hover:bg-spark-orange/80'
               }`}
             >
@@ -332,7 +332,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
             {confirmWithdraw === 'looking-for-team' && (
               <div className="flex items-center gap-2 pl-1">
                 <span className="text-spark-eggshell/60 text-xs font-mono">Confirm withdraw?</span>
-                <button onClick={() => { handleWithdraw('looking-for-team'); setConfirmWithdraw(null); }} className="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-300 rounded text-xs hover:bg-red-500/30 transition-colors">Yes</button>
+                <button onClick={() => { handleWithdraw('looking-for-team'); setConfirmWithdraw(null); }} className="px-2 py-0.5 bg-green-500/20 border border-green-500/40 text-green-300 rounded text-xs hover:bg-green-500/30 transition-colors">Yes</button>
                 <button onClick={() => setConfirmWithdraw(null)} className="px-2 py-0.5 border border-spark-teal/40 text-spark-eggshell/60 rounded text-xs hover:bg-spark-teal/10 transition-colors">Cancel</button>
               </div>
             )}

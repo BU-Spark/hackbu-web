@@ -67,13 +67,13 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       'Examples:',
       '  > apps',
       '  > open bounties',
-      '  > open gallery',
+      '  > open events',
     ].join('\n'),
 
     apps: () => [
       'Available apps:',
       '  bounties      💰 Browse open coding challenges',
-      '  gallery       🚀 See student projects',
+
       '  events        📅 Upcoming meetups',
       '  hall-of-fame  🏆 Past bounty winners',
       '',
@@ -83,7 +83,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     ls: () => [
       'Available apps:',
       '  bounties      💰 Browse open coding challenges',
-      '  gallery       🚀 See student projects',
+
       '  events        📅 Upcoming meetups',
       '  hall-of-fame  🏆 Past bounty winners',
       '',
@@ -93,7 +93,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
     open: (arg?: string) => {
       if (!arg) return 'Usage: open <app>\nRun \'apps\' to see available apps';
 
-      const validApps = ['bounties', 'gallery', 'events', 'hall-of-fame'];
+      const validApps = ['bounties', 'events', 'hall-of-fame'];
       if (!validApps.includes(arg)) {
         return `Unknown app: ${arg}\nRun \'apps\' to see available apps`;
       }

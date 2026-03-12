@@ -6,6 +6,7 @@ interface CardListProps {
     desc?: string;
     when?: string;
     where?: string;
+    url?: string;
     links?: string; // JSON string
   }>;
   type?: 'project' | 'event';
@@ -26,10 +27,15 @@ export function CardList({ items, type = 'project' }: CardListProps) {
         }
 
         if (type === 'event') {
+          const Wrapper = item.url ? 'a' : 'div';
+          const wrapperProps = item.url
+            ? { href: item.url, target: '_blank', rel: 'noopener noreferrer' }
+            : {};
           return (
-            <div
-              key={item.title || idx}
-              className="border border-spark-teal/40 rounded-lg p-4 hover:border-spark-chartreuse transition-colors"
+            <Wrapper
+              key={`${item.title}-${idx}`}
+              {...wrapperProps}
+              className={`block border border-spark-teal/40 rounded-lg p-4 hover:border-spark-chartreuse transition-colors ${item.url ? 'cursor-pointer group' : ''}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
@@ -40,8 +46,11 @@ export function CardList({ items, type = 'project' }: CardListProps) {
                     {item.when} — {item.where}
                   </p>
                 </div>
+                {item.url && (
+                  <span className="text-spark-teal/50 group-hover:text-spark-chartreuse transition-colors text-sm mt-1">↗</span>
+                )}
               </div>
-            </div>
+            </Wrapper>
           );
         }
 
