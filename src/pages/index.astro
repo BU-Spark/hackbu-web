@@ -244,9 +244,16 @@ const motdContent = [
       }
 
       // Skip boot on click
-      boot!.addEventListener("click", () => {
-        if (boot) boot.style.display = "none";
-        if (typeof umami !== 'undefined') umami.track('boot-skip', { method: 'click' });
+      let bootDismissed = false;
+      const dismissBoot = (method) => {
+        if (!boot || bootDismissed) return;
+        bootDismissed = true;
+        boot.style.display = "none";
+        if (typeof umami !== 'undefined') umami.track('boot-skip', { method });
+      };
+      boot!.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dismissBoot("click");
       });
 
       // Wire up dock buttons
@@ -315,10 +322,7 @@ const motdContent = [
 
       // Hide boot on any interaction (only after animation finishes)
       const hideBootOnInteraction = () => {
-        if (boot) {
-          boot.style.display = "none";
-        }
-        if (typeof umami !== 'undefined') umami.track('boot-skip', { method: 'interaction' });
+        dismissBoot("interaction");
         document.removeEventListener("click", hideBootOnInteraction);
         document.removeEventListener("keydown", hideBootOnInteraction);
       };
