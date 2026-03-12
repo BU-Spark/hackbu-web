@@ -72,11 +72,16 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   const [interestedCount, setInterestedCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
   const [toast, setToast] = useState<{ msg: string; error: boolean } | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     setInterestedDone(hasResponded(bounty.slug, 'interested'));
     setTeamDone(hasResponded(bounty.slug, 'looking-for-team'));
+    const responses = getResponses();
+    const storedTeamId = responses[bounty.slug]?.interested?.teamId;
+    if (storedTeamId) setTeamId(storedTeamId);
     fetchCounts();
   }, [bounty.slug]);
 
@@ -156,9 +161,10 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       fname: fname.trim(), lname: lname.trim(), email: email.trim(), workingMode,
     }));
 
-    saveResponse(bounty.slug, modalType!, { fname: fname.trim(), lname: lname.trim(), email: email.trim() });
-    if (modalType === 'interested') setInterestedDone(true);
-    if (modalType === 'looking-for-team') setTeamDone(true);
+    const submittedType = modalType!;
+    saveResponse(bounty.slug, submittedType, { fname: fname.trim(), lname: lname.trim(), email: email.trim() });
+    if (submittedType === 'interested') setInterestedDone(true);
+    if (submittedType === 'looking-for-team') setTeamDone(true);
     setModalType(null);
     setShowNextSteps(true);
 
@@ -178,7 +184,16 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
           working_mode: modalType === 'interested' ? workingMode : undefined,
         }),
       });
-      if (!res.ok) showToast('Saved locally — sync will retry on next visit.', true);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.teamId) {
+          setTeamId(data.teamId);
+          // Re-save with teamId
+          saveResponse(bounty.slug, submittedType, { fname: fname.trim(), lname: lname.trim(), email: email.trim(), teamId: data.teamId });
+        }
+      } else {
+        showToast('Saved locally — sync will retry on next visit.', true);
+      }
     } catch {
       showToast('No connection — saved locally and will sync when online.', true);
     }
@@ -312,6 +327,28 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
               <li>In the meantime, review the <span className="text-spark-chartreuse">project brief</span> below to get started.</li>
             </ol>
           </div>
+          {teamId && (
+            <div className="space-y-2 pt-1 border-t border-spark-teal/20">
+              <p className="text-sm text-spark-eggshell/70 font-mono">Share this link with your teammates:</p>
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={`${typeof window !== 'undefined' ? window.location.origin : ''}/join/${bounty.slug}?team=${teamId}`}
+                  className="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 rounded text-xs text-spark-eggshell/80 font-mono"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/join/${bounty.slug}?team=${teamId}`);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="px-3 py-2 bg-spark-teal/20 border border-spark-teal/40 rounded text-xs font-mono text-spark-teal hover:bg-spark-teal/30 transition-colors whitespace-nowrap"
+                >
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          )}
           {bounty.docLink && (
             <a
               href={bounty.docLink}

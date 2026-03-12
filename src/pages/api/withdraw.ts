@@ -26,6 +26,15 @@ export const POST: APIRoute = async ({ request }) => {
     if (type === 'interested') {
       tagsToRemove.push({ name: `solo:${bounty_slug}`, status: 'inactive' });
       tagsToRemove.push({ name: `has-team:${bounty_slug}`, status: 'inactive' });
+
+      // Also remove any team-group tags for this bounty
+      try {
+        const memberInfo = await (mailchimp as any).lists.getListMember(AUDIENCE_ID, subscriberHash, { fields: ['tags'] });
+        const teamGroupTags = (memberInfo.tags || [])
+          .filter((t: any) => t.name.startsWith(`team-group:${bounty_slug}:`))
+          .map((t: any) => ({ name: t.name, status: 'inactive' }));
+        tagsToRemove.push(...teamGroupTags);
+      } catch {}
     }
     await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
       tags: tagsToRemove,

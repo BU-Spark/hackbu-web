@@ -201,6 +201,13 @@ const dl = deadlineLabel(bounty.deadline);
               <li>In the meantime, review the <span class="text-spark-chartreuse">project brief</span> below to get started.</li>
             </ol>
           </div>
+          <div id="join-link-area" class="hidden space-y-2 pt-2" style="border-top:1px solid rgba(6,177,162,.2);">
+            <p class="text-sm text-spark-eggshell/70 font-mono">Share this link with your teammates:</p>
+            <div class="flex items-center gap-2">
+              <input id="join-link-input" readonly class="flex-1 px-3 py-2 bg-spark-black border border-spark-teal/40 text-xs text-spark-eggshell/80 font-mono" value="" />
+              <button id="copy-join-link" class="px-3 py-2 border border-spark-teal/40 text-xs font-mono text-spark-teal hover:bg-spark-teal/10 transition-colors whitespace-nowrap">Copy</button>
+            </div>
+          </div>
           {bounty.docLink && (
             <a href={bounty.docLink} target="_blank" rel="noopener noreferrer"
                class="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm hover:bg-spark-chartreuse/85 transition-colors">
@@ -425,7 +432,20 @@ const dl = deadlineLabel(bounty.deadline);
         document.getElementById("next-steps")?.classList.remove("hidden");
         try {
           const res = await fetch("/api/respond", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ first_name: fname, last_name: lname, email, bounty_slug: slug, type: submittedType, bounty_title: bountyTitle, doc_link: docLink, teammates: validTeammates, working_mode: workingMode, repo_link: repoLink, instructions_link: instructionsLink }) });
-          if (!res.ok) { console.error("API error:", await res.text()); showToast("Saved locally — sync will retry on next visit.", true); }
+          if (res.ok) {
+            const data = await res.json();
+            if (data.teamId) {
+              // Re-save with teamId
+              saveResponse(slug, submittedType, { fname, lname, email, teamId: data.teamId });
+              // Show join link
+              const joinLinkArea = document.getElementById("join-link-area");
+              const joinLinkInput = document.getElementById("join-link-input");
+              if (joinLinkArea && joinLinkInput) {
+                joinLinkInput.value = window.location.origin + "/join/" + slug + "?team=" + data.teamId;
+                joinLinkArea.classList.remove("hidden");
+              }
+            }
+          } else { console.error("API error:", await res.text()); showToast("Saved locally — sync will retry on next visit.", true); }
         } catch (err) { console.error("Failed to submit:", err); showToast("No connection — saved locally and will sync when online.", true); }
         fetchCounts();
       }
@@ -459,6 +479,24 @@ const dl = deadlineLabel(bounty.deadline);
         else window.location.href = "/";
       }
       document.getElementById("close-next-steps")?.addEventListener("click", () => { document.getElementById("next-steps")?.classList.add("hidden"); });
+      document.getElementById("copy-join-link")?.addEventListener("click", function() {
+        const input = document.getElementById("join-link-input");
+        if (input) { navigator.clipboard.writeText(input.value); this.textContent = "Copied!"; setTimeout(() => { this.textContent = "Copy"; }, 2000); }
+      });
+      // Restore join link if previously registered with team
+      (function() {
+        const responses = getResponses();
+        const data = responses[slug]?.interested;
+        if (data?.teamId) {
+          const joinLinkArea = document.getElementById("join-link-area");
+          const joinLinkInput = document.getElementById("join-link-input");
+          if (joinLinkArea && joinLinkInput) {
+            joinLinkInput.value = window.location.origin + "/join/" + slug + "?team=" + data.teamId;
+            joinLinkArea.classList.remove("hidden");
+            if (hasResponded(slug, "interested")) document.getElementById("next-steps")?.classList.remove("hidden");
+          }
+        }
+      })();
       document.getElementById("close-btn")?.addEventListener("click", (e) => { e.preventDefault(); goBack(); });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {

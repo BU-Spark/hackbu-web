@@ -10,7 +10,7 @@ import { rateLimit, getClientIp } from '../lib/rate-limit';
 const adminKey = import.meta.env.ADMIN_KEY;
 
 let authorized = false;
-let bountyData: Record<string, { title: string; interested: any[]; lookingForTeam: any[] }> = {};
+let bountyData: Record<string, { title: string; interested: any[]; lookingForTeam: any[]; teamGroups: Record<string, any[]> }> = {};
 let authError = '';
 
 // Check session cookie on any request
@@ -67,6 +67,9 @@ if (authorized) {
         email: m.email_address,
         workingMode: 'unknown',
         teammates: m.merge_fields?.TEAMMATES || '',
+        teamGroupIds: (m.tags || [])
+          .filter((t: any) => t.name.startsWith('team-group:'))
+          .map((t: any) => t.name),
       }));
   }
 
@@ -89,7 +92,17 @@ if (authorized) {
       if (soloSet.has(r.email)) r.workingMode = 'solo';
       else if (hasTeamSet.has(r.email)) r.workingMode = 'has-team';
     }
-    bountyData[s] = { title: entry.data.title, interested, lookingForTeam };
+    // Build team groups from team-group tags
+    const teamGroups: Record<string, any[]> = {};
+    for (const r of interested) {
+      const teamTag = (r.teamGroupIds || []).find((t: string) => t.startsWith(`team-group:${s}:`));
+      if (teamTag) {
+        const tId = teamTag.split(':')[2];
+        if (!teamGroups[tId]) teamGroups[tId] = [];
+        teamGroups[tId].push(r);
+      }
+    }
+    bountyData[s] = { title: entry.data.title, interested, lookingForTeam, teamGroups };
   }
 }
 
@@ -215,6 +228,11 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       .card-teammates { margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--border); font-size: 0.74rem; color: var(--muted); line-height: 1.5; }
       .card-teammates strong { color: var(--text); }
 
+      .team-group { border: 1px solid var(--orange); border-radius: 10px; padding: 0.75rem; margin-bottom: 0.75rem; }
+      .team-group-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--orange); margin-bottom: 0.5rem; font-weight: 600; }
+      .team-group .cards { margin-bottom: 0; }
+      [data-theme="light"] .team-group { border-color: rgba(180,83,9,0.3); }
+      [data-theme="light"] .team-group-label { color: #b45309; }
       .empty-state { color: var(--muted); font-size: 0.8rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px dashed var(--border); border-radius: 8px; }
 
       .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
@@ -376,29 +394,49 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                 {data.interested.length === 0 ? (
                   <div class="empty-state">No responses yet.</div>
                 ) : (
-                  <div class="cards">
-                    {data.interested.map((r: any) => (
-                      <div class="card">
-                        <div class="card-name">{r.name}</div>
-                        <div class="card-email">{r.email}</div>
-                        <div class="card-footer">
-                          {r.workingMode === 'solo' && (
-                            <span class="badge badge-solo">Solo</span>
-                          )}
-                          {r.workingMode === 'has-team' && (
-                            <span class="badge badge-hasteam">Has team</span>
-                          )}
-                          {r.workingMode === 'unknown' && (
-                            <span class="badge badge-unknown">—</span>
-                          )}
+                  <div>
+                    {/* Team groups */}
+                    {Object.entries(data.teamGroups).map(([tId, members]) => (
+                      <div class="team-group">
+                        <div class="team-group-label">Team {tId}</div>
+                        <div class="cards">
+                          {members.map((r: any) => (
+                            <div class="card">
+                              <div class="card-name">{r.name}</div>
+                              <div class="card-email">{r.email}</div>
+                              <div class="card-footer">
+                                <span class="badge badge-hasteam">Team</span>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        {r.teammates && (
-                          <div class="card-teammates">
-                            <strong>Teammates:</strong> {r.teammates}
-                          </div>
-                        )}
                       </div>
                     ))}
+                    {/* Solo / ungrouped members */}
+                    {(() => {
+                      const groupedEmails = new Set(Object.values(data.teamGroups).flat().map((r: any) => r.email));
+                      const ungrouped = data.interested.filter((r: any) => !groupedEmails.has(r.email));
+                      return ungrouped.length > 0 && (
+                        <div class="cards">
+                          {ungrouped.map((r: any) => (
+                            <div class="card">
+                              <div class="card-name">{r.name}</div>
+                              <div class="card-email">{r.email}</div>
+                              <div class="card-footer">
+                                {r.workingMode === 'solo' && <span class="badge badge-solo">Solo</span>}
+                                {r.workingMode === 'has-team' && <span class="badge badge-hasteam">Has team</span>}
+                                {r.workingMode === 'unknown' && <span class="badge badge-unknown">—</span>}
+                              </div>
+                              {r.teammates && (
+                                <div class="card-teammates">
+                                  <strong>Teammates:</strong> {r.teammates}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
