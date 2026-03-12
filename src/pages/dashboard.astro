@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content';
 import '../styles/global.css';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import mailchimp, { AUDIENCE_ID } from '../lib/mailchimp';
+import { rateLimit, getClientIp } from '../lib/rate-limit';
 
 const adminKey = import.meta.env.ADMIN_KEY;
 
@@ -28,6 +29,7 @@ if (Astro.request.method === 'POST') {
     Astro.cookies.delete('hackbu-admin', { path: '/dashboard' });
     authorized = false;
   } else if (adminKey && provided === adminKey) {
+    // Reset doesn't matter here, successful login
     authorized = true;
     Astro.cookies.set('hackbu-admin', adminKey, {
       path: '/dashboard',
@@ -37,7 +39,11 @@ if (Astro.request.method === 'POST') {
       maxAge: 60 * 60 * 4, // 4 hours
     });
   } else {
-    authError = 'Incorrect key — try again.';
+    const ip = getClientIp(Astro.request);
+    const rl = rateLimit(ip, { name: 'login', limit: 5, windowSec: 300 });
+    authError = rl.allowed
+      ? 'Incorrect key — try again.'
+      : 'Too many failed attempts. Please wait 5 minutes.';
   }
 }
 
@@ -258,6 +264,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       [data-theme="light"] #dash-bounty-filter { background: #fff !important; border-color: #d0d0d0 !important; color: #1a1a1a !important; }
       [data-theme="light"] #dash-search:focus,
       [data-theme="light"] #dash-bounty-filter:focus { border-color: #0d6b5e !important; }
+      [data-theme="light"] #export-csv { background: #0d6b5e !important; color: #fff !important; }
 
       @media (max-width: 640px) {
         .shell { grid-template-columns: 1fr; }
@@ -349,6 +356,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                 <option value={s}>{d.title}</option>
               ))}
             </select>
+            <button id="export-csv" style="padding:0.55rem 1rem;background:var(--chartreuse);color:#0a0a0a;font-family:inherit;font-weight:700;font-size:0.82rem;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;" title="Export all responses as CSV">Export CSV ↓</button>
           </div>
 
           {Object.entries(bountyData).map(([s, data], i) => (
@@ -448,6 +456,31 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
 
       searchInput?.addEventListener('input', applyFilters);
       bountyFilter?.addEventListener('change', applyFilters);
+
+      // CSV Export
+      document.getElementById('export-csv')?.addEventListener('click', function() {
+        const rows = [['Bounty', 'Name', 'Email', 'Working Mode', 'Teammates', 'Tags']];
+        document.querySelectorAll('.bounty-section').forEach(section => {
+          const title = section.querySelector('.bounty-title')?.textContent || '';
+          section.querySelectorAll('.sub-section').forEach(sub => {
+            const tag = (sub.querySelector('.sub-label')?.textContent || '').trim().split('\n')[0].trim();
+            sub.querySelectorAll('.card').forEach(card => {
+              const name = card.querySelector('.card-name')?.textContent || '';
+              const email = card.querySelector('.card-email')?.textContent || '';
+              const badge = card.querySelector('.badge')?.textContent?.trim() || '';
+              const teammates = (card.querySelector('.card-teammates')?.textContent || '').replace('Teammates:', '').trim();
+              rows.push([title, name, email, badge, teammates, tag]);
+            });
+          });
+        });
+        const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g, '""') + '"').join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'hackbu-responses-' + new Date().toISOString().slice(0,10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
     </script>
   </body>
 </html>
