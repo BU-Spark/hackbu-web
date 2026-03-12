@@ -75,7 +75,7 @@ const dl = deadlineLabel(bounty.deadline);
         <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase text-spark-eggshell/50 hover:text-spark-teal transition-colors back-link">
           <span>&#8592;</span><span>HackBU OS</span>
         </a>
-        <div class="flex gap-2" id="counters">
+        <div class="flex items-center gap-2" id="counters">
           <span class="inline-flex items-center gap-1.5 px-3 py-1 border border-spark-chartreuse/20 text-xs font-mono text-spark-chartreuse/60" title="Interested">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             <span id="count-interested">0</span> interested
@@ -84,6 +84,9 @@ const dl = deadlineLabel(bounty.deadline);
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span id="count-team">0</span> team
           </span>
+          <a id="close-btn" href="/" class="w-7 h-7 flex items-center justify-center rounded bg-[#FF5F57] hover:brightness-110 transition-all ml-2" aria-label="Close" title="Back to HackBU OS">
+            <span class="text-[#4D0000] font-black text-sm leading-none">&times;</span>
+          </a>
         </div>
       </div>
     </nav>
@@ -420,10 +423,15 @@ const dl = deadlineLabel(bounty.deadline);
       document.getElementById("modal-cancel").addEventListener("click", closeModal);
       document.getElementById("modal-submit").addEventListener("click", submitForm);
       modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+      function goBack() {
+        if (window.history.length > 1) window.history.back();
+        else window.location.href = "/";
+      }
+      document.getElementById("close-btn")?.addEventListener("click", (e) => { e.preventDefault(); goBack(); });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           if (!modal.classList.contains("hidden")) { closeModal(); return; }
-          window.location.href = "/";
+          goBack();
         }
       });
 
