@@ -11,10 +11,10 @@ const bounties = defineCollection({
     status: z.enum(['open', 'completed', 'closed']),
     featured: z.boolean().optional().default(false),
     winner: z.string().optional(),
-    winnerSubmission: z.union([z.string().url(), z.literal('')]).optional(),
-    docLink: z.union([z.string().url(), z.literal('')]).optional(),
-    repoLink: z.union([z.string().url(), z.literal('')]).optional(),
-    instructionsLink: z.union([z.string().url(), z.literal('')]).optional(),
+    winnerSubmission: z.string().optional(),
+    docLink: z.string().optional(),
+    repoLink: z.string().optional(),
+    instructionsLink: z.string().optional(),
   }),
 });
 
