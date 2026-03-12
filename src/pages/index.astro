@@ -219,6 +219,15 @@ const motdContent = [
         }
       }, interval);
 
+      // Skip boot if ?open= param is present
+      const urlParams = new URLSearchParams(window.location.search);
+      const autoOpen = urlParams.get('open');
+      if (autoOpen && boot) {
+        boot.style.display = 'none';
+        clearInterval(bootInterval);
+        window.dispatchEvent(new CustomEvent('openWindow', { detail: autoOpen }));
+      }
+
       // Skip boot on click
       boot!.addEventListener("click", () => {
         if (boot) boot.style.display = "none";
