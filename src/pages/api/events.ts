@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
-const EVENTBRITE_ORG_ID = '13250579290';
+const EVENTBRITE_ORG_ID = '206780206649';
 const EVENTBRITE_TOKEN = import.meta.env.EVENTBRITE_TOKEN || '';
 
 export const GET: APIRoute = async () => {
@@ -15,11 +15,10 @@ export const GET: APIRoute = async () => {
 
   try {
     const res = await fetch(
-      `https://www.eventbriteapi.com/v3/organizations/${EVENTBRITE_ORG_ID}/events/?status=live,started&order_by=start_asc&expand=venue`,
+      `https://www.eventbriteapi.com/v3/organizations/${EVENTBRITE_ORG_ID}/events/?status=live&order_by=start_asc&expand=venue`,
       {
         headers: {
           Authorization: `Bearer ${EVENTBRITE_TOKEN}`,
-          'Content-Type': 'application/json',
         },
       }
     );
@@ -35,19 +34,19 @@ export const GET: APIRoute = async () => {
 
     const data = await res.json();
     const events = (data.events || []).map((evt: any) => ({
-      title: evt.name?.text || '',
-      when: evt.start?.local
-        ? new Date(evt.start.local).toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-          })
-        : '',
-      where: evt.venue?.name || evt.venue?.address?.localized_address_display || 'TBD',
-      url: evt.url || '',
-    }));
+        title: evt.name?.text || '',
+        when: evt.start?.local
+          ? new Date(evt.start.local).toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+            })
+          : '',
+        where: evt.venue?.name || evt.venue?.address?.localized_address_display || 'TBD',
+        url: evt.url || '',
+      }));
 
     return new Response(JSON.stringify({ events }), {
       status: 200,

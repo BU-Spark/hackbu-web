@@ -10,6 +10,343 @@
   }
 }
 
+/* ─── Light mode theme overrides ─── */
+/* Spark brand: clean white bg, teal (#3D8C84) primary, orange (#E8573A) accent */
+:root {
+  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="light"] {
+  --light-bg: #FAFAFA;
+  --light-bg-alt: #F0F0F0;
+  --light-text: #1A1A1A;
+  --light-text-muted: #6B6B6B;
+  --light-border: rgba(61, 140, 132, 0.2);
+  --light-accent: #3D8C84;
+  --light-chartreuse: #3D8C84; /* remap green → teal */
+  --light-orange: #E8573A;
+}
+
+/* Override core backgrounds → clean white */
+[data-theme="light"] .bg-spark-black {
+  background-color: var(--light-bg) !important;
+}
+[data-theme="light"] .bg-spark-black\/70 {
+  background-color: rgba(250, 250, 250, 0.85) !important;
+}
+[data-theme="light"] .bg-spark-black\/80 {
+  background-color: rgba(250, 250, 250, 0.92) !important;
+}
+[data-theme="light"] .bg-spark-black\/95 {
+  background-color: rgba(250, 250, 250, 0.97) !important;
+}
+[data-theme="light"] .bg-spark-black\/50 {
+  background-color: rgba(250, 250, 250, 0.7) !important;
+}
+[data-theme="light"] .bg-spark-black\/40 {
+  background-color: rgba(240, 240, 240, 0.6) !important;
+}
+
+/* Override text colors */
+[data-theme="light"] .text-spark-eggshell {
+  color: var(--light-text) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/90 {
+  color: rgba(26, 26, 26, 0.9) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/80 {
+  color: rgba(26, 26, 26, 0.8) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/70 {
+  color: rgba(26, 26, 26, 0.7) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/60 {
+  color: rgba(26, 26, 26, 0.6) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/50 {
+  color: rgba(26, 26, 26, 0.5) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/40 {
+  color: rgba(26, 26, 26, 0.4) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/30 {
+  color: rgba(26, 26, 26, 0.3) !important;
+}
+[data-theme="light"] .text-spark-eggshell\/20 {
+  color: rgba(26, 26, 26, 0.2) !important;
+}
+
+/* Chartreuse → teal (no green in light mode) */
+[data-theme="light"] .text-spark-chartreuse {
+  color: var(--light-chartreuse) !important;
+}
+[data-theme="light"] .text-spark-chartreuse\/70 {
+  color: rgba(61, 140, 132, 0.7) !important;
+}
+[data-theme="light"] .text-spark-chartreuse\/60 {
+  color: rgba(61, 140, 132, 0.6) !important;
+}
+[data-theme="light"] .bg-spark-chartreuse {
+  background-color: #3D8C84 !important;
+  color: #fff !important;
+}
+[data-theme="light"] .bg-spark-chartreuse\/80 {
+  background-color: rgba(61, 140, 132, 0.8) !important;
+}
+[data-theme="light"] .bg-spark-chartreuse\/85 {
+  background-color: rgba(61, 140, 132, 0.85) !important;
+}
+[data-theme="light"] .bg-spark-chartreuse\/10,
+[data-theme="light"] .bg-spark-chartreuse\/20,
+[data-theme="light"] .bg-spark-chartreuse\/30 {
+  background-color: rgba(61, 140, 132, 0.1) !important;
+}
+
+/* Orange → Spark coral-orange */
+[data-theme="light"] .text-spark-orange {
+  color: var(--light-orange) !important;
+}
+[data-theme="light"] .text-spark-orange\/40 {
+  color: rgba(232, 87, 58, 0.4) !important;
+}
+[data-theme="light"] .text-spark-orange\/60 {
+  color: rgba(232, 87, 58, 0.6) !important;
+}
+[data-theme="light"] .bg-spark-orange {
+  background-color: #E8573A !important;
+  color: #fff !important;
+}
+
+/* Teal adjustments for light mode */
+[data-theme="light"] .text-spark-teal {
+  color: var(--light-accent) !important;
+}
+[data-theme="light"] .text-spark-teal\/50 {
+  color: rgba(61, 140, 132, 0.5) !important;
+}
+[data-theme="light"] .text-spark-teal\/40 {
+  color: rgba(61, 140, 132, 0.4) !important;
+}
+[data-theme="light"] .text-spark-teal\/70 {
+  color: rgba(61, 140, 132, 0.7) !important;
+}
+[data-theme="light"] .text-spark-teal\/80 {
+  color: rgba(61, 140, 132, 0.8) !important;
+}
+
+/* Border overrides */
+[data-theme="light"] .border-spark-teal\/20,
+[data-theme="light"] .border-spark-teal\/25,
+[data-theme="light"] .border-spark-teal\/30,
+[data-theme="light"] .border-spark-teal\/40 {
+  border-color: rgba(61, 140, 132, 0.2) !important;
+}
+[data-theme="light"] .border-spark-chartreuse {
+  border-color: #3D8C84 !important;
+}
+[data-theme="light"] .border-spark-chartreuse\/40,
+[data-theme="light"] .border-spark-chartreuse\/50,
+[data-theme="light"] .border-spark-chartreuse\/60,
+[data-theme="light"] .border-spark-chartreuse\/20 {
+  border-color: rgba(61, 140, 132, 0.3) !important;
+}
+[data-theme="light"] .border-spark-orange\/20,
+[data-theme="light"] .border-spark-orange\/30 {
+  border-color: rgba(232, 87, 58, 0.2) !important;
+}
+
+/* Glow effects → clean shadows in light mode */
+[data-theme="light"] .glow-chartreuse {
+  box-shadow:
+    0 0 0 1px rgba(61, 140, 132, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.04) !important;
+}
+[data-theme="light"] .glow-teal {
+  box-shadow:
+    0 0 0 1px rgba(61, 140, 132, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Scanlines → nearly invisible in light mode */
+[data-theme="light"] .scanlines::after {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.015) 3px,
+    rgba(0, 0, 0, 0.015) 4px
+  ) !important;
+}
+
+/* Sweep line → subtle teal sweep */
+[data-theme="light"] .sweep-line {
+  background: linear-gradient(90deg, transparent, rgba(61, 140, 132, 0.04), rgba(61, 140, 132, 0.06), transparent) !important;
+}
+
+/* Desktop grid → light neutral grid */
+[data-theme="light"] .desktop-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px) !important;
+}
+
+/* White text (used in inputs) → dark text */
+[data-theme="light"] .text-white {
+  color: var(--light-text) !important;
+}
+
+/* Body-level override for standalone pages */
+[data-theme="light"] body.bg-spark-black,
+[data-theme="light"] .min-h-screen.bg-spark-black {
+  background-color: var(--light-bg) !important;
+}
+
+/* Fix the topbar and dock backgrounds */
+[data-theme="light"] header.bg-spark-black {
+  background-color: rgba(250, 250, 250, 0.95) !important;
+  border-bottom-color: rgba(61, 140, 132, 0.12) !important;
+}
+
+/* Terminal in light mode → teal instead of green */
+[data-theme="light"] .text-spark-chartreuse.whitespace-pre-wrap,
+[data-theme="light"] .text-spark-chartreuse.whitespace-pre {
+  color: #2D6E67 !important;
+}
+
+/* Body-level background for standalone pages */
+[data-theme="light"] .theme-body {
+  background-color: var(--light-bg) !important;
+  color: var(--light-text) !important;
+}
+
+/* Standalone bounty page body::before scanlines + bg grid */
+[data-theme="light"] body.theme-body::before {
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.01) 2px,rgba(0,0,0,0.01) 4px) !important;
+}
+[data-theme="light"] body.theme-body {
+  background-image: radial-gradient(rgba(61,140,132,0.03) 1px,transparent 1px) !important;
+}
+
+/* Hall of fame: clean card style for light mode */
+[data-theme="light"] .placard {
+  background: linear-gradient(140deg,#FFFFFF 0%,#FAFAFA 50%,#FFFFFF 100%) !important;
+  border-top-color: rgba(61,140,132,0.25) !important;
+  border-left-color: rgba(61,140,132,0.12) !important;
+  border-right-color: rgba(61,140,132,0.08) !important;
+  border-bottom-color: rgba(61,140,132,0.08) !important;
+}
+[data-theme="light"] .placard:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06),0 0 0 1px rgba(61,140,132,0.18) !important;
+}
+
+/* Prize pill light mode */
+[data-theme="light"] .prize-pill {
+  background: linear-gradient(135deg,rgba(232,87,58,0.08),rgba(232,87,58,0.03)) !important;
+  border-top-color: rgba(232,87,58,0.3) !important;
+}
+
+/* Header inline styles */
+[data-theme="light"] header.border-b {
+  border-bottom-color: rgba(61, 140, 132, 0.1) !important;
+}
+
+/* HackBU logo → invert to black in light mode; Spark logo stays unchanged */
+[data-theme="light"] .hackbu-logo {
+  filter: invert(1) !important;
+}
+
+/* Hall of fame: darker gold for light mode */
+[data-theme="light"] .gold-accent {
+  color: #8B6914 !important;
+}
+[data-theme="light"] .gold-accent-stroke {
+  stroke: #8B6914 !important;
+}
+[data-theme="light"] .gold-accent-stroke path {
+  stroke: #8B6914 !important;
+}
+
+/* Spark! logo → dark version in light mode */
+[data-theme="light"] .spark-logo {
+  filter: brightness(0) saturate(100%) invert(30%) sepia(50%) saturate(500%) hue-rotate(140deg) !important;
+}
+
+/* Boot screen → light background instead of black */
+[data-theme="light"] #boot {
+  background-color: var(--light-bg) !important;
+}
+[data-theme="light"] #boot .bg-spark-black {
+  background-color: var(--light-bg) !important;
+}
+
+/* Status badges → darker in light mode */
+[data-theme="light"] .status-open {
+  background-color: rgba(22, 163, 74, 0.15) !important;
+  color: #15803d !important;
+  border-color: rgba(22, 163, 74, 0.4) !important;
+}
+[data-theme="light"] .difficulty-beginner {
+  background-color: rgba(22, 163, 74, 0.15) !important;
+  color: #15803d !important;
+}
+[data-theme="light"] .difficulty-intermediate {
+  background-color: rgba(217, 119, 6, 0.15) !important;
+  color: #b45309 !important;
+}
+
+/* Bounty detail page: "Open" status in light mode */
+[data-theme="light"] .text-green-400 {
+  color: #15803d !important;
+}
+[data-theme="light"] .border-green-500\/30 {
+  border-color: rgba(22, 163, 74, 0.4) !important;
+}
+[data-theme="light"] .bg-green-400 {
+  background-color: #15803d !important;
+}
+/* Bounty detail page: "Intermediate" difficulty in light mode */
+[data-theme="light"] .text-yellow-400\/70 {
+  color: #b45309 !important;
+}
+[data-theme="light"] .border-yellow-500\/20 {
+  border-color: rgba(217, 119, 6, 0.35) !important;
+}
+
+/* Bounty detail page: section labels (Prize, Deadline, Mission Brief) → darker in light mode */
+[data-theme="light"] .section-label {
+  color: #2D6E67 !important;
+}
+
+/* "Back to HackBU OS" link → more visible in both modes */
+[data-theme="light"] .back-link {
+  color: #3D8C84 !important;
+}
+[data-theme="light"] .back-link:hover {
+  color: #2D6E67 !important;
+}
+
+/* Withdraw buttons → darker green in light mode */
+[data-theme="light"] .bg-green-500\/20 {
+  background-color: rgba(22, 163, 74, 0.15) !important;
+}
+[data-theme="light"] .border-green-500\/40 {
+  border-color: rgba(22, 163, 74, 0.5) !important;
+}
+[data-theme="light"] .text-green-300 {
+  color: #15803d !important;
+}
+
+/* Action panel (Get Involved sidebar) → light in light mode */
+[data-theme="light"] .action-panel {
+  background: linear-gradient(145deg, #FFFFFF, #F5F5F5) !important;
+  border-top-color: rgba(61, 140, 132, 0.3) !important;
+  border-left-color: rgba(61, 140, 132, 0.15) !important;
+  border-right-color: rgba(61, 140, 132, 0.1) !important;
+  border-bottom-color: rgba(61, 140, 132, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+
 /* ─── Glitch animation ─── */
 @keyframes glitch {
   0%, 82%, 100% {

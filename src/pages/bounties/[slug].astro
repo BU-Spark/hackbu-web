@@ -25,6 +25,14 @@ const dl = deadlineLabel(bounty.deadline);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{bounty.title} — HackBU Bounties</title>
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('hackbu-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <style>
       body::before {
         content:"";position:fixed;inset:0;
@@ -42,7 +50,8 @@ const dl = deadlineLabel(bounty.deadline);
       .anim-2{opacity:0;animation:fadeUp .5s ease .08s forwards;}
       .anim-3{opacity:0;animation:fadeUp .5s ease .16s forwards;}
       .anim-4{opacity:0;animation:fadeUp .5s ease .24s forwards;}
-      .section-label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(6,177,162,.5);margin-bottom:.5rem;}
+      .section-label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(6,177,162,.6);margin-bottom:.5rem;}
+      [data-theme="light"] .section-label{color:#2D6E67 !important;}
       .div-line{border:none;height:1px;background:linear-gradient(to right,transparent,rgba(6,177,162,.2),transparent);margin:1.5rem 0;}
       .prize-hero{font-family:"Bebas Neue",system-ui,sans-serif;font-size:clamp(3rem,8vw,5rem);line-height:1;color:#FF572D;letter-spacing:.02em;text-shadow:0 0 40px rgba(255,87,45,.2);}
       .sidebar{position:sticky;top:2rem;align-self:flex-start;}
@@ -56,11 +65,11 @@ const dl = deadlineLabel(bounty.deadline);
       .bracket-l{border-left:1px solid rgba(201,162,39,.2);padding-left:1rem;}
     </style>
   </head>
-  <body class="min-h-screen bg-spark-black text-spark-eggshell">
+  <body class="min-h-screen bg-spark-black text-spark-eggshell theme-body">
 
     <nav class="border-b border-white/[0.05] anim-1">
       <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase text-spark-eggshell/30 hover:text-spark-teal transition-colors">
+        <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase text-spark-eggshell/50 hover:text-spark-teal transition-colors back-link">
           <span>&#8592;</span><span>HackBU OS</span>
         </a>
         <div class="flex gap-2" id="counters">
@@ -198,7 +207,7 @@ const dl = deadlineLabel(bounty.deadline);
           </div>
         </div>
         <div class="mt-4">
-          <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.2em] uppercase text-spark-eggshell/20 hover:text-spark-teal transition-colors">
+          <a href="/" class="flex items-center gap-2 font-mono text-[10px] tracking-[.2em] uppercase text-spark-eggshell/50 hover:text-spark-teal transition-colors back-link">
             <span>&#8592;</span><span>Back to HackBU OS</span>
           </a>
         </div>
@@ -326,14 +335,14 @@ const dl = deadlineLabel(bounty.deadline);
       function updateButtonStates() {
         if (hasResponded(slug, "interested")) {
           btnInterest.querySelector("span").textContent = "Withdraw Interest";
-          btnInterest.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 border border-red-500/40 text-red-300 font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-red-500/30";
+          btnInterest.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-500/20 border border-green-500/40 text-green-300 font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-green-500/30";
         } else {
           btnInterest.querySelector("span").textContent = "I'm Interested";
           btnInterest.className = "btn-primary-cta w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-chartreuse/85";
         }
         if (hasResponded(slug, "looking-for-team")) {
           btnTeam.querySelector("span").textContent = "Withdraw Team Request";
-          btnTeam.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 border border-red-500/40 text-red-300 font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-red-500/30";
+          btnTeam.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-500/20 border border-green-500/40 text-green-300 font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-green-500/30";
         } else {
           btnTeam.querySelector("span").textContent = "Looking for Teammates";
           btnTeam.className = "w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-spark-orange text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-orange/85";
@@ -398,7 +407,7 @@ const dl = deadlineLabel(bounty.deadline);
         const existing = document.getElementById(`confirm-${type}`);
         if (existing) { existing.remove(); return; }
         const div = document.createElement("div"); div.id = `confirm-${type}`; div.className = "flex items-center gap-2 mt-1 text-xs font-mono";
-        div.innerHTML = `<span class="text-spark-eggshell/50">Confirm withdraw?</span><button class="px-2 py-0.5 bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 confirm-yes">Yes</button><button class="px-2 py-0.5 border border-spark-teal/30 text-spark-eggshell/40 hover:bg-spark-teal/10 confirm-no">Cancel</button>`;
+        div.innerHTML = `<span class="text-spark-eggshell/50">Confirm withdraw?</span><button class="px-2 py-0.5 bg-green-500/20 border border-green-500/40 text-green-300 hover:bg-green-500/30 confirm-yes">Yes</button><button class="px-2 py-0.5 border border-spark-teal/30 text-spark-eggshell/40 hover:bg-spark-teal/10 confirm-no">Cancel</button>`;
         div.querySelector(".confirm-yes").addEventListener("click", () => { div.remove(); withdraw(type); });
         div.querySelector(".confirm-no").addEventListener("click", () => div.remove());
         btn.insertAdjacentElement("afterend", div);

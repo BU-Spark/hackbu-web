@@ -10,7 +10,7 @@ const { events = [] } = Astro.props;
 
 <header class="fixed top-0 left-0 right-0 h-12 bg-spark-black border-b border-spark-teal/20 z-40 flex items-center justify-between px-5" style="backdrop-filter: blur(8px);">
   <div class="flex items-center gap-3">
-    <img src="/hackbu-logo.png" alt="HackBU Logo" class="h-6 opacity-90" />
+    <img src="/hackbu-logo.png" alt="HackBU Logo" class="h-6 opacity-90 hackbu-logo" />
     <div class="flex items-center gap-1.5">
       <span class="font-mono text-spark-teal/40 text-xs select-none">&gt;_</span>
       <span class="font-display text-lg tracking-wider text-spark-eggshell glitch-text">HackBU OS</span>
@@ -22,6 +22,15 @@ const { events = [] } = Astro.props;
   </div>
 
   <div class="flex items-center gap-2">
+    <button
+      id="themeToggle"
+      class="w-7 h-7 flex items-center justify-center border border-spark-teal/20 hover:border-spark-teal/50 text-spark-teal/50 hover:text-spark-teal font-mono text-xs transition-all"
+      aria-label="Toggle light/dark mode"
+      title="Toggle light/dark mode"
+    >
+      <span id="theme-icon-sun" class="hidden">☀</span>
+      <span id="theme-icon-moon">☽</span>
+    </button>
     <button
       id="helpButton"
       class="w-7 h-7 flex items-center justify-center border border-spark-teal/20 hover:border-spark-teal/50 text-spark-teal/50 hover:text-spark-teal font-mono text-xs transition-all"

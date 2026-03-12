@@ -22,6 +22,14 @@ const completed = entries
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hall of Fame — HackBU</title>
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('hackbu-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <style>
       body::before {
         content: '';
@@ -100,7 +108,7 @@ const completed = entries
       }
     </style>
   </head>
-  <body class="min-h-screen bg-spark-black text-spark-eggshell">
+  <body class="min-h-screen bg-spark-black text-spark-eggshell theme-body">
 
     <header class="relative border-b border-white/[0.06] overflow-hidden">
       <div class="absolute inset-0 pointer-events-none"
@@ -111,7 +119,7 @@ const completed = entries
           <div class="flex items-center gap-2 font-mono text-[10px] tracking-[.25em] uppercase" style="color:rgba(217,234,223,.25);">
             <a href="/" class="hover:text-spark-teal transition-colors">HackBU OS</a>
             <span>/</span>
-            <span style="color:#c9a227;">Hall of Fame</span>
+            <span class="gold-accent" style="color:#c9a227;">Hall of Fame</span>
           </div>
           <a href="/" class="w-7 h-7 flex items-center justify-center rounded bg-[#FF5F57] hover:brightness-110 transition-all" aria-label="Close" title="Back to HackBU OS">
             <span class="text-[#4D0000] font-black text-sm leading-none">×</span>
@@ -131,7 +139,7 @@ const completed = entries
             </p>
           </div>
           <div class="text-right pb-1 font-mono">
-            <div class="font-display text-5xl leading-none" style="color:#c9a227;">{completed.length}</div>
+            <div class="font-display text-5xl leading-none gold-accent" style="color:#c9a227;">{completed.length}</div>
             <div class="text-[10px] tracking-[.3em] uppercase mt-1" style="color:rgba(217,234,223,.25);">
               {completed.length === 1 ? 'inductee' : 'inductees'}
             </div>
@@ -162,21 +170,21 @@ const completed = entries
               <span class="rank-mark" aria-hidden="true">#{i + 1}</span>
               <div class="relative z-10 flex items-start p-6 gap-5">
                 <div class="shrink-0 w-12 text-center mt-0.5">
-                  <div class="font-display text-4xl leading-none" style="color:#c9a227;">{i + 1}</div>
+                  <div class="font-display text-4xl leading-none gold-accent" style="color:#c9a227;">{i + 1}</div>
                   <div class="w-6 h-px mx-auto mt-2" style="background:rgba(201,162,39,.3);"></div>
                 </div>
                 <div class="shrink-0 w-px self-stretch" style="background:linear-gradient(to bottom,transparent,rgba(201,162,39,.2),transparent);"></div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-mono text-[9px] tracking-[.3em] uppercase mb-1.5" style="color:rgba(201,162,39,.5);">Completed Bounty</div>
+                  <div class="font-mono text-[9px] tracking-[.3em] uppercase mb-1.5 gold-accent" style="color:rgba(201,162,39,.5);">Completed Bounty</div>
                   <h2 class="font-display text-2xl lg:text-3xl text-spark-eggshell leading-tight mb-3">{b.title}</h2>
                   <div class="flex items-center gap-2.5 mb-4 flex-wrap">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2.5">
+                    <svg class="gold-accent-stroke" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2.5">
                       <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
                       <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
                       <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
                       <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
                     </svg>
-                    <span class="font-mono text-sm font-semibold" style="color:#e8c848;">{b.winner}</span>
+                    <span class="font-mono text-sm font-semibold gold-accent" style="color:#e8c848;">{b.winner}</span>
                     {b.winnerSubmission && (
                       <span class="font-mono text-[9px] px-1.5 py-0.5" style="color:rgba(6,177,162,.6);border:1px solid rgba(6,177,162,.2);">view submission ↗</span>
                     )}

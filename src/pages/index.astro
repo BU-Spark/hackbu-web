@@ -91,6 +91,15 @@ const motdContent = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HackBU OS</title>
+    <script is:inline>
+      // Theme init — runs before paint to prevent flash
+      (function() {
+        var stored = localStorage.getItem('hackbu-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
     <!-- Boot Screen (new CRT style) -->
@@ -98,7 +107,7 @@ const motdContent = [
     <div
       id="boot"
       data-boot-style="new"
-      class="fixed inset-0 z-50 flex scanlines bg-black"
+      class="fixed inset-0 z-50 flex scanlines bg-spark-black"
     >
       <!-- CRT vignette -->
       <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);"></div>
@@ -229,6 +238,36 @@ const motdContent = [
         if (e.key === "`") {
           e.preventDefault();
           window.dispatchEvent(new Event("toggleTerminal"));
+        }
+      });
+
+      // Theme toggle
+      const themeToggle = document.getElementById("themeToggle");
+      const sunIcon = document.getElementById("theme-icon-sun");
+      const moonIcon = document.getElementById("theme-icon-moon");
+      function updateThemeIcons() {
+        const current = document.documentElement.getAttribute("data-theme");
+        if (current === "light") {
+          sunIcon?.classList.remove("hidden");
+          moonIcon?.classList.add("hidden");
+        } else {
+          sunIcon?.classList.add("hidden");
+          moonIcon?.classList.remove("hidden");
+        }
+      }
+      updateThemeIcons();
+      themeToggle?.addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme");
+        const next = current === "light" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("hackbu-theme", next);
+        updateThemeIcons();
+      });
+      // Listen for OS preference changes
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("hackbu-theme")) {
+          document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+          updateThemeIcons();
         }
       });
 
