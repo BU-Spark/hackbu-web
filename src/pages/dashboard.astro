@@ -12,57 +12,78 @@ let authorized = false;
 let bountyData: Record<string, { title: string; interested: any[]; lookingForTeam: any[] }> = {};
 let authError = '';
 
+// Check session cookie on any request
+const sessionCookie = Astro.cookies.get('hackbu-admin')?.value;
+if (sessionCookie && adminKey && sessionCookie === adminKey) {
+  authorized = true;
+}
+
+// Handle login POST
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const provided = form.get('key')?.toString() || '';
-  if (adminKey && provided === adminKey) {
+  const action = form.get('action')?.toString() || '';
+
+  if (action === 'logout') {
+    Astro.cookies.delete('hackbu-admin', { path: '/dashboard' });
+    authorized = false;
+  } else if (adminKey && provided === adminKey) {
     authorized = true;
-
-    // Fetch all members once and filter by tag client-side (avoids tag ID vs segment ID mismatch)
-    let allMembers: any[] = [];
-    try {
-      const res = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
-        count: 1000,
-        status: 'subscribed',
-        fields: ['members.email_address', 'members.merge_fields', 'members.tags'],
-      });
-      allMembers = res.members || [];
-    } catch (e) { console.error('Failed to fetch members:', e); }
-
-    function getMembersWithTag(tag: string) {
-      return allMembers
-        .filter((m: any) => (m.tags || []).some((t: any) => t.name === tag))
-        .map((m: any) => ({
-          name: `${m.merge_fields?.FNAME || ''} ${m.merge_fields?.LNAME || ''}`.trim() || '(unknown)',
-          email: m.email_address,
-          workingMode: 'unknown',
-          teammates: m.merge_fields?.TEAMMATES || '',
-        }));
-    }
-
-    function getEmailsWithTag(tag: string): Set<string> {
-      return new Set(
-        allMembers
-          .filter((m: any) => (m.tags || []).some((t: any) => t.name === tag))
-          .map((m: any) => m.email_address)
-      );
-    }
-
-    const entries = await getCollection('bounties');
-    for (const entry of entries) {
-      const s = entry.slug;
-      const interested = getMembersWithTag(`interested:${s}`);
-      const lookingForTeam = getMembersWithTag(`team:${s}`);
-      const soloSet = getEmailsWithTag(`solo:${s}`);
-      const hasTeamSet = getEmailsWithTag(`has-team:${s}`);
-      for (const r of interested) {
-        if (soloSet.has(r.email)) r.workingMode = 'solo';
-        else if (hasTeamSet.has(r.email)) r.workingMode = 'has-team';
-      }
-      bountyData[s] = { title: entry.data.title, interested, lookingForTeam };
-    }
+    Astro.cookies.set('hackbu-admin', adminKey, {
+      path: '/dashboard',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 4, // 4 hours
+    });
   } else {
     authError = 'Incorrect key — try again.';
+  }
+}
+
+// Fetch data if authorized
+if (authorized) {
+  let allMembers: any[] = [];
+  try {
+    const res = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
+      count: 1000,
+      status: 'subscribed',
+      fields: ['members.email_address', 'members.merge_fields', 'members.tags'],
+    });
+    allMembers = res.members || [];
+  } catch (e) { console.error('Failed to fetch members:', e); }
+
+  function getMembersWithTag(tag: string) {
+    return allMembers
+      .filter((m: any) => (m.tags || []).some((t: any) => t.name === tag))
+      .map((m: any) => ({
+        name: `${m.merge_fields?.FNAME || ''} ${m.merge_fields?.LNAME || ''}`.trim() || '(unknown)',
+        email: m.email_address,
+        workingMode: 'unknown',
+        teammates: m.merge_fields?.TEAMMATES || '',
+      }));
+  }
+
+  function getEmailsWithTag(tag: string): Set<string> {
+    return new Set(
+      allMembers
+        .filter((m: any) => (m.tags || []).some((t: any) => t.name === tag))
+        .map((m: any) => m.email_address)
+    );
+  }
+
+  const entries = await getCollection('bounties');
+  for (const entry of entries) {
+    const s = entry.slug;
+    const interested = getMembersWithTag(`interested:${s}`);
+    const lookingForTeam = getMembersWithTag(`team:${s}`);
+    const soloSet = getEmailsWithTag(`solo:${s}`);
+    const hasTeamSet = getEmailsWithTag(`has-team:${s}`);
+    for (const r of interested) {
+      if (soloSet.has(r.email)) r.workingMode = 'solo';
+      else if (hasTeamSet.has(r.email)) r.workingMode = 'has-team';
+    }
+    bountyData[s] = { title: entry.data.title, interested, lookingForTeam };
   }
 }
 
@@ -233,6 +254,10 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       [data-theme="light"] .card-teammates strong { color: #1a1a1a; }
       [data-theme="light"] .empty-state { background: #fff; border-color: #d0d0d0; color: #888; }
       [data-theme="light"] .divider { border-color: #d0d0d0; }
+      [data-theme="light"] #dash-search,
+      [data-theme="light"] #dash-bounty-filter { background: #fff !important; border-color: #d0d0d0 !important; color: #1a1a1a !important; }
+      [data-theme="light"] #dash-search:focus,
+      [data-theme="light"] #dash-bounty-filter:focus { border-color: #0d6b5e !important; }
 
       @media (max-width: 640px) {
         .shell { grid-template-columns: 1fr; }
@@ -261,7 +286,13 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       <div class="shell">
         <!-- Sidebar -->
         <aside class="sidebar">
-          <div class="sidebar-logo">HackBU Admin</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="sidebar-logo">HackBU Admin</div>
+            <form method="POST" style="margin:0;">
+              <input type="hidden" name="action" value="logout" />
+              <button type="submit" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:0.68rem;padding:0.25rem 0.5rem;border-radius:4px;cursor:pointer;">Logout</button>
+            </form>
+          </div>
           <div class="sidebar-sub">Bounty responses</div>
 
           <div class="sidebar-stat">
@@ -307,6 +338,17 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
               <div class="stat-label">Active bounties</div>
               <div class="stat-value" style="color: var(--teal)">{Object.keys(bountyData).length}</div>
             </div>
+          </div>
+
+          <!-- Search & Filter -->
+          <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+            <input type="text" id="dash-search" placeholder="Search by name or email..." style="flex:1;min-width:200px;padding:0.55rem 0.85rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:0.82rem;border-radius:8px;outline:none;" />
+            <select id="dash-bounty-filter" style="padding:0.55rem 0.85rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:0.82rem;border-radius:8px;outline:none;">
+              <option value="">All bounties</option>
+              {Object.entries(bountyData).map(([s, d]) => (
+                <option value={s}>{d.title}</option>
+              ))}
+            </select>
           </div>
 
           {Object.entries(bountyData).map(([s, data], i) => (
@@ -378,5 +420,34 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       </div>
     )}
 
+    <script is:inline>
+      const searchInput = document.getElementById('dash-search');
+      const bountyFilter = document.getElementById('dash-bounty-filter');
+
+      function applyFilters() {
+        const query = (searchInput?.value || '').toLowerCase().trim();
+        const bountySlug = bountyFilter?.value || '';
+
+        document.querySelectorAll('.bounty-section').forEach(section => {
+          const sectionId = section.id;
+          if (bountySlug && sectionId !== bountySlug) {
+            section.style.display = 'none';
+            return;
+          }
+          section.style.display = '';
+
+          section.querySelectorAll('.card').forEach(card => {
+            const name = (card.querySelector('.card-name')?.textContent || '').toLowerCase();
+            const email = (card.querySelector('.card-email')?.textContent || '').toLowerCase();
+            const teammates = (card.querySelector('.card-teammates')?.textContent || '').toLowerCase();
+            const match = !query || name.includes(query) || email.includes(query) || teammates.includes(query);
+            card.style.display = match ? '' : 'none';
+          });
+        });
+      }
+
+      searchInput?.addEventListener('input', applyFilters);
+      bountyFilter?.addEventListener('change', applyFilters);
+    </script>
   </body>
 </html>

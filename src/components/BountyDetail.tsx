@@ -68,6 +68,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   const [agreeNotify, setAgreeNotify] = useState(false);
   const [agreeHours, setAgreeHours] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState<string | null>(null);
+  const [showNextSteps, setShowNextSteps] = useState(false);
   const [interestedCount, setInterestedCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
   const [toast, setToast] = useState<{ msg: string; error: boolean } | null>(null);
@@ -107,14 +108,17 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     Advanced: 'bg-red-500/30 text-red-300',
   };
 
-  function openModal(type: string) {
+  // Restore persisted form state on mount
+  useEffect(() => {
     const stored = getStoredData();
-    setFname(stored.fname || '');
-    setLname(stored.lname || '');
-    setEmail(stored.email || '');
+    if (stored.fname) setFname(stored.fname);
+    if (stored.lname) setLname(stored.lname);
+    if (stored.email) setEmail(stored.email);
+    if (stored.workingMode) setWorkingMode(stored.workingMode as 'solo' | 'team');
+  }, []);
+
+  function openModal(type: string) {
     setFormError('');
-    setWorkingMode((stored.workingMode as 'solo' | 'team') || 'solo');
-    setTeammates([{ name: '', email: '' }]);
     setAgreeNotify(false);
     setAgreeHours(false);
     setConfirmWithdraw(null);
@@ -156,7 +160,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     if (modalType === 'interested') setInterestedDone(true);
     if (modalType === 'looking-for-team') setTeamDone(true);
     setModalType(null);
-    showToast('Registered! Check your email shortly.');
+    setShowNextSteps(true);
 
     try {
       const res = await fetch('/api/respond', {
@@ -290,6 +294,35 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
               </a>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Next Steps after registration */}
+      {showNextSteps && (
+        <div className="border border-spark-chartreuse/40 rounded-lg p-4 bg-spark-chartreuse/5 space-y-3 action-panel">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg text-spark-chartreuse">You're registered!</h3>
+            <button onClick={() => setShowNextSteps(false)} className="text-spark-eggshell/40 hover:text-spark-eggshell/70 transition-colors text-lg leading-none">×</button>
+          </div>
+          <div className="text-sm text-spark-eggshell/70 space-y-2 font-mono">
+            <p>Here's what to expect:</p>
+            <ol className="list-decimal list-inside space-y-1.5 pl-1">
+              <li>You should receive an <span className="text-spark-chartreuse">email with instructions</span> shortly.</li>
+              <li>If not, contact <a href="mailto:kzingade@bu.edu" className="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" className="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
+              <li>In the meantime, review the <span className="text-spark-chartreuse">project brief</span> below to get started.</li>
+            </ol>
+          </div>
+          {bounty.docLink && (
+            <a
+              href={bounty.docLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              View Project Brief
+            </a>
+          )}
         </div>
       )}
 

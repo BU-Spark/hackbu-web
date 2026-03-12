@@ -179,6 +179,29 @@ const dl = deadlineLabel(bounty.deadline);
       </div>
 
       <div class="lg:w-72 xl:w-80 shrink-0 sidebar anim-4">
+        <!-- Next Steps panel (shown after registration) -->
+        <div id="next-steps" class="hidden mb-4 border border-spark-chartreuse/40 p-4 space-y-3 action-panel" style="background:rgba(191,241,60,0.03);">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display text-lg text-spark-chartreuse">You're registered!</h3>
+            <button id="close-next-steps" class="text-spark-eggshell/40 hover:text-spark-eggshell/70 transition-colors text-lg leading-none">×</button>
+          </div>
+          <div class="text-sm text-spark-eggshell/70 space-y-2 font-mono">
+            <p>Here's what to expect:</p>
+            <ol class="list-decimal list-inside space-y-1.5 pl-1">
+              <li>You should receive an <span class="text-spark-chartreuse">email with instructions</span> shortly.</li>
+              <li>If not, contact <a href="mailto:kzingade@bu.edu" class="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" class="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
+              <li>In the meantime, review the <span class="text-spark-chartreuse">project brief</span> below to get started.</li>
+            </ol>
+          </div>
+          {bounty.docLink && (
+            <a href={bounty.docLink} target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm hover:bg-spark-chartreuse/85 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              View Project Brief
+            </a>
+          )}
+        </div>
+
         <div class="action-panel p-5 space-y-5">
           <div class="section-label" style="color:rgba(191,241,60,.4);">Get Involved</div>
           <div class="space-y-2.5" id="involve-buttons">
@@ -391,7 +414,7 @@ const dl = deadlineLabel(bounty.deadline);
         const submittedType = currentType;
         saveResponse(slug, submittedType, { fname, lname, email });
         closeModal(); updateButtonStates();
-        showToast("Registered! Check your email shortly.");
+        document.getElementById("next-steps")?.classList.remove("hidden");
         try {
           const res = await fetch("/api/respond", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ first_name: fname, last_name: lname, email, bounty_slug: slug, type: submittedType, bounty_title: bountyTitle, doc_link: docLink, teammates: validTeammates, working_mode: workingMode, repo_link: repoLink, instructions_link: instructionsLink }) });
           if (!res.ok) { console.error("API error:", await res.text()); showToast("Saved locally — sync will retry on next visit.", true); }
@@ -427,6 +450,7 @@ const dl = deadlineLabel(bounty.deadline);
         if (window.history.length > 1) window.history.back();
         else window.location.href = "/";
       }
+      document.getElementById("close-next-steps")?.addEventListener("click", () => { document.getElementById("next-steps")?.classList.add("hidden"); });
       document.getElementById("close-btn")?.addEventListener("click", (e) => { e.preventDefault(); goBack(); });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
