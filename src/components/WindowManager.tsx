@@ -10,6 +10,37 @@ import { BountyCard } from './BountyCard';
 import { playOpen, playClose, playClick } from '../lib/sounds';
 import { daysUntil } from '../lib/deadline';
 
+function getNextWednesday(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 3=Wed
+  let daysUntilWed = (3 - day + 7) % 7;
+  if (daysUntilWed === 0) {
+    // It's Wednesday — show today if before 6pm, otherwise next week
+    if (now.getHours() >= 18) daysUntilWed = 7;
+  }
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntilWed);
+  return next.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function InnovationHours() {
+  const dateStr = getNextWednesday();
+  return (
+    <div className="border border-spark-orange/30 rounded-lg p-4 mb-3 bg-spark-orange/5">
+      <div className="flex items-start gap-3">
+        <span className="text-lg">🔧</span>
+        <div>
+          <h3 className="font-display text-lg text-spark-orange">Tech Innovation Hours</h3>
+          <p className="text-sm text-spark-eggshell/70 mt-1">
+            {dateStr}, 4:00 – 6:00 PM — BU Spark!
+          </p>
+          <p className="text-xs text-spark-eggshell/40 mt-1 font-mono">Every Wednesday · Drop-in for guidance, resources &amp; building</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface WindowManagerProps {
   bounties: any[];
   projects: any[];
@@ -36,6 +67,7 @@ export function WindowManager({
   const [bountyStatusFilter, setBountyStatusFilter] = useState('');
   const [bountySort, setBountySort] = useState('newest');
   const [selectedBounty, setSelectedBounty] = useState<any>(null);
+  const [liveEvents, setLiveEvents] = useState<any[] | null>(null);
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
@@ -72,6 +104,18 @@ export function WindowManager({
     });
   }, []);
 
+  // Fetch live events from Eventbrite API
+  useEffect(() => {
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.events && data.events.length > 0) {
+          setLiveEvents(data.events);
+        }
+      })
+      .catch(() => {}); // Fall back to static events
+  }, []);
+
   // Listen for events from dock and buttons
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -88,16 +132,30 @@ export function WindowManager({
       setTerminalOpen((prev) => !prev);
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // Close the focused (topmost) window
+        const topWindow = Object.entries(zIndices).reduce((max, [id, z]) =>
+          z > (zIndices[max] || 0) ? id : max
+        , '');
+        if (topWindow && openWindows.includes(topWindow)) {
+          closeWindow(topWindow);
+        }
+      }
+    };
+
     window.addEventListener('openWindow' as any, handleOpenWindow);
     window.addEventListener('closeWindow' as any, handleCloseWindow);
     window.addEventListener('toggleTerminal' as any, handleToggleTerminal);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('openWindow' as any, handleOpenWindow);
       window.removeEventListener('closeWindow' as any, handleCloseWindow);
       window.removeEventListener('toggleTerminal' as any, handleToggleTerminal);
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [openWindow, closeWindow]);
+  }, [openWindow, closeWindow, openWindows, zIndices]);
 
   // Prepare data for tables
   const bountiesData = bounties.map((b) => {
@@ -314,7 +372,8 @@ export function WindowManager({
           zIndex={zIndices.events}
           isFocused={focusedWindow === 'events'}
         >
-          <CardList items={events} type="event" />
+          <InnovationHours />
+          <CardList items={liveEvents || events} type="event" />
         </Window>
       )}
 

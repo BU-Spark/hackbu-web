@@ -41,7 +41,7 @@ export function About() {
                   <img
                     src={sponsor.logo}
                     alt={sponsor.name}
-                    className="h-16 object-contain"
+                    className={`h-16 object-contain ${sponsor.logo.includes('BUSPARK') ? 'spark-logo' : ''}`}
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}

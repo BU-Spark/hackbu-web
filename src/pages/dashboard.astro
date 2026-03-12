@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import { getCollection } from 'astro:content';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import mailchimp, { AUDIENCE_ID } from '../lib/mailchimp';
 
 const adminKey = import.meta.env.ADMIN_KEY;
@@ -74,6 +75,14 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin — Bounty Responses</title>
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('hackbu-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       :root {
@@ -190,6 +199,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
     </style>
   </head>
   <body>
+    <ThemeToggle />
 
     {!authorized ? (
       <div class="gate-wrap">

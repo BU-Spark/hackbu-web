@@ -1,0 +1,45 @@
+---
+// Floating theme toggle for standalone pages (without the main topbar)
+---
+
+<button
+  id="themeToggleFloat"
+  class="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 border border-spark-teal/30 hover:border-spark-teal/60 bg-spark-black/80 hover:bg-spark-black text-spark-teal/70 hover:text-spark-teal font-mono text-xs tracking-wide transition-all"
+  style="backdrop-filter: blur(8px);"
+  aria-label="Toggle light/dark mode"
+  title="Toggle light/dark mode"
+>
+  <span id="float-theme-sun" class="hidden">☀</span>
+  <span id="float-theme-moon">☽</span>
+  <span id="float-theme-label" class="uppercase text-[10px] tracking-widest">Light</span>
+</button>
+
+<script>
+  const themeBtn = document.getElementById("themeToggleFloat");
+  const sunIcon = document.getElementById("float-theme-sun");
+  const moonIcon = document.getElementById("float-theme-moon");
+  const themeLabel = document.getElementById("float-theme-label");
+
+  function updateThemeUI() {
+    const current = document.documentElement.getAttribute("data-theme");
+    if (current === "light") {
+      sunIcon?.classList.remove("hidden");
+      moonIcon?.classList.add("hidden");
+      if (themeLabel) themeLabel.textContent = "Dark";
+    } else {
+      sunIcon?.classList.add("hidden");
+      moonIcon?.classList.remove("hidden");
+      if (themeLabel) themeLabel.textContent = "Light";
+    }
+  }
+
+  updateThemeUI();
+
+  themeBtn?.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("hackbu-theme", next);
+    updateThemeUI();
+  });
+</script>
