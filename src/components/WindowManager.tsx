@@ -81,6 +81,7 @@ export function WindowManager({
     setOpenWindows((prev) => {
       if (!prev.includes(id)) {
         playOpen();
+        if (typeof umami !== 'undefined') umami.track('window-open', { window: id });
         return [...prev, id];
       }
       return prev;

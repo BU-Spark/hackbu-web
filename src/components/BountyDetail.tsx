@@ -165,6 +165,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     saveResponse(bounty.slug, submittedType, { fname: fname.trim(), lname: lname.trim(), email: email.trim() });
     if (submittedType === 'interested') setInterestedDone(true);
     if (submittedType === 'looking-for-team') setTeamDone(true);
+    if (typeof umami !== 'undefined') umami.track('bounty-signup', { bounty: bounty.slug, type: submittedType });
     setModalType(null);
     setShowNextSteps(true);
 

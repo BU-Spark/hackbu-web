@@ -122,11 +122,11 @@ const motdContent = [
       // Theme init — runs before paint to prevent flash
       (function() {
         var stored = localStorage.getItem('hackbu-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = stored || (prefersDark ? 'dark' : 'light');
+        var theme = stored || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="6268acbc-ec7d-467c-82e3-a2719f9e0967"></script>
   </head>
   <body>
     <!-- Boot Screen (new CRT style) -->
@@ -245,6 +245,7 @@ const motdContent = [
       // Skip boot on click
       boot!.addEventListener("click", () => {
         if (boot) boot.style.display = "none";
+        if (typeof umami !== 'undefined') umami.track('boot-skip', { method: 'click' });
       });
 
       // Wire up dock buttons
@@ -301,6 +302,7 @@ const motdContent = [
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("hackbu-theme", next);
         updateThemeIcons();
+        if (typeof umami !== 'undefined') umami.track('theme-toggle', { theme: next });
       });
       // Listen for OS preference changes
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
@@ -315,20 +317,10 @@ const motdContent = [
         if (boot) {
           boot.style.display = "none";
         }
+        if (typeof umami !== 'undefined') umami.track('boot-skip', { method: 'interaction' });
         document.removeEventListener("click", hideBootOnInteraction);
         document.removeEventListener("keydown", hideBootOnInteraction);
       };
-
-      // Request fullscreen on first user gesture
-      const requestFullscreenOnce = () => {
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        }
-        document.removeEventListener("click", requestFullscreenOnce);
-        document.removeEventListener("keydown", requestFullscreenOnce);
-      };
-      document.addEventListener("click", requestFullscreenOnce);
-      document.addEventListener("keydown", requestFullscreenOnce);
 
       const totalDuration = lines.length * interval + 300;
       setTimeout(() => {

@@ -37,11 +37,11 @@ const dl = deadlineLabel(bounty.deadline);
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('hackbu-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = stored || (prefersDark ? 'dark' : 'light');
+        var theme = stored || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="6268acbc-ec7d-467c-82e3-a2719f9e0967"></script>
     <style>
       body::before {
         content:"";position:fixed;inset:0;
