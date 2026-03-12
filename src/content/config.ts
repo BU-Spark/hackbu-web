@@ -6,7 +6,9 @@ const bounties = defineCollection({
     title: z.string(),
     difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']),
     prize: z.number(),
-    deadline: z.coerce.string(),
+    deadline: z.union([z.string(), z.date()]).transform((v) =>
+      v instanceof Date ? v.toISOString().split('T')[0] : v
+    ),
     tags: z.array(z.string()),
     status: z.enum(['open', 'completed', 'closed']),
     featured: z.boolean().optional().default(false),
