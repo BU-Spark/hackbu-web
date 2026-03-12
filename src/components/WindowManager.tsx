@@ -68,6 +68,7 @@ export function WindowManager({
   const [bountySort, setBountySort] = useState('newest');
   const [selectedBounty, setSelectedBounty] = useState<any>(null);
   const [liveEvents, setLiveEvents] = useState<any[] | null>(null);
+  const [bountyCounts, setBountyCounts] = useState<Record<string, { interested: number; lookingForTeam: number }> | null>(null);
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
@@ -102,6 +103,14 @@ export function WindowManager({
       delete newIndices[id];
       return newIndices;
     });
+  }, []);
+
+  // Fetch all bounty counts in one batch call
+  useEffect(() => {
+    fetch('/api/bounty-counts')
+      .then((res) => res.ok ? res.json() : {})
+      .then((data) => setBountyCounts(data))
+      .catch(() => setBountyCounts({}));
   }, []);
 
   // Fetch live events from Eventbrite API
@@ -314,11 +323,12 @@ export function WindowManager({
             }
 
             return (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filtered.map((b) => (
                   <BountyCard
                     key={b.slug}
                     bounty={b}
+                    counts={bountyCounts ? bountyCounts[b.slug] : undefined}
                     onClick={() => {
                       playClick();
                       const full = bounties.find((bx: any) => bx.slug === b.slug);
