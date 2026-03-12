@@ -1,10 +1,15 @@
 ---
 // Random background image selection
 const backgrounds = [
-  '/backgrounds/085A0479.jpg',
-  '/backgrounds/DSC04485.jpg',
-  '/backgrounds/Screen-Shot-2024-07-25-at-1.13.32-PM-700x700.png',
-  '/backgrounds/Screen-Shot-2024-07-25-at-1.29.00-PM-700x700.png',
+  '/backgrounds/bg-1.jpg',
+  '/backgrounds/bg-2.jpg',
+  '/backgrounds/bg-5.jpg',
+  '/backgrounds/bg-6.jpg',
+  '/backgrounds/bg-7.jpg',
+  '/backgrounds/bg-8.jpg',
+  '/backgrounds/bg-9.jpg',
+  '/backgrounds/bg-10.png',
+  '/backgrounds/bg-11.png',
 ];
 const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 ---
@@ -22,14 +27,21 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
   <!-- Sweeping scanline -->
   <div class="sweep-line" style="top: 0;"></div>
 
-  <!-- Logo watermarks (bottom-right) -->
-  <div class="absolute bottom-14 right-8 flex items-end gap-4 z-0 pointer-events-none">
-    <div class="opacity-100">
-      <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48 spark-logo" />
+  <!-- Logo watermarks + widget (bottom-right) -->
+  <div class="absolute bottom-14 right-8 flex flex-col items-end gap-3 z-0 pointer-events-none">
+    <div class="flex items-end gap-4">
+      <div class="opacity-100">
+        <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48 spark-logo" />
+      </div>
+      <div class="opacity-100">
+        <img src="/hackbu-logo.png" alt="HackBU" class="h-48 hackbu-logo" />
+      </div>
     </div>
-    <div class="opacity-100">
-      <img src="/hackbu-logo.png" alt="HackBU" class="h-48 hackbu-logo" />
-    </div>
+  </div>
+
+  <!-- Schedule widget (clickable, above desktop layer) -->
+  <div class="absolute bottom-[270px] right-8 z-20">
+    <img src="/widget/image(1).png" alt="Weekly HackBU Schedule" class="h-44 rounded opacity-90 cursor-pointer hover:opacity-100 transition-opacity" id="schedule-widget" />
   </div>
 
   <!-- Main desktop area -->
@@ -41,5 +53,56 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
   <div class="absolute bottom-2 right-6 text-[10px] text-spark-teal/50 font-mono z-0 uppercase tracking-widest">
     Powered by BU IS&amp;T
   </div>
+
+  <!-- Schedule widget modal -->
+  <div id="schedule-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div class="relative flex flex-col items-center gap-5 p-6 max-w-lg w-full">
+      <button id="schedule-modal-close" class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded bg-[#FF5F57] hover:brightness-110 transition-all" aria-label="Close">
+        <span class="text-[#4D0000] font-black text-lg leading-none">&times;</span>
+      </button>
+      <img src="/widget/image(1).png" alt="Weekly HackBU Schedule" class="w-full rounded" />
+      <div class="flex gap-3">
+        <button id="schedule-open-events" class="px-5 py-2.5 font-mono text-xs uppercase tracking-[.2em] border border-spark-chartreuse/40 text-spark-chartreuse hover:bg-spark-chartreuse hover:text-spark-black transition-all">
+          Events Window
+        </button>
+        <a href="https://www.eventbrite.com/o/bu-spark-13250579290" target="_blank" rel="noopener" class="px-5 py-2.5 font-mono text-xs uppercase tracking-[.2em] border border-spark-orange/40 text-spark-orange hover:bg-spark-orange hover:text-spark-black transition-all">
+          Eventbrite
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const widget = document.getElementById('schedule-widget');
+    const modal = document.getElementById('schedule-modal');
+    const closeBtn = document.getElementById('schedule-modal-close');
+    const eventsBtn = document.getElementById('schedule-open-events');
+
+    widget?.addEventListener('click', () => {
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    });
+
+    function closeModal() {
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+    }
+
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    eventsBtn?.addEventListener('click', () => {
+      closeModal();
+      window.dispatchEvent(new CustomEvent('openWindow', { detail: 'events' }));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+  </script>
 
 </main>

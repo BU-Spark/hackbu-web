@@ -116,6 +116,16 @@ export function WindowManager({
       .catch(() => {}); // Fall back to static events
   }, []);
 
+  // Check for ?open= query param on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const autoOpen = params.get('open');
+    if (autoOpen) {
+      openWindow(autoOpen);
+    }
+  }, [openWindow]);
+
   // Listen for events from dock and buttons
   useEffect(() => {
     if (typeof window === 'undefined') return;
