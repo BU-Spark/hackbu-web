@@ -23,14 +23,23 @@ const completed = entries
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hall of Fame — HackBU</title>
+    <meta name="description" content="Celebrate past bounty winners from HackBU — see completed challenges, prizes awarded, and the builders behind them." />
+    <meta property="og:title" content="Hall of Fame — HackBU" />
+    <meta property="og:description" content="Celebrate past bounty winners from HackBU — completed challenges, prizes awarded, and the builders behind them." />
+    <meta property="og:image" content="https://hackbu.dev/hackbu-logo.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hall of Fame — HackBU" />
+    <meta name="twitter:description" content="Celebrate past bounty winners from HackBU." />
+    <meta name="twitter:image" content="https://hackbu.dev/hackbu-logo.png" />
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('hackbu-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = stored || (prefersDark ? 'dark' : 'light');
+        var theme = stored || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="6268acbc-ec7d-467c-82e3-a2719f9e0967"></script>
     <style>
       body::before {
         content: '';

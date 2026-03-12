@@ -3,8 +3,13 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import mailchimp, { AUDIENCE_ID } from '../../lib/mailchimp';
 import crypto from 'node:crypto';
+import { rateLimit, rateLimitResponse, getClientIp } from '../../lib/rate-limit';
 
 export const POST: APIRoute = async ({ request }) => {
+  const ip = getClientIp(request);
+  const rl = rateLimit(ip, { name: 'respond', limit: 10, windowSec: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   try {
     const body = await request.json();
     const { first_name, last_name, email, bounty_slug, type, bounty_title, doc_link, repo_link, instructions_link, teammates, working_mode } = body;
@@ -42,18 +47,46 @@ export const POST: APIRoute = async ({ request }) => {
     });
     console.log('setListMember result:', JSON.stringify(memberRes).slice(0, 200));
 
-    // Add the primary tag + working mode tag (for interested submissions)
+    // Add the primary tag + working mode tag, and deactivate conflicting mode tags
     const tagsToAdd: { name: string; status: string }[] = [{ name: tag, status: 'active' }];
+    let teamId: string | undefined;
     if (working_mode) {
-      const modeTag = working_mode === 'team' ? `has-team:${bounty_slug}` : `solo:${bounty_slug}`;
-      tagsToAdd.push({ name: modeTag, status: 'active' });
+      // When registering interest, deactivate the "looking for team" tag
+      if (type === 'interested') {
+        tagsToAdd.push({ name: `team:${bounty_slug}`, status: 'inactive' });
+      }
+      if (working_mode === 'team') {
+        tagsToAdd.push({ name: `has-team:${bounty_slug}`, status: 'active' });
+        tagsToAdd.push({ name: `solo:${bounty_slug}`, status: 'inactive' });
+        teamId = crypto.randomBytes(4).toString('hex');
+        tagsToAdd.push({ name: `team-group:${bounty_slug}:${teamId}`, status: 'active' });
+        // Deactivate any old team-group tags for this bounty
+        try {
+          const memberInfo = await (mailchimp as any).lists.getListMember(AUDIENCE_ID, subscriberHash, { fields: ['tags'] });
+          const oldTeamTags = (memberInfo.tags || [])
+            .filter((t: any) => t.name.startsWith(`team-group:${bounty_slug}:`))
+            .map((t: any) => ({ name: t.name, status: 'inactive' }));
+          tagsToAdd.push(...oldTeamTags);
+        } catch {}
+      } else {
+        tagsToAdd.push({ name: `solo:${bounty_slug}`, status: 'active' });
+        tagsToAdd.push({ name: `has-team:${bounty_slug}`, status: 'inactive' });
+        // Deactivate any old team-group tags for this bounty
+        try {
+          const memberInfo = await (mailchimp as any).lists.getListMember(AUDIENCE_ID, subscriberHash, { fields: ['tags'] });
+          const oldTeamTags = (memberInfo.tags || [])
+            .filter((t: any) => t.name.startsWith(`team-group:${bounty_slug}:`))
+            .map((t: any) => ({ name: t.name, status: 'inactive' }));
+          tagsToAdd.push(...oldTeamTags);
+        } catch {}
+      }
     }
     const tagRes = await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
       tags: tagsToAdd,
     });
     console.log('updateListMemberTags result:', JSON.stringify(tagRes));
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return new Response(JSON.stringify({ success: true, ...(teamId ? { teamId } : {}) }), { status: 200 });
   } catch (err: any) {
     const detail = err?.response?.body ? JSON.stringify(err.response.body) : String(err);
     console.error('Respond API error:', detail);

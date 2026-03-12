@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { deadlineLabel } from '../lib/deadline';
 
 interface BountyCardProps {
@@ -14,7 +13,9 @@ interface BountyCardProps {
     winner?: string;
     winnerSubmission?: string;
   };
-  onClick: () => void;
+  href: string;
+  onClick?: () => void;
+  counts?: { interested: number; lookingForTeam: number };
 }
 
 const statusColors: Record<string, string> = {
@@ -29,27 +30,17 @@ const difficultyColors: Record<string, string> = {
   Advanced: 'bg-red-500/20 text-red-300',
 };
 
-export function BountyCard({ bounty, onClick }: BountyCardProps) {
-  const [interested, setInterested] = useState(0);
-  const [team, setTeam] = useState(0);
+export function BountyCard({ bounty, href, onClick, counts }: BountyCardProps) {
+  const loading = counts === undefined;
+  const interested = counts?.interested ?? 0;
+  const team = counts?.lookingForTeam ?? 0;
   const dl = deadlineLabel(bounty.deadline);
 
-  useEffect(() => {
-    fetch(`/api/bounty-counts?slug=${encodeURIComponent(bounty.slug)}`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => {
-        if (d) {
-          setInterested(d.interested || 0);
-          setTeam(d.lookingForTeam || 0);
-        }
-      })
-      .catch(() => {});
-  }, [bounty.slug]);
-
   return (
-    <div
-      onClick={() => { window.location.href = `/bounties/${bounty.slug}`; }}
-      className={`group relative flex flex-col gap-3 p-4 bg-spark-black border rounded-xl cursor-pointer hover:border-spark-chartreuse/60 hover:bg-spark-teal/5 transition-all duration-200 hover:shadow-[0_0_16px_rgba(168,230,29,0.08)] ${bounty.featured ? 'border-spark-chartreuse/50 ring-1 ring-spark-chartreuse/20' : 'border-spark-teal/30'}`}
+    <a
+      href={href}
+      onClick={onClick}
+      className={`group relative flex flex-col gap-3 p-4 bg-spark-black border rounded-xl cursor-pointer hover:border-spark-chartreuse/60 hover:bg-spark-teal/5 transition-all duration-200 hover:shadow-[0_0_16px_rgba(168,230,29,0.08)] no-underline ${bounty.featured ? 'border-spark-chartreuse/50 ring-1 ring-spark-chartreuse/20' : 'border-spark-teal/30'}`}
     >
       {bounty.featured && (
         <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-spark-chartreuse text-spark-black text-[10px] font-mono font-bold rounded uppercase tracking-wider">
@@ -110,7 +101,7 @@ export function BountyCard({ bounty, onClick }: BountyCardProps) {
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
-            {interested}
+            {loading ? <span className="w-3 h-3 rounded bg-spark-chartreuse/20 animate-pulse" /> : interested}
           </span>
           {/* Team */}
           <span className="inline-flex items-center gap-1 text-xs font-mono text-spark-orange/70" title="Looking for teammates">
@@ -120,10 +111,10 @@ export function BountyCard({ bounty, onClick }: BountyCardProps) {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            {team}
+            {loading ? <span className="w-3 h-3 rounded bg-spark-orange/20 animate-pulse" /> : team}
           </span>
         </div>
       </div>
-    </div>
+    </a>
   );
 }

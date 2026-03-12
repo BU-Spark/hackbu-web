@@ -68,6 +68,7 @@ export function WindowManager({
   const [bountySort, setBountySort] = useState('newest');
   const [selectedBounty, setSelectedBounty] = useState<any>(null);
   const [liveEvents, setLiveEvents] = useState<any[] | null>(null);
+  const [bountyCounts, setBountyCounts] = useState<Record<string, { interested: number; lookingForTeam: number }> | null>(null);
 
   const openWindow = useCallback((id: string) => {
     // Always bring window to front (whether opening new or already open)
@@ -80,6 +81,7 @@ export function WindowManager({
     setOpenWindows((prev) => {
       if (!prev.includes(id)) {
         playOpen();
+        if (typeof umami !== 'undefined') umami.track('window-open', { window: id });
         return [...prev, id];
       }
       return prev;
@@ -102,6 +104,14 @@ export function WindowManager({
       delete newIndices[id];
       return newIndices;
     });
+  }, []);
+
+  // Fetch all bounty counts in one batch call
+  useEffect(() => {
+    fetch('/api/bounty-counts')
+      .then((res) => res.ok ? res.json() : {})
+      .then((data) => setBountyCounts(data))
+      .catch(() => setBountyCounts({}));
   }, []);
 
   // Fetch live events from Eventbrite API
@@ -314,22 +324,18 @@ export function WindowManager({
             }
 
             return (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filtered.map((b) => (
                   <BountyCard
                     key={b.slug}
                     bounty={b}
-                    onClick={() => {
-                      playClick();
-                      const full = bounties.find((bx: any) => bx.slug === b.slug);
-                      if (full) {
-                        let tags: string[] = [];
-                        try { tags = typeof full.tags === 'string' ? JSON.parse(full.tags) : full.tags; }
-                        catch { tags = []; }
-                        setSelectedBounty({ ...full, tags });
-                        openWindow('bounty-detail');
-                      }
-                    }}
+                    counts={
+                      bountyCounts === null
+                        ? undefined
+                        : (bountyCounts[b.slug] ?? { interested: 0, lookingForTeam: 0 })
+                    }
+                    href={`/bounties/${b.slug}`}
+                    onClick={() => playClick()}
                   />
                 ))}
               </div>

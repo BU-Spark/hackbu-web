@@ -21,10 +21,11 @@ export function Window({
   zIndex,
   isFocused = true,
 }: WindowProps) {
-  const [pos, setPos] = useState({ x: initialX, y: initialY });
-  const [size, setSize] = useState({ width: 600, height: 400 });
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [pos, setPos] = useState({ x: isMobile ? 0 : initialX, y: isMobile ? 0 : initialY });
+  const [size, setSize] = useState({ width: isMobile ? window.innerWidth : 600, height: isMobile ? window.innerHeight - 56 : 400 });
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isMaximized, setIsMaximized] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(isMobile);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
@@ -32,8 +33,8 @@ export function Window({
   const windowRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, width: 0, height: 0, posX: 0, posY: 0 });
-  const savedSize = useRef({ width: 600, height: 400 });
-  const savedPos = useRef({ x: initialX, y: initialY });
+  const savedSize = useRef(isMobile ? { width: window.innerWidth, height: window.innerHeight - 56 } : { width: 600, height: 400 });
+  const savedPos = useRef(isMobile ? { x: 0, y: 0 } : { x: initialX, y: initialY });
 
   const MIN_WIDTH = 300;
   const MIN_HEIGHT = 200;
@@ -158,6 +159,7 @@ export function Window({
   };
 
   const handleMinimize = () => {
+    if (isMobile) return;
     if (!isMinimized && isMaximized) {
       // If maximized, restore first then minimize
       setPos(savedPos.current);
@@ -168,6 +170,7 @@ export function Window({
   };
 
   const handleMaximize = () => {
+    if (isMobile) return;
     if (isMaximized) {
       // Restore
       setPos(savedPos.current);

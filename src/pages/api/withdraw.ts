@@ -3,8 +3,13 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import mailchimp, { AUDIENCE_ID } from '../../lib/mailchimp';
 import crypto from 'node:crypto';
+import { rateLimit, rateLimitResponse, getClientIp } from '../../lib/rate-limit';
 
 export const POST: APIRoute = async ({ request }) => {
+  const ip = getClientIp(request);
+  const rl = rateLimit(ip, { name: 'withdraw', limit: 10, windowSec: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   try {
     const body = await request.json();
     const { email, bounty_slug, type } = body;
@@ -21,6 +26,15 @@ export const POST: APIRoute = async ({ request }) => {
     if (type === 'interested') {
       tagsToRemove.push({ name: `solo:${bounty_slug}`, status: 'inactive' });
       tagsToRemove.push({ name: `has-team:${bounty_slug}`, status: 'inactive' });
+
+      // Also remove any team-group tags for this bounty
+      try {
+        const memberInfo = await (mailchimp as any).lists.getListMember(AUDIENCE_ID, subscriberHash, { fields: ['tags'] });
+        const teamGroupTags = (memberInfo.tags || [])
+          .filter((t: any) => t.name.startsWith(`team-group:${bounty_slug}:`))
+          .map((t: any) => ({ name: t.name, status: 'inactive' }));
+        tagsToRemove.push(...teamGroupTags);
+      } catch {}
     }
     await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
       tags: tagsToRemove,

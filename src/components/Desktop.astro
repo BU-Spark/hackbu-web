@@ -8,8 +8,8 @@ const backgrounds = [
   '/backgrounds/bg-7.jpg',
   '/backgrounds/bg-8.jpg',
   '/backgrounds/bg-9.jpg',
-  '/backgrounds/bg-10.png',
-  '/backgrounds/bg-11.png',
+  '/backgrounds/bg-10.jpg',
+  '/backgrounds/bg-11.jpg',
 ];
 const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 ---
@@ -27,9 +27,17 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
   <!-- Sweeping scanline -->
   <div class="sweep-line" style="top: 0;"></div>
 
-  <!-- Logo watermarks + widget (bottom-right) -->
-  <div class="absolute bottom-14 right-8 flex flex-col items-end gap-3 z-0 pointer-events-none">
-    <div class="flex items-end gap-4">
+  <!-- Logo watermarks + schedule widget (bottom-right, hidden on mobile) -->
+  <div class="absolute bottom-14 right-8 flex-col items-end gap-3 z-0 hidden md:flex">
+    <button
+      type="button"
+      id="schedule-widget"
+      aria-label="Open weekly HackBU schedule"
+      class="bg-transparent border-0 p-0 rounded cursor-pointer"
+    >
+      <img src="/widget/image(1).png" alt="" class="h-64 rounded opacity-90 hover:opacity-100 transition-opacity" />
+    </button>
+    <div class="flex items-end gap-4 pointer-events-none">
       <div class="opacity-100">
         <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48 spark-logo" />
       </div>
@@ -37,11 +45,6 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
         <img src="/hackbu-logo.png" alt="HackBU" class="h-48 hackbu-logo" />
       </div>
     </div>
-  </div>
-
-  <!-- Schedule widget (clickable, above desktop layer) -->
-  <div class="absolute bottom-[270px] right-8 z-20">
-    <img src="/widget/image(1).png" alt="Weekly HackBU Schedule" class="h-44 rounded opacity-90 cursor-pointer hover:opacity-100 transition-opacity" id="schedule-widget" />
   </div>
 
   <!-- Main desktop area -->
@@ -65,7 +68,7 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
         <button id="schedule-open-events" class="px-5 py-2.5 font-mono text-xs uppercase tracking-[.2em] border border-spark-chartreuse/40 text-spark-chartreuse hover:bg-spark-chartreuse hover:text-spark-black transition-all">
           Events Window
         </button>
-        <a href="https://www.eventbrite.com/o/bu-spark-13250579290" target="_blank" rel="noopener" class="px-5 py-2.5 font-mono text-xs uppercase tracking-[.2em] border border-spark-orange/40 text-spark-orange hover:bg-spark-orange hover:text-spark-black transition-all">
+        <a href="https://www.eventbrite.com/o/bu-spark-13250579290" target="_blank" rel="noopener" class="px-5 py-2.5 font-mono text-xs uppercase tracking-[.2em] border border-spark-orange/40 text-spark-orange hover:bg-spark-black hover:border-spark-orange hover:text-spark-orange hover:shadow-[0_0_12px_rgba(255,87,45,0.3)] transition-all">
           Eventbrite
         </a>
       </div>
@@ -81,6 +84,7 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
     widget?.addEventListener('click', () => {
       modal?.classList.remove('hidden');
       modal?.classList.add('flex');
+      if (typeof umami !== 'undefined') umami.track('schedule-widget-click');
     });
 
     function closeModal() {

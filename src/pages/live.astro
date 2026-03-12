@@ -16,11 +16,11 @@ const streamTime: string = streamEvent?.when || "Check Discord for schedule";
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('hackbu-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = stored || (prefersDark ? 'dark' : 'light');
+        var theme = stored || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="6268acbc-ec7d-467c-82e3-a2719f9e0967"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet" />

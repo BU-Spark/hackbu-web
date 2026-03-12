@@ -29,8 +29,8 @@ const bgImages = [
   '/backgrounds/bg-7.jpg',
   '/backgrounds/bg-8.jpg',
   '/backgrounds/bg-9.jpg',
-  '/backgrounds/bg-10.png',
-  '/backgrounds/bg-11.png',
+  '/backgrounds/bg-10.jpg',
+  '/backgrounds/bg-11.jpg',
 ];
 const bootBg = bgImages[Math.floor(Math.random() * bgImages.length)];
 import Topbar from "../components/Topbar.astro";
@@ -108,16 +108,26 @@ const motdContent = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HackBU OS</title>
+    <title>HackBU OS — Coding Bounties by BU Spark!</title>
+    <meta name="description" content="HackBU OS is BU Spark!'s bounty board — browse open coding challenges, win prizes, and build real projects with the Boston University tech community." />
+    <meta property="og:title" content="HackBU OS — Coding Bounties by BU Spark!" />
+    <meta property="og:description" content="Browse open coding challenges, win prizes, and build real projects with the BU tech community." />
+    <meta property="og:image" content="https://hackbu.dev/hackbu-logo.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HackBU OS — Coding Bounties by BU Spark!" />
+    <meta name="twitter:description" content="Browse open coding challenges, win prizes, and build real projects with the BU tech community." />
+    <meta name="twitter:image" content="https://hackbu.dev/hackbu-logo.png" />
     <script is:inline>
       // Theme init — runs before paint to prevent flash
       (function() {
         var stored = localStorage.getItem('hackbu-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = stored || (prefersDark ? 'dark' : 'light');
+        var theme = stored || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="6268acbc-ec7d-467c-82e3-a2719f9e0967"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
     <!-- Boot Screen (new CRT style) -->
@@ -132,7 +142,7 @@ const motdContent = [
 
       <!-- NEW STYLE: OS window popup -->
       <div id="boot-new" class="relative z-10 w-full h-full flex items-center justify-center">
-        <div class="bg-spark-black border border-spark-chartreuse w-full max-w-xl" style="box-shadow: 0 0 0 1px rgba(191,241,60,0.25), 0 0 20px rgba(191,241,60,0.12), 0 16px 48px rgba(0,0,0,0.85);">
+        <div class="bg-spark-black border border-spark-chartreuse w-full max-w-xl mx-4 sm:mx-0" style="box-shadow: 0 0 0 1px rgba(191,241,60,0.25), 0 0 20px rgba(191,241,60,0.12), 0 16px 48px rgba(0,0,0,0.85);">
           <!-- Title bar -->
           <div class="px-3 py-2.5 flex items-center justify-between border-b border-spark-chartreuse/40 bg-spark-black select-none">
             <div class="flex items-center gap-2.5">
@@ -146,8 +156,8 @@ const motdContent = [
             </div>
           </div>
           <!-- Content -->
-          <div class="p-6 scanlines">
-            <div class="font-display text-4xl text-spark-chartreuse tracking-widest mb-1" style="text-shadow: 0 0 24px rgba(191,241,60,0.45), 0 0 48px rgba(191,241,60,0.15);">HACKBU OS</div>
+          <div class="p-4 sm:p-6 scanlines">
+            <div class="font-display text-2xl sm:text-4xl text-spark-chartreuse tracking-widest mb-1" style="text-shadow: 0 0 24px rgba(191,241,60,0.45), 0 0 48px rgba(191,241,60,0.15);">HACKBU OS</div>
             <div class="font-mono text-spark-teal/75 text-xs uppercase tracking-[0.4em] mb-6">v1.0 — BU Spark!</div>
             <pre id="bootlog" class="font-mono text-spark-chartreuse text-xs leading-relaxed whitespace-pre-wrap"></pre>
             <span id="bootcursor" class="inline-block w-2 h-3.5 bg-spark-chartreuse boot-cursor align-middle ml-0.5"></span>
@@ -234,8 +244,16 @@ const motdContent = [
       }
 
       // Skip boot on click
-      boot!.addEventListener("click", () => {
-        if (boot) boot.style.display = "none";
+      let bootDismissed = false;
+      const dismissBoot = (method) => {
+        if (!boot || bootDismissed) return;
+        bootDismissed = true;
+        boot.style.display = "none";
+        if (typeof umami !== 'undefined') umami.track('boot-skip', { method });
+      };
+      boot!.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dismissBoot("click");
       });
 
       // Wire up dock buttons
@@ -292,6 +310,7 @@ const motdContent = [
         document.documentElement.setAttribute("data-theme", next);
         localStorage.setItem("hackbu-theme", next);
         updateThemeIcons();
+        if (typeof umami !== 'undefined') umami.track('theme-toggle', { theme: next });
       });
       // Listen for OS preference changes
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
@@ -303,29 +322,28 @@ const motdContent = [
 
       // Hide boot on any interaction (only after animation finishes)
       const hideBootOnInteraction = () => {
-        if (boot) {
-          boot.style.display = "none";
-        }
+        dismissBoot("interaction");
         document.removeEventListener("click", hideBootOnInteraction);
         document.removeEventListener("keydown", hideBootOnInteraction);
       };
-
-      // Request fullscreen on first user gesture
-      const requestFullscreenOnce = () => {
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        }
-        document.removeEventListener("click", requestFullscreenOnce);
-        document.removeEventListener("keydown", requestFullscreenOnce);
-      };
-      document.addEventListener("click", requestFullscreenOnce);
-      document.addEventListener("keydown", requestFullscreenOnce);
 
       const totalDuration = lines.length * interval + 300;
       setTimeout(() => {
         document.addEventListener("click", hideBootOnInteraction);
         document.addEventListener("keydown", hideBootOnInteraction);
       }, totalDuration);
+    </script>
+    <script is:inline>
+      // Netlify Identity redirect: after login, Identity redirects to / with a token fragment
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", function(user) {
+          if (!user) {
+            window.netlifyIdentity.on("login", function() {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
     </script>
   </body>
 </html>

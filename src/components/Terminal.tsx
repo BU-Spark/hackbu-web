@@ -183,7 +183,7 @@ export function Terminal({ isOpen, onToggle, onOpenWindow }: TerminalProps) {
       }`}
       style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
     >
-      <div className="w-full max-w-7xl mx-auto h-96 bg-spark-black/95 border-4 border-b-0 border-spark-chartreuse rounded-b-lg flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+      <div className="w-full max-w-7xl mx-auto h-64 sm:h-96 bg-spark-black/95 border-4 border-b-0 border-spark-chartreuse rounded-b-lg flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-sm">
         <div className="flex items-center justify-between px-4 py-3 bg-spark-teal border-b-2 border-spark-chartreuse">
           <span className="font-mono font-bold text-spark-black">
             HackBU Terminal - Press ` to toggle

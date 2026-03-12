@@ -41,5 +41,6 @@
     document.documentElement.setAttribute("data-theme", next);
     localStorage.setItem("hackbu-theme", next);
     updateThemeUI();
+    if (typeof umami !== 'undefined') umami.track('theme-toggle', { theme: next });
   });
 </script>
