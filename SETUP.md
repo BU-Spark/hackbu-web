@@ -2,20 +2,28 @@
 
 ## Current Status
 
-- ✅ `.env` filled with Mailchimp credentials
+- ✅ `.env` filled with Mailchimp + Eventbrite credentials
 - ✅ Mailchimp audience created: "Spark! Bounty Board"
 - ✅ Mailchimp merge fields created: `BOUNTY`, `DOCLINK`, `TEAMMATES`
-- ✅ One bounty exists: `src/content/bounties/plate-gallery.md`
-- ✅ API routes wired: `/api/respond`, `/api/withdraw`, `/api/bounty-counts`
+- ✅ Multiple bounties in `src/content/bounties/`
+- ✅ API routes wired: `/api/respond`, `/api/withdraw`, `/api/bounty-counts`, `/api/events`
 - ✅ Card grid UI with filters, sort, deadline countdown, live counters
 - ✅ "I'm Interested" form — name, email, solo/team toggle, teammate rows, ack checkboxes
 - ✅ "Looking for Teammates" form — name, email, solo/team toggle
 - ✅ Withdraw confirmation dialog (inline Yes/Cancel)
-- ✅ Admin dashboard at `/admin/responses` (password-protected, POST-based)
+- ✅ Admin dashboard at `/dashboard` (cookie-auth, CSV export, search/filter, light mode)
 - ✅ Solo/team Mailchimp tagging (`solo:<slug>`, `has-team:<slug>`)
-- ⏳ Mailchimp email automation — set up in dashboard (see below)
-- ⏳ More bounties need to be added
+- ✅ Batch bounty counts API (single call for all bounties)
+- ✅ Rate limiting on API routes and admin login
+- ✅ SEO meta tags (Open Graph, Twitter Card) on all pages
+- ✅ Mobile-responsive layout (auto-maximize windows, touch-friendly dock)
+- ✅ Background images compressed (41MB → 3.3MB)
+- ✅ Eventbrite live event fetching with static JSON fallback
+- ✅ Hall of Fame page at `/hall-of-fame`
+- ✅ Post-submission next steps panel (standalone + OS window)
+- ⏳ Mailchimp email automation — set up per bounty slug (see below)
 - ⏳ Deploy to Netlify/Vercel (GitHub Pages won't work — needs SSR for API routes)
+- ⏳ Teammate registration flow — collect info from all team members (#11)
 
 ---
 
@@ -27,7 +35,8 @@ Copy `.env.example` to `.env` and fill in:
 MAILCHIMP_API_KEY=        # Account > Extras > API Keys
 MAILCHIMP_SERVER_PREFIX=  # e.g. us6 (last part of API key after the dash)
 MAILCHIMP_AUDIENCE_ID=    # Audience > Settings > Audience name and defaults > Audience ID
-ADMIN_KEY=                # Any secret passphrase — used to unlock /admin/responses
+ADMIN_KEY=                # Any secret passphrase — used to unlock /dashboard
+EVENTBRITE_TOKEN=         # Eventbrite private OAuth token (optional, falls back to static JSON)
 ```
 
 ---
@@ -192,6 +201,7 @@ docLink: https://...        # optional — URL to Google Doc / Notion brief
    - `MAILCHIMP_SERVER_PREFIX`
    - `MAILCHIMP_AUDIENCE_ID`
    - `ADMIN_KEY`
+   - `EVENTBRITE_TOKEN` (optional)
 5. `netlify.toml` handles build command and publish dir automatically
 
 ### Vercel
@@ -204,7 +214,7 @@ docLink: https://...        # optional — URL to Google Doc / Notion brief
 2. Install: `npm install @astrojs/vercel`
 3. Push to GitHub, import repo in Vercel dashboard
 4. Add env vars in **Vercel → Project → Settings → Environment Variables**:
-   - `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID`, `ADMIN_KEY`
+   - `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID`, `ADMIN_KEY`, `EVENTBRITE_TOKEN`
 5. `vercel.json` handles build settings
 
 ### Self-hosted / Node
@@ -249,18 +259,15 @@ npm run add-bounty   # interactive CLI to add a new bounty .md file
 ## Pending / Future Work
 
 ### High priority
-- [ ] Add remaining bounties as `.md` files in `src/content/bounties/`
-- [ ] Set up Mailchimp automation for `interested:plate-gallery` (see Email Automation section above)
-- [ ] Deploy to Netlify or Vercel with all 4 env vars configured
-- [ ] Add `ADMIN_KEY` to production env vars, verify `/admin/responses` works on prod
+- [ ] Set up Mailchimp automation per bounty slug (see Email Automation section above)
+- [ ] Deploy to Netlify or Vercel with all 5 env vars configured
+- [ ] Teammate registration flow — collect info from all team members (GitHub #11)
 
-### Medium priority (researched, not yet built)
-- [ ] `featured: true` frontmatter field — pins/highlights bounty at top of card grid
+### Medium priority
 - [ ] `track` field (e.g. "AI", "Web", "Design") — adds category filter tab to bounty window
-- [ ] Past winners on completed bounties — add `winner` + `winnerSubmission` to frontmatter, show in detail view
 - [ ] Structured deliverables field — `deliverables` array in frontmatter, shown prominently in detail view
+- [ ] Leaderboard populated with real data (currently placeholder in `src/data/leaderboard.json`)
 
 ### Lower priority
 - [ ] Decap CMS — set `repo: your-org/hackbu-web` in `public/admin/config.yml`
-- [ ] Hall of Fame page (`/hall-of-fame`) showing past winners across all bounties
-- [ ] Leaderboard populated with real data (currently placeholder in `src/data/leaderboard.json`)
+- [ ] Static data files (leaderboard.json, events.json) replaced with CMS or API sources
