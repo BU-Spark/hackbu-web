@@ -331,14 +331,7 @@ export function WindowManager({
                     counts={bountyCounts ? bountyCounts[b.slug] : undefined}
                     onClick={() => {
                       playClick();
-                      const full = bounties.find((bx: any) => bx.slug === b.slug);
-                      if (full) {
-                        let tags: string[] = [];
-                        try { tags = typeof full.tags === 'string' ? JSON.parse(full.tags) : full.tags; }
-                        catch { tags = []; }
-                        setSelectedBounty({ ...full, tags });
-                        openWindow('bounty-detail');
-                      }
+                      window.location.href = `/bounties/${b.slug}`;
                     }}
                   />
                 ))}
