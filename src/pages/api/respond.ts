@@ -3,8 +3,13 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import mailchimp, { AUDIENCE_ID } from '../../lib/mailchimp';
 import crypto from 'node:crypto';
+import { rateLimit, rateLimitResponse, getClientIp } from '../../lib/rate-limit';
 
 export const POST: APIRoute = async ({ request }) => {
+  const ip = getClientIp(request);
+  const rl = rateLimit(ip, { name: 'respond', limit: 10, windowSec: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   try {
     const body = await request.json();
     const { first_name, last_name, email, bounty_slug, type, bounty_title, doc_link, repo_link, instructions_link, teammates, working_mode } = body;
