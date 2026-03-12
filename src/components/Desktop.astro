@@ -8,8 +8,8 @@ const backgrounds = [
   '/backgrounds/bg-7.jpg',
   '/backgrounds/bg-8.jpg',
   '/backgrounds/bg-9.jpg',
-  '/backgrounds/bg-10.png',
-  '/backgrounds/bg-11.png',
+  '/backgrounds/bg-10.jpg',
+  '/backgrounds/bg-11.jpg',
 ];
 const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 ---
@@ -27,8 +27,8 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
   <!-- Sweeping scanline -->
   <div class="sweep-line" style="top: 0;"></div>
 
-  <!-- Logo watermarks + widget (bottom-right) -->
-  <div class="absolute bottom-14 right-8 flex flex-col items-end gap-3 z-0 pointer-events-none">
+  <!-- Logo watermarks + widget (bottom-right, hidden on mobile) -->
+  <div class="absolute bottom-14 right-8 flex-col items-end gap-3 z-0 pointer-events-none hidden md:flex">
     <div class="flex items-end gap-4">
       <div class="opacity-100">
         <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48 spark-logo" />
@@ -39,8 +39,8 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
     </div>
   </div>
 
-  <!-- Schedule widget (clickable, above desktop layer) -->
-  <div class="absolute bottom-[270px] right-8 z-20">
+  <!-- Schedule widget (clickable, above desktop layer, hidden on mobile) -->
+  <div class="absolute bottom-[270px] right-8 z-20 hidden md:block">
     <img src="/widget/image(1).png" alt="Weekly HackBU Schedule" class="h-44 rounded opacity-90 cursor-pointer hover:opacity-100 transition-opacity" id="schedule-widget" />
   </div>
 

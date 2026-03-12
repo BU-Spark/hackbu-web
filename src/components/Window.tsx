@@ -21,10 +21,11 @@ export function Window({
   zIndex,
   isFocused = true,
 }: WindowProps) {
-  const [pos, setPos] = useState({ x: initialX, y: initialY });
-  const [size, setSize] = useState({ width: 600, height: 400 });
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [pos, setPos] = useState({ x: isMobile ? 0 : initialX, y: isMobile ? 0 : initialY });
+  const [size, setSize] = useState({ width: isMobile ? window.innerWidth : 600, height: isMobile ? window.innerHeight - 56 : 400 });
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isMaximized, setIsMaximized] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(isMobile);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);

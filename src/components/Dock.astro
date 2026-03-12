@@ -2,7 +2,7 @@
 // Static dock with buttons for each app
 ---
 
-<div id="dock" class="fixed bottom-5 left-5 flex gap-2 z-30">
+<div id="dock" class="fixed bottom-5 left-5 right-5 flex flex-wrap gap-2 z-30">
   <button
     class="dock-btn group flex items-center gap-2 px-3 py-2 bg-spark-black border border-spark-teal/40 hover:border-spark-chartreuse text-spark-teal/80 hover:text-spark-chartreuse font-mono text-xs uppercase tracking-widest transition-all"
     data-open="bounties"
@@ -51,5 +51,12 @@
   }
   .dock-hof:hover .dock-bracket {
     color: rgba(201,162,39,0.5);
+  }
+  @media (max-width: 767px) {
+    .dock-btn, .dock-hof {
+      min-height: 44px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.7rem;
+    }
   }
 </style>
