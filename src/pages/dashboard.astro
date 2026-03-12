@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import { getCollection } from 'astro:content';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import mailchimp, { AUDIENCE_ID } from '../lib/mailchimp';
 
 const adminKey = import.meta.env.ADMIN_KEY;
@@ -198,6 +199,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
     </style>
   </head>
   <body>
+    <ThemeToggle />
 
     {!authorized ? (
       <div class="gate-wrap">

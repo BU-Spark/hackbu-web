@@ -10,6 +10,37 @@ import { BountyCard } from './BountyCard';
 import { playOpen, playClose, playClick } from '../lib/sounds';
 import { daysUntil } from '../lib/deadline';
 
+function getNextWednesday(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 3=Wed
+  let daysUntilWed = (3 - day + 7) % 7;
+  if (daysUntilWed === 0) {
+    // It's Wednesday — show today if before 6pm, otherwise next week
+    if (now.getHours() >= 18) daysUntilWed = 7;
+  }
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntilWed);
+  return next.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function InnovationHours() {
+  const dateStr = getNextWednesday();
+  return (
+    <div className="border border-spark-orange/30 rounded-lg p-4 mb-3 bg-spark-orange/5">
+      <div className="flex items-start gap-3">
+        <span className="text-lg">🔧</span>
+        <div>
+          <h3 className="font-display text-lg text-spark-orange">Tech Innovation Hours</h3>
+          <p className="text-sm text-spark-eggshell/70 mt-1">
+            {dateStr}, 4:00 – 6:00 PM — BU Spark!
+          </p>
+          <p className="text-xs text-spark-eggshell/40 mt-1 font-mono">Every Wednesday · Drop-in for guidance, resources &amp; building</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface WindowManagerProps {
   bounties: any[];
   projects: any[];
@@ -341,6 +372,7 @@ export function WindowManager({
           zIndex={zIndices.events}
           isFocused={focusedWindow === 'events'}
         >
+          <InnovationHours />
           <CardList items={liveEvents || events} type="event" />
         </Window>
       )}

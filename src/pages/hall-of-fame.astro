@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import { getCollection } from 'astro:content';
 
 const entries = await getCollection('bounties');
@@ -109,6 +110,7 @@ const completed = entries
     </style>
   </head>
   <body class="min-h-screen bg-spark-black text-spark-eggshell theme-body">
+    <ThemeToggle />
 
     <header class="relative border-b border-white/[0.06] overflow-hidden">
       <div class="absolute inset-0 pointer-events-none"

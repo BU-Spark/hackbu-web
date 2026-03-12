@@ -24,12 +24,13 @@ const { events = [] } = Astro.props;
   <div class="flex items-center gap-2">
     <button
       id="themeToggle"
-      class="w-7 h-7 flex items-center justify-center border border-spark-teal/20 hover:border-spark-teal/50 text-spark-teal/50 hover:text-spark-teal font-mono text-xs transition-all"
+      class="h-7 flex items-center gap-1.5 px-2.5 border border-spark-teal/20 hover:border-spark-teal/50 text-spark-teal/50 hover:text-spark-teal font-mono text-xs transition-all"
       aria-label="Toggle light/dark mode"
       title="Toggle light/dark mode"
     >
       <span id="theme-icon-sun" class="hidden">☀</span>
       <span id="theme-icon-moon">☽</span>
+      <span id="theme-label" class="uppercase text-[10px] tracking-widest">Light</span>
     </button>
     <button
       id="helpButton"

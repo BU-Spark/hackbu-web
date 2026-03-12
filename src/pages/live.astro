@@ -1,6 +1,7 @@
 ---
 import events from "../data/events.json";
 import "../styles/global.css";
+import ThemeToggle from "../components/ThemeToggle.astro";
 
 const streamEvent = (events as any[]).find((e) => e.streamUrl);
 const streamTime: string = streamEvent?.when || "Check Discord for schedule";
@@ -267,6 +268,7 @@ const streamTime: string = streamEvent?.when || "Check Discord for schedule";
     </style>
   </head>
   <body>
+    <ThemeToggle />
     <div class="scanline-sweep"></div>
 
     <!-- SMPTE top bar -->

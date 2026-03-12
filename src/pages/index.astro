@@ -69,6 +69,18 @@ function line(text: string): string {
 }
 const bountyLine = `  * ${openCount} open bounties - ${formattedPrize} in prizes`;
 const eventLine = `  > Next: ${nextEventStr}`;
+
+// Compute next Wednesday 4pm for Innovation Hours
+function getNextWedLabel(): string {
+  const day = now.getDay();
+  let daysUntilWed = (3 - day + 7) % 7;
+  if (daysUntilWed === 0 && now.getHours() >= 18) daysUntilWed = 7;
+  if (daysUntilWed === 0) return 'TODAY 4-6pm';
+  if (daysUntilWed === 1) return 'TOMORROW 4-6pm';
+  return `in ${daysUntilWed}d (Wed 4-6pm)`;
+}
+const innovLine = `  > Innovation Hours: ${getNextWedLabel()}`;
+
 const motdContent = [
   `╔${'═'.repeat(W)}╗`,
   line('  Welcome to HackBU OS v1.0'),
@@ -77,6 +89,7 @@ const motdContent = [
   line(''),
   line(bountyLine),
   line(eventLine),
+  line(innovLine),
   line(''),
   line('  Tip: Windows are draggable!'),
   line(''),
@@ -245,14 +258,17 @@ const motdContent = [
       const themeToggle = document.getElementById("themeToggle");
       const sunIcon = document.getElementById("theme-icon-sun");
       const moonIcon = document.getElementById("theme-icon-moon");
+      const themeLabel = document.getElementById("theme-label");
       function updateThemeIcons() {
         const current = document.documentElement.getAttribute("data-theme");
         if (current === "light") {
           sunIcon?.classList.remove("hidden");
           moonIcon?.classList.add("hidden");
+          if (themeLabel) themeLabel.textContent = "Dark";
         } else {
           sunIcon?.classList.add("hidden");
           moonIcon?.classList.remove("hidden");
+          if (themeLabel) themeLabel.textContent = "Light";
         }
       }
       updateThemeIcons();

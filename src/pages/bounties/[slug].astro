@@ -1,5 +1,6 @@
 ---
 import '../../styles/global.css';
+import ThemeToggle from '../../components/ThemeToggle.astro';
 import { getCollection } from 'astro:content';
 import { deadlineLabel } from '../../lib/deadline';
 
@@ -66,6 +67,8 @@ const dl = deadlineLabel(bounty.deadline);
     </style>
   </head>
   <body class="min-h-screen bg-spark-black text-spark-eggshell theme-body">
+
+    <ThemeToggle />
 
     <nav class="border-b border-white/[0.05] anim-1">
       <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -417,6 +420,13 @@ const dl = deadlineLabel(bounty.deadline);
       document.getElementById("modal-cancel").addEventListener("click", closeModal);
       document.getElementById("modal-submit").addEventListener("click", submitForm);
       modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (!modal.classList.contains("hidden")) { closeModal(); return; }
+          window.location.href = "/";
+        }
+      });
+
     </script>
   </body>
 </html>
