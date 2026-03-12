@@ -81,7 +81,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     setTeamDone(hasResponded(bounty.slug, 'looking-for-team'));
     const responses = getResponses();
     const storedTeamId = responses[bounty.slug]?.interested?.teamId;
-    if (storedTeamId) setTeamId(storedTeamId);
+    setTeamId(storedTeamId ?? null);
     fetchCounts();
   }, [bounty.slug]);
 
@@ -191,12 +191,14 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
           setTeamId(data.teamId);
           // Re-save with teamId
           saveResponse(bounty.slug, submittedType, { fname: fname.trim(), lname: lname.trim(), email: email.trim(), teamId: data.teamId });
+        } else {
+          setTeamId(null);
         }
       } else {
-        showToast('Saved locally — sync will retry on next visit.', true);
+        showToast('Server error — your info is saved locally. Please try again later.', true);
       }
     } catch {
-      showToast('No connection — saved locally and will sync when online.', true);
+      showToast('No connection — saved locally. Please try again when online.', true);
     }
     fetchCounts();
   }
@@ -207,7 +209,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     const withdrawEmail = data?.email || getStoredData().email;
 
     removeResponse(bounty.slug, type);
-    if (type === 'interested') setInterestedDone(false);
+    if (type === 'interested') { setInterestedDone(false); setTeamId(null); }
     if (type === 'looking-for-team') setTeamDone(false);
     showToast('Withdrawn.');
 

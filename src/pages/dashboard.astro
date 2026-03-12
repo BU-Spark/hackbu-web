@@ -496,6 +496,10 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       bountyFilter?.addEventListener('change', applyFilters);
 
       // CSV Export
+      function sanitizeCsvCell(value) {
+        const cell = String(value ?? '');
+        return /^[=+\-@]/.test(cell) ? "'" + cell : cell;
+      }
       document.getElementById('export-csv')?.addEventListener('click', function() {
         const rows = [['Bounty', 'Name', 'Email', 'Working Mode', 'Teammates', 'Tags']];
         document.querySelectorAll('.bounty-section').forEach(section => {
@@ -507,7 +511,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
               const email = card.querySelector('.card-email')?.textContent || '';
               const badge = card.querySelector('.badge')?.textContent?.trim() || '';
               const teammates = (card.querySelector('.card-teammates')?.textContent || '').replace('Teammates:', '').trim();
-              rows.push([title, name, email, badge, teammates, tag]);
+              rows.push([title, name, email, badge, teammates, tag].map(sanitizeCsvCell));
             });
           });
         });

@@ -47,16 +47,20 @@ export function rateLimit(ip: string, opts: RateLimitOptions): RateLimitResult {
     };
   }
 
+  if (entry.count >= opts.limit) {
+    const headers = {
+      'X-RateLimit-Limit': String(opts.limit),
+      'X-RateLimit-Remaining': '0',
+    };
+    return { allowed: false, limit: opts.limit, remaining: 0, headers };
+  }
+
   entry.count++;
   const remaining = Math.max(0, opts.limit - entry.count);
   const headers = {
     'X-RateLimit-Limit': String(opts.limit),
     'X-RateLimit-Remaining': String(remaining),
   };
-
-  if (entry.count > opts.limit) {
-    return { allowed: false, limit: opts.limit, remaining: 0, headers };
-  }
 
   return { allowed: true, limit: opts.limit, remaining, headers };
 }

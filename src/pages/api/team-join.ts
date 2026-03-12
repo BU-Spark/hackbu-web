@@ -20,15 +20,25 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Validate team exists by checking if anyone has the team-group tag
     const teamTag = `team-group:${bounty_slug}:${team_id}`;
-    const allRes = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
-      count: 1000,
-      status: 'subscribed',
-      fields: ['members.tags', 'members.email_address'],
-    });
-    const teamMembers = (allRes.members || []).filter((m: any) =>
-      (m.tags || []).some((t: any) => t.name === teamTag)
-    );
-    if (teamMembers.length === 0) {
+    let teamFound = false;
+    let offset = 0;
+    const pageSize = 1000;
+    while (true) {
+      const res = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
+        count: pageSize,
+        offset,
+        status: 'subscribed',
+        fields: ['members.tags', 'members.email_address', 'total_items'],
+      });
+      const members = res.members || [];
+      if (members.some((m: any) => (m.tags || []).some((t: any) => t.name === teamTag))) {
+        teamFound = true;
+        break;
+      }
+      offset += pageSize;
+      if (offset >= (res.total_items || 0) || members.length < pageSize) break;
+    }
+    if (!teamFound) {
       return new Response(JSON.stringify({ error: 'Team not found' }), { status: 404 });
     }
 
@@ -44,15 +54,25 @@ export const POST: APIRoute = async ({ request }) => {
       },
     });
 
-    // Add tags
+    // Build tags, deactivating any old team-group tags for this bounty
+    const tagsToUpdate: { name: string; status: string }[] = [
+      { name: `interested:${bounty_slug}`, status: 'active' },
+      { name: `has-team:${bounty_slug}`, status: 'active' },
+      { name: teamTag, status: 'active' },
+      { name: `solo:${bounty_slug}`, status: 'inactive' },
+      { name: `team:${bounty_slug}`, status: 'inactive' },
+    ];
+
+    try {
+      const memberInfo = await (mailchimp as any).lists.getListMember(AUDIENCE_ID, subscriberHash, { fields: ['tags'] });
+      const oldTeamTags = (memberInfo.tags || [])
+        .filter((t: any) => t.name.startsWith(`team-group:${bounty_slug}:`) && t.name !== teamTag)
+        .map((t: any) => ({ name: t.name, status: 'inactive' }));
+      tagsToUpdate.push(...oldTeamTags);
+    } catch {}
+
     await (mailchimp as any).lists.updateListMemberTags(AUDIENCE_ID, subscriberHash, {
-      tags: [
-        { name: `interested:${bounty_slug}`, status: 'active' },
-        { name: `has-team:${bounty_slug}`, status: 'active' },
-        { name: teamTag, status: 'active' },
-        { name: `solo:${bounty_slug}`, status: 'inactive' },
-        { name: `team:${bounty_slug}`, status: 'inactive' },
-      ],
+      tags: tagsToUpdate,
     });
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });

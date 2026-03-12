@@ -13,7 +13,8 @@ interface BountyCardProps {
     winner?: string;
     winnerSubmission?: string;
   };
-  onClick: () => void;
+  href: string;
+  onClick?: () => void;
   counts?: { interested: number; lookingForTeam: number };
 }
 
@@ -29,16 +30,17 @@ const difficultyColors: Record<string, string> = {
   Advanced: 'bg-red-500/20 text-red-300',
 };
 
-export function BountyCard({ bounty, onClick, counts }: BountyCardProps) {
+export function BountyCard({ bounty, href, onClick, counts }: BountyCardProps) {
   const loading = counts === undefined;
   const interested = counts?.interested ?? 0;
   const team = counts?.lookingForTeam ?? 0;
   const dl = deadlineLabel(bounty.deadline);
 
   return (
-    <div
+    <a
+      href={href}
       onClick={onClick}
-      className={`group relative flex flex-col gap-3 p-4 bg-spark-black border rounded-xl cursor-pointer hover:border-spark-chartreuse/60 hover:bg-spark-teal/5 transition-all duration-200 hover:shadow-[0_0_16px_rgba(168,230,29,0.08)] ${bounty.featured ? 'border-spark-chartreuse/50 ring-1 ring-spark-chartreuse/20' : 'border-spark-teal/30'}`}
+      className={`group relative flex flex-col gap-3 p-4 bg-spark-black border rounded-xl cursor-pointer hover:border-spark-chartreuse/60 hover:bg-spark-teal/5 transition-all duration-200 hover:shadow-[0_0_16px_rgba(168,230,29,0.08)] no-underline ${bounty.featured ? 'border-spark-chartreuse/50 ring-1 ring-spark-chartreuse/20' : 'border-spark-teal/30'}`}
     >
       {bounty.featured && (
         <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-spark-chartreuse text-spark-black text-[10px] font-mono font-bold rounded uppercase tracking-wider">
@@ -113,6 +115,6 @@ export function BountyCard({ bounty, onClick, counts }: BountyCardProps) {
           </span>
         </div>
       </div>
-    </div>
+    </a>
   );
 }

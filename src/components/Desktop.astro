@@ -29,7 +29,14 @@ const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
   <!-- Logo watermarks + schedule widget (bottom-right, hidden on mobile) -->
   <div class="absolute bottom-14 right-8 flex-col items-end gap-3 z-0 hidden md:flex">
-    <img src="/widget/image(1).png" alt="Weekly HackBU Schedule" class="h-64 rounded opacity-90 cursor-pointer hover:opacity-100 transition-opacity" id="schedule-widget" />
+    <button
+      type="button"
+      id="schedule-widget"
+      aria-label="Open weekly HackBU schedule"
+      class="bg-transparent border-0 p-0 rounded cursor-pointer"
+    >
+      <img src="/widget/image(1).png" alt="" class="h-64 rounded opacity-90 hover:opacity-100 transition-opacity" />
+    </button>
     <div class="flex items-end gap-4 pointer-events-none">
       <div class="opacity-100">
         <img src="/BUSPARK_Main_Blck Bkgrnd_lg.png" alt="BU Spark!" class="h-48 spark-logo" />

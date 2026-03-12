@@ -59,8 +59,11 @@ const isOpen = bounty?.status === 'open';
           </div>
 
           <div id="form-area" class="space-y-3">
+            <label for="input-fname" class="sr-only">First Name</label>
             <input id="input-fname" type="text" placeholder="First Name" class="field-input w-full px-4 py-3 bg-spark-black border border-spark-teal/30 text-spark-eggshell font-mono text-sm transition-all" />
+            <label for="input-lname" class="sr-only">Last Name</label>
             <input id="input-lname" type="text" placeholder="Last Name" class="field-input w-full px-4 py-3 bg-spark-black border border-spark-teal/30 text-spark-eggshell font-mono text-sm transition-all" />
+            <label for="input-email" class="sr-only">Email address</label>
             <input id="input-email" type="email" placeholder="you@bu.edu" class="field-input w-full px-4 py-3 bg-spark-black border border-spark-teal/30 text-spark-eggshell font-mono text-sm transition-all" />
             <p id="form-error" class="text-red-400 text-xs font-mono hidden"></p>
             <button id="submit-btn" class="w-full px-4 py-3 bg-spark-chartreuse text-spark-black font-mono font-bold text-sm cursor-pointer transition-colors hover:bg-spark-chartreuse/85">
@@ -117,6 +120,7 @@ const isOpen = bounty?.status === 'open';
               const responses = JSON.parse(localStorage.getItem('hackbu-bounty-responses') || '{}');
               if (!responses[slug]) responses[slug] = {};
               responses[slug]['interested'] = { fname: f, lname: l, email: e, teamId, timestamp: new Date().toISOString() };
+              delete responses[slug]['looking-for-team'];
               localStorage.setItem('hackbu-bounty-responses', JSON.stringify(responses));
             } catch {}
 

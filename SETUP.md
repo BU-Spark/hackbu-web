@@ -260,7 +260,7 @@ npm run add-bounty   # interactive CLI to add a new bounty .md file
 
 ### High priority
 - [ ] Set up Mailchimp automation per bounty slug (see Email Automation section above)
-- [ ] Deploy to Netlify or Vercel with all 5 env vars configured
+- [ ] Deploy to Netlify or Vercel with the 4 required env vars configured (EVENTBRITE_TOKEN is optional)
 - [ ] Teammate registration flow — collect info from all team members (GitHub #11)
 
 ### Medium priority

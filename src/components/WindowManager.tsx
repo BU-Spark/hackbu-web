@@ -329,11 +329,13 @@ export function WindowManager({
                   <BountyCard
                     key={b.slug}
                     bounty={b}
-                    counts={bountyCounts ? bountyCounts[b.slug] : undefined}
-                    onClick={() => {
-                      playClick();
-                      window.location.href = `/bounties/${b.slug}`;
-                    }}
+                    counts={
+                      bountyCounts === null
+                        ? undefined
+                        : (bountyCounts[b.slug] ?? { interested: 0, lookingForTeam: 0 })
+                    }
+                    href={`/bounties/${b.slug}`}
+                    onClick={() => playClick()}
                   />
                 ))}
               </div>

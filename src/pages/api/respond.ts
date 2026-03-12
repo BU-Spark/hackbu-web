@@ -51,6 +51,10 @@ export const POST: APIRoute = async ({ request }) => {
     const tagsToAdd: { name: string; status: string }[] = [{ name: tag, status: 'active' }];
     let teamId: string | undefined;
     if (working_mode) {
+      // When registering interest, deactivate the "looking for team" tag
+      if (type === 'interested') {
+        tagsToAdd.push({ name: `team:${bounty_slug}`, status: 'inactive' });
+      }
       if (working_mode === 'team') {
         tagsToAdd.push({ name: `has-team:${bounty_slug}`, status: 'active' });
         tagsToAdd.push({ name: `solo:${bounty_slug}`, status: 'inactive' });

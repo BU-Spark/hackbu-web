@@ -29,7 +29,7 @@ const dl = deadlineLabel(bounty.deadline);
     <meta name="description" content={`${bounty.title} — $${bounty.prize} prize. ${bounty.difficulty} difficulty. ${bounty.status} bounty on HackBU OS.`} />
     <meta property="og:title" content={`${bounty.title} — HackBU Bounties`} />
     <meta property="og:description" content={`$${bounty.prize} prize · ${bounty.difficulty} · ${bounty.status}`} />
-    <meta property="og:image" content="/hackbu-logo.png" />
+    <meta property="og:image" content="https://hackbu.dev/hackbu-logo.png" />
     <meta property="og:type" content="article" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={`${bounty.title} — HackBU Bounties`} />
@@ -445,8 +445,8 @@ const dl = deadlineLabel(bounty.deadline);
                 joinLinkArea.classList.remove("hidden");
               }
             }
-          } else { console.error("API error:", await res.text()); showToast("Saved locally — sync will retry on next visit.", true); }
-        } catch (err) { console.error("Failed to submit:", err); showToast("No connection — saved locally and will sync when online.", true); }
+          } else { console.error("API error:", await res.text()); showToast("Server error — your info is saved locally. Please try again later.", true); }
+        } catch (err) { console.error("Failed to submit:", err); showToast("No connection — saved locally. Please try again when online.", true); }
         fetchCounts();
       }
       async function withdraw(type) {
