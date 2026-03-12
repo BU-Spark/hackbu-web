@@ -1,6 +1,5 @@
 backend:
-  name: github
-  repo: YOUR_ORG/hackbu-web   # e.g. hackbu/hackbu-web
+  name: git-gateway
   branch: main
 
 media_folder: public/uploads
@@ -11,10 +10,11 @@ collections:
     label: Bounties
     folder: src/content/bounties
     create: true
-    slug: "{{fields.slug}}"
+    slug: "{{slug}}"
+    identifier_field: title
+    extension: md
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Slug, name: slug, widget: string, hint: "URL-safe identifier, e.g. plate-gallery" }
       - label: Difficulty
         name: difficulty
         widget: select
