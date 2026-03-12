@@ -26,6 +26,14 @@ const dl = deadlineLabel(bounty.deadline);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{bounty.title} — HackBU Bounties</title>
+    <meta name="description" content={`${bounty.title} — $${bounty.prize} prize. ${bounty.difficulty} difficulty. ${bounty.status} bounty on HackBU OS.`} />
+    <meta property="og:title" content={`${bounty.title} — HackBU Bounties`} />
+    <meta property="og:description" content={`$${bounty.prize} prize · ${bounty.difficulty} · ${bounty.status}`} />
+    <meta property="og:image" content="/hackbu-logo.png" />
+    <meta property="og:type" content="article" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={`${bounty.title} — HackBU Bounties`} />
+    <meta name="twitter:description" content={`$${bounty.prize} prize · ${bounty.difficulty} · ${bounty.status}`} />
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('hackbu-theme');

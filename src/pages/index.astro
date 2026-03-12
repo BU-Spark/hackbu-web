@@ -29,8 +29,8 @@ const bgImages = [
   '/backgrounds/bg-7.jpg',
   '/backgrounds/bg-8.jpg',
   '/backgrounds/bg-9.jpg',
-  '/backgrounds/bg-10.png',
-  '/backgrounds/bg-11.png',
+  '/backgrounds/bg-10.jpg',
+  '/backgrounds/bg-11.jpg',
 ];
 const bootBg = bgImages[Math.floor(Math.random() * bgImages.length)];
 import Topbar from "../components/Topbar.astro";
@@ -108,7 +108,16 @@ const motdContent = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HackBU OS</title>
+    <title>HackBU OS — Coding Bounties by BU Spark!</title>
+    <meta name="description" content="HackBU OS is BU Spark!'s bounty board — browse open coding challenges, win prizes, and build real projects with the Boston University tech community." />
+    <meta property="og:title" content="HackBU OS — Coding Bounties by BU Spark!" />
+    <meta property="og:description" content="Browse open coding challenges, win prizes, and build real projects with the BU tech community." />
+    <meta property="og:image" content="/hackbu-logo.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HackBU OS — Coding Bounties by BU Spark!" />
+    <meta name="twitter:description" content="Browse open coding challenges, win prizes, and build real projects with the BU tech community." />
+    <meta name="twitter:image" content="/hackbu-logo.png" />
     <script is:inline>
       // Theme init — runs before paint to prevent flash
       (function() {
@@ -132,7 +141,7 @@ const motdContent = [
 
       <!-- NEW STYLE: OS window popup -->
       <div id="boot-new" class="relative z-10 w-full h-full flex items-center justify-center">
-        <div class="bg-spark-black border border-spark-chartreuse w-full max-w-xl" style="box-shadow: 0 0 0 1px rgba(191,241,60,0.25), 0 0 20px rgba(191,241,60,0.12), 0 16px 48px rgba(0,0,0,0.85);">
+        <div class="bg-spark-black border border-spark-chartreuse w-full max-w-xl mx-4 sm:mx-0" style="box-shadow: 0 0 0 1px rgba(191,241,60,0.25), 0 0 20px rgba(191,241,60,0.12), 0 16px 48px rgba(0,0,0,0.85);">
           <!-- Title bar -->
           <div class="px-3 py-2.5 flex items-center justify-between border-b border-spark-chartreuse/40 bg-spark-black select-none">
             <div class="flex items-center gap-2.5">
@@ -146,8 +155,8 @@ const motdContent = [
             </div>
           </div>
           <!-- Content -->
-          <div class="p-6 scanlines">
-            <div class="font-display text-4xl text-spark-chartreuse tracking-widest mb-1" style="text-shadow: 0 0 24px rgba(191,241,60,0.45), 0 0 48px rgba(191,241,60,0.15);">HACKBU OS</div>
+          <div class="p-4 sm:p-6 scanlines">
+            <div class="font-display text-2xl sm:text-4xl text-spark-chartreuse tracking-widest mb-1" style="text-shadow: 0 0 24px rgba(191,241,60,0.45), 0 0 48px rgba(191,241,60,0.15);">HACKBU OS</div>
             <div class="font-mono text-spark-teal/75 text-xs uppercase tracking-[0.4em] mb-6">v1.0 — BU Spark!</div>
             <pre id="bootlog" class="font-mono text-spark-chartreuse text-xs leading-relaxed whitespace-pre-wrap"></pre>
             <span id="bootcursor" class="inline-block w-2 h-3.5 bg-spark-chartreuse boot-cursor align-middle ml-0.5"></span>
