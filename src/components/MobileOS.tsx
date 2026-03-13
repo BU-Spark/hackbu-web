@@ -211,7 +211,7 @@ export function MobileOS({ bounties, projects, leaderboard, events, motd }: Mobi
                 onClick={() => navigate('events')}
                 className="flex flex-col items-center justify-center gap-2 p-5 border border-spark-teal/30 rounded-xl bg-spark-black hover:border-spark-teal/60 transition-colors active:scale-95"
               >
-                <span className="text-3xl">EVT</span>
+                <span className="text-3xl">&#128197;</span>
                 <span className="font-mono text-xs text-spark-eggshell/70 uppercase tracking-wider">Events</span>
               </button>
               <a
@@ -371,13 +371,13 @@ export function MobileOS({ bounties, projects, leaderboard, events, motd }: Mobi
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
           )},
-          { id: 'bounties' as const, label: 'BNTY', icon: (
+          { id: 'bounties' as const, label: 'BOUNTY', icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="1" x2="12" y2="23" />
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
           )},
-          { id: 'events' as const, label: 'EVNT', icon: (
+          { id: 'events' as const, label: 'EVENTS', icon: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
