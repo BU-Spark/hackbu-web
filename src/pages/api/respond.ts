@@ -49,6 +49,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Add the primary tag + working mode tag, and deactivate conflicting mode tags
     const tagsToAdd: { name: string; status: string }[] = [{ name: tag, status: 'active' }];
+    if (type === 'looking-for-team') {
+      tagsToAdd.push({ name: 'looking-for-team', status: 'active' });
+    }
     let teamId: string | undefined;
     if (working_mode) {
       // When registering interest, deactivate the "looking for team" tag
