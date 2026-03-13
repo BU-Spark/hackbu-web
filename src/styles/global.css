@@ -347,6 +347,19 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
 }
 
+/* ─── Mobile OS light mode overrides ─── */
+[data-theme="light"] .mobile-bottom-nav {
+  background-color: var(--light-bg) !important;
+  border-top-color: rgba(61, 140, 132, 0.25) !important;
+}
+[data-theme="light"] .mobile-bottom-nav button {
+  color: rgba(61, 140, 132, 0.5) !important;
+}
+[data-theme="light"] .mobile-bottom-nav button.bg-spark-teal {
+  background-color: #3D8C84 !important;
+  color: #fff !important;
+}
+
 /* ─── Glitch animation ─── */
 @keyframes glitch {
   0%, 82%, 100% {

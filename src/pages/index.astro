@@ -36,6 +36,7 @@ const bootBg = bgImages[Math.floor(Math.random() * bgImages.length)];
 import Topbar from "../components/Topbar.astro";
 import Dock from "../components/Dock.astro";
 import { WindowManager } from "../components/WindowManager";
+import { MobileOS } from "../components/MobileOS";
 import "../styles/global.css";
 
 // Compute dynamic bounty stats at build time
@@ -172,10 +173,25 @@ const motdContent = [
       </div>
     </div>
 
-    <Topbar events={events} />
+    <div class="hidden md:block">
+      <Topbar events={events} />
 
-    <Desktop>
-      <WindowManager
+      <Desktop>
+        <WindowManager
+          client:load
+          bounties={bounties}
+          projects={projects}
+          leaderboard={leaderboard}
+          events={events}
+          motd={motdContent}
+        />
+      </Desktop>
+
+      <Dock />
+    </div>
+
+    <div class="md:hidden">
+      <MobileOS
         client:load
         bounties={bounties}
         projects={projects}
@@ -183,13 +199,18 @@ const motdContent = [
         events={events}
         motd={motdContent}
       />
-    </Desktop>
-
-    <Dock />
+    </div>
 
     <script>
       // Boot animation
       const boot = document.getElementById("boot") as HTMLElement;
+      const isMobile = window.innerWidth < 768;
+
+      // Mobile: skip boot on return visits
+      if (isMobile && localStorage.getItem('hackbu-mobile-booted')) {
+        if (boot) boot.style.display = 'none';
+      }
+
       const isClassic = boot?.dataset.bootStyle === 'classic';
 
       const newLines = [
@@ -223,7 +244,7 @@ const motdContent = [
       }
 
       let i = 0;
-      const interval = isClassic ? 350 : 280;
+      const interval = isMobile ? 180 : (isClassic ? 350 : 280);
       const bootInterval = setInterval(() => {
         if (i < lines.length) {
           bootlog!.textContent += lines[i] + "\n";
@@ -255,6 +276,7 @@ const motdContent = [
         if (!boot || bootDismissed) return;
         bootDismissed = true;
         boot.style.display = "none";
+        if (isMobile) localStorage.setItem('hackbu-mobile-booted', '1');
         if (typeof umami !== 'undefined') umami.track('boot-skip', { method });
       };
       boot!.addEventListener("click", (e) => {
