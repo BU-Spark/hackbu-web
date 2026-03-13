@@ -139,7 +139,10 @@ export function MobileOS({ bounties, projects, leaderboard, events, motd }: Mobi
   };
 
   const showChrome = screen !== 'home';
-  const activeTab = screen === 'home' ? 'home' : screen.startsWith('bounty') ? 'bounties' : screen === 'events' ? 'events' : 'home';
+  const activeTab = screen === 'home' ? 'home'
+    : (screen === 'bounties' || screen === 'bounty-detail') ? 'bounties'
+    : screen === 'events' ? 'events'
+    : 'home';
 
   return (
     <div className="fixed inset-0 flex flex-col bg-spark-black">
@@ -397,9 +400,10 @@ export function MobileOS({ bounties, projects, leaderboard, events, motd }: Mobi
               }}
               className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 font-mono text-[10px] uppercase tracking-[0.15em] transition-all ${
                 isActive
-                  ? 'text-spark-black bg-spark-teal shadow-[0_0_16px_rgba(6,177,162,0.3)]'
+                  ? 'bg-spark-teal shadow-[0_0_16px_rgba(6,177,162,0.3)]'
                   : 'text-spark-teal/60 hover:text-spark-teal'
               }`}
+              style={isActive ? { backgroundColor: '#06B1A2', color: '#12110C' } : undefined}
             >
               {tab.icon}
               {tab.label}
