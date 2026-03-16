@@ -1,5 +1,3 @@
-export const prerender = false;
-
 import type { APIRoute } from 'astro';
 import { rateLimit, rateLimitResponse, getClientIp } from '../../lib/rate-limit';
 import matter from 'gray-matter';
@@ -52,8 +50,22 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
+  // Validate slug to prevent path traversal
+  if (!/^[a-z0-9][a-z0-9-]*$/i.test(slug)) {
+    return new Response(JSON.stringify({ error: 'Invalid slug format' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Read bounty file
-  const bountyPath = path.join(BOUNTIES_DIR, `${slug}.md`);
+  const bountyPath = path.resolve(BOUNTIES_DIR, `${slug}.md`);
+  if (!bountyPath.startsWith(BOUNTIES_DIR + path.sep)) {
+    return new Response(JSON.stringify({ error: 'Invalid slug path' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   if (!fs.existsSync(bountyPath)) {
     return new Response(JSON.stringify({ error: 'Bounty not found' }), {
       status: 404,
@@ -78,20 +90,26 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     parsed.data.winnerSubmission = winnerSubmission;
   }
 
-  // Write bounty file back
-  const updated = matter.stringify(parsed.content, parsed.data);
-  fs.writeFileSync(bountyPath, updated, 'utf-8');
-
-  // Update leaderboard
-  const difficulty = parsed.data.difficulty || 'Intermediate';
-  const badge = DIFFICULTY_BADGES[difficulty] || '⚡';
-
+  // Read leaderboard (before writing anything, so we can fail early)
   let leaderboard: { name: string; points: number; badges: string; rank: number }[] = [];
   try {
-    leaderboard = JSON.parse(fs.readFileSync(LEADERBOARD_PATH, 'utf-8'));
-  } catch {
-    leaderboard = [];
+    const raw = fs.readFileSync(LEADERBOARD_PATH, 'utf-8');
+    leaderboard = JSON.parse(raw);
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+      leaderboard = [];
+    } else {
+      console.error('Failed to read leaderboard:', err);
+      return new Response(JSON.stringify({ error: 'Leaderboard read failed' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   }
+
+  // Update leaderboard data
+  const difficulty = parsed.data.difficulty || 'Intermediate';
+  const badge = DIFFICULTY_BADGES[difficulty] || '⚡';
 
   const existing = leaderboard.find((e) => e.name === winner);
   if (existing) {
@@ -101,11 +119,25 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     leaderboard.push({ name: winner, points: 1, badges: badge, rank: 0 });
   }
 
-  // Recalculate ranks
   leaderboard.sort((a, b) => b.points - a.points);
   leaderboard.forEach((e, i) => (e.rank = i + 1));
 
-  fs.writeFileSync(LEADERBOARD_PATH, JSON.stringify(leaderboard, null, 2) + '\n', 'utf-8');
+  // Write both files — bounty first, then leaderboard
+  // If leaderboard write fails, restore the bounty file
+  const bountyContent = matter.stringify(parsed.content, parsed.data);
+  fs.writeFileSync(bountyPath, bountyContent, 'utf-8');
+
+  try {
+    fs.writeFileSync(LEADERBOARD_PATH, JSON.stringify(leaderboard, null, 2) + '\n', 'utf-8');
+  } catch (err) {
+    // Rollback bounty file
+    console.error('Failed to write leaderboard, rolling back bounty:', err);
+    fs.writeFileSync(bountyPath, raw, 'utf-8');
+    return new Response(JSON.stringify({ error: 'Failed to update leaderboard' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   return new Response(JSON.stringify({ success: true }), {
     status: 200,

@@ -26,13 +26,13 @@ if (Astro.request.method === 'POST') {
   const action = form.get('action')?.toString() || '';
 
   if (action === 'logout') {
-    Astro.cookies.delete('hackbu-admin', { path: '/dashboard' });
+    Astro.cookies.delete('hackbu-admin', { path: '/' });
     authorized = false;
   } else if (adminKey && provided === adminKey) {
     // Reset doesn't matter here, successful login
     authorized = true;
     Astro.cookies.set('hackbu-admin', adminKey, {
-      path: '/dashboard',
+      path: '/',
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
