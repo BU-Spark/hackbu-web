@@ -346,7 +346,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
               <div className="space-y-1.5">
                 <p className="text-spark-orange text-xs uppercase tracking-wider">Team search active</p>
                 <ol className="list-decimal list-inside space-y-1.5 pl-1">
-                  <li>You'll receive an <span className="text-spark-chartreuse">email with a Discord invite</span> to connect with other teammates.</li>
+                  <li>You'll receive an <span className="text-spark-chartreuse">email shortly</span> with more information.</li>
                   <li>If not, contact <a href="mailto:kzingade@bu.edu" className="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" className="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
                   <li>Once you've found a team, come back and click <span className="text-spark-chartreuse">I'm Interested</span> to register together.</li>
                 </ol>
