@@ -69,7 +69,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   const [agreeHours, setAgreeHours] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState<string | null>(null);
   const [showNextSteps, setShowNextSteps] = useState(false);
-  const [lastSubmitType, setLastSubmitType] = useState<string | null>(null);
+
   const [interestedCount, setInterestedCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
   const [toast, setToast] = useState<{ msg: string; error: boolean } | null>(null);
@@ -167,7 +167,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     if (submittedType === 'interested') setInterestedDone(true);
     if (submittedType === 'looking-for-team') setTeamDone(true);
     if (typeof umami !== 'undefined') umami.track('bounty-signup', { bounty: bounty.slug, type: submittedType });
-    setLastSubmitType(submittedType);
+
     setModalType(null);
     setShowNextSteps(true);
 
@@ -324,25 +324,32 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
             <h3 className="font-display text-lg text-spark-chartreuse">You're registered!</h3>
             <button onClick={() => setShowNextSteps(false)} className="text-spark-eggshell/40 hover:text-spark-eggshell/70 transition-colors text-lg leading-none">×</button>
           </div>
-          {lastSubmitType === 'looking-for-team' ? (
-            <div className="text-sm text-spark-eggshell/70 space-y-2 font-mono">
-              <p>Here's what to expect:</p>
-              <ol className="list-decimal list-inside space-y-1.5 pl-1">
-                <li>You'll receive an <span className="text-spark-chartreuse">email with a Discord invite</span> to connect with other teammates.</li>
-                <li>If not, contact <a href="mailto:kzingade@bu.edu" className="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" className="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
-                <li>Once you've found a team, come back and click <span className="text-spark-chartreuse">I'm Interested</span> to register together.</li>
-              </ol>
-            </div>
-          ) : (
-            <div className="text-sm text-spark-eggshell/70 space-y-2 font-mono">
-              <p>Here's what to expect:</p>
-              <ol className="list-decimal list-inside space-y-1.5 pl-1">
-                <li>You should receive an <span className="text-spark-chartreuse">email with instructions</span> shortly.</li>
-                <li>If not, contact <a href="mailto:kzingade@bu.edu" className="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" className="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
-                <li>In the meantime, review the <span className="text-spark-chartreuse">project brief</span> below to get started.</li>
-              </ol>
-            </div>
-          )}
+          <div className="text-sm text-spark-eggshell/70 space-y-2 font-mono">
+            <p>Here's what to expect:</p>
+            {interestedDone && (
+              <div className="space-y-1.5">
+                <p className="text-spark-chartreuse text-xs uppercase tracking-wider">Interest registered</p>
+                <ol className="list-decimal list-inside space-y-1.5 pl-1">
+                  <li>You should receive an <span className="text-spark-chartreuse">email with instructions</span> shortly.</li>
+                  <li>If not, contact <a href="mailto:kzingade@bu.edu" className="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" className="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
+                  <li>In the meantime, review the <span className="text-spark-chartreuse">project brief</span> below to get started.</li>
+                </ol>
+              </div>
+            )}
+            {interestedDone && teamDone && (
+              <hr className="border-spark-teal/20" />
+            )}
+            {teamDone && (
+              <div className="space-y-1.5">
+                <p className="text-spark-orange text-xs uppercase tracking-wider">Team search active</p>
+                <ol className="list-decimal list-inside space-y-1.5 pl-1">
+                  <li>You'll receive an <span className="text-spark-chartreuse">email with a Discord invite</span> to connect with other teammates.</li>
+                  <li>If not, contact <a href="mailto:kzingade@bu.edu" className="text-spark-teal hover:underline">kzingade@bu.edu</a> or <a href="mailto:buspark@bu.edu" className="text-spark-teal hover:underline">buspark@bu.edu</a>.</li>
+                  <li>Once you've found a team, come back and click <span className="text-spark-chartreuse">I'm Interested</span> to register together.</li>
+                </ol>
+              </div>
+            )}
+          </div>
           {teamId && (
             <div className="space-y-2 pt-1 border-t border-spark-teal/20">
               <p className="text-sm text-spark-eggshell/70 font-mono">Share this link with your teammates:</p>
