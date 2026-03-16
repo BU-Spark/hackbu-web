@@ -10,7 +10,7 @@ import { rateLimit, getClientIp } from '../lib/rate-limit';
 const adminKey = import.meta.env.ADMIN_KEY;
 
 let authorized = false;
-let bountyData: Record<string, { title: string; interested: any[]; lookingForTeam: any[]; teamGroups: Record<string, any[]> }> = {};
+let bountyData: Record<string, { title: string; status: string; difficulty: string; interested: any[]; lookingForTeam: any[]; teamGroups: Record<string, any[]> }> = {};
 let authError = '';
 
 // Check session cookie on any request
@@ -102,7 +102,7 @@ if (authorized) {
         teamGroups[tId].push(r);
       }
     }
-    bountyData[s] = { title: entry.data.title, interested, lookingForTeam, teamGroups };
+    bountyData[s] = { title: entry.data.title, status: entry.data.status, difficulty: entry.data.difficulty, interested, lookingForTeam, teamGroups };
   }
 }
 
@@ -283,6 +283,9 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       [data-theme="light"] #dash-search:focus,
       [data-theme="light"] #dash-bounty-filter:focus { border-color: #0d6b5e !important; }
       [data-theme="light"] #export-csv { background: #0d6b5e !important; color: #fff !important; }
+      [data-theme="light"] .winner-select,
+      [data-theme="light"] .winner-url { background: #fff !important; border-color: #d0d0d0 !important; color: #1a1a1a !important; }
+      [data-theme="light"] .declare-btn { background: #b45309 !important; color: #fff !important; }
 
       @media (max-width: 640px) {
         .shell { grid-template-columns: 1fr; }
@@ -460,6 +463,47 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                   </div>
                 )}
               </div>
+
+              <!-- Declare Winner -->
+              <div class="sub-section" style="margin-top:1.5rem;">
+                {data.status === 'completed' ? (
+                  <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:8px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#c084fc;font-size:0.82rem;font-weight:600;">
+                    <span>🏆</span>
+                    <span>Winner declared</span>
+                  </div>
+                ) : data.status === 'closed' ? (
+                  <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:8px;background:rgba(100,100,100,0.1);border:1px solid rgba(100,100,100,0.3);color:var(--muted);font-size:0.82rem;">
+                    Bounty closed
+                  </div>
+                ) : (
+                  <div class="winner-form" data-slug={s} data-title={data.title}>
+                    <div class="sub-label" style="margin-bottom:0.75rem;">
+                      Declare Winner
+                    </div>
+                    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+                      <div style="flex:1;min-width:180px;">
+                        <label style="display:block;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">Winner</label>
+                        <select class="winner-select" style="width:100%;padding:0.55rem 0.85rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:0.82rem;border-radius:8px;outline:none;">
+                          <option value="">Select winner...</option>
+                          {Object.entries(data.teamGroups).map(([tId, members]) => (
+                            <option value={`Team ${tId}`}>Team {tId} ({members.map((m: any) => m.name).join(', ')})</option>
+                          ))}
+                          {data.interested.map((r: any) => (
+                            <option value={r.name}>{r.name} ({r.email})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div style="flex:1;min-width:180px;">
+                        <label style="display:block;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">Submission URL (optional)</label>
+                        <input type="url" class="winner-url" placeholder="https://github.com/..." style="width:100%;padding:0.55rem 0.85rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:0.82rem;border-radius:8px;outline:none;" />
+                      </div>
+                      <button type="button" class="declare-btn" style="padding:0.55rem 1.25rem;background:var(--orange);color:#0a0a0a;font-family:inherit;font-weight:700;font-size:0.82rem;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">
+                        Declare Winner 🏆
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </section>
           ))}
         </main>
@@ -522,6 +566,52 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
         a.download = 'hackbu-responses-' + new Date().toISOString().slice(0,10) + '.csv';
         a.click();
         URL.revokeObjectURL(a.href);
+      });
+      // Declare Winner
+      document.querySelectorAll('.declare-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const form = btn.closest('.winner-form');
+          if (!form) return;
+          const slug = form.dataset.slug;
+          const title = form.dataset.title;
+          const select = form.querySelector('.winner-select');
+          const urlInput = form.querySelector('.winner-url');
+          const winner = select?.value;
+          const winnerSubmission = urlInput?.value || '';
+
+          if (!winner) {
+            alert('Please select a winner.');
+            return;
+          }
+
+          if (!confirm(`Declare "${winner}" as the winner of "${title}"?\n\nThis will mark the bounty as completed.`)) {
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Submitting...';
+
+          try {
+            const res = await fetch('/api/declare-winner', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ slug, winner, winnerSubmission: winnerSubmission || undefined }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              alert('Winner declared! Reloading...');
+              location.reload();
+            } else {
+              alert('Error: ' + (data.error || 'Unknown error'));
+              btn.disabled = false;
+              btn.textContent = 'Declare Winner 🏆';
+            }
+          } catch (err) {
+            alert('Network error: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = 'Declare Winner 🏆';
+          }
+        });
       });
     </script>
   </body>
