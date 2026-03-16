@@ -68,7 +68,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   const [agreeNotify, setAgreeNotify] = useState(false);
   const [agreeHours, setAgreeHours] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState<string | null>(null);
-  const [showNextSteps, setShowNextSteps] = useState(false);
+  const [nextStepsDismissed, setNextStepsDismissed] = useState(false);
 
   const [interestedCount, setInterestedCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
@@ -78,8 +78,11 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    setInterestedDone(hasResponded(bounty.slug, 'interested'));
-    setTeamDone(hasResponded(bounty.slug, 'looking-for-team'));
+    const interested = hasResponded(bounty.slug, 'interested');
+    const team = hasResponded(bounty.slug, 'looking-for-team');
+    setInterestedDone(interested);
+    setTeamDone(team);
+    setNextStepsDismissed(!interested && !team);
     const responses = getResponses();
     const storedTeamId = responses[bounty.slug]?.interested?.teamId;
     setTeamId(storedTeamId ?? null);
@@ -169,7 +172,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     if (typeof umami !== 'undefined') umami.track('bounty-signup', { bounty: bounty.slug, type: submittedType });
 
     setModalType(null);
-    setShowNextSteps(true);
+    setNextStepsDismissed(false);
 
     try {
       const res = await fetch('/api/respond', {
@@ -318,11 +321,11 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       )}
 
       {/* Next Steps after registration */}
-      {showNextSteps && (
+      {(interestedDone || teamDone) && !nextStepsDismissed && (
         <div className="border border-spark-chartreuse/40 rounded-lg p-4 bg-spark-chartreuse/5 space-y-3 action-panel">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-lg text-spark-chartreuse">You're registered!</h3>
-            <button onClick={() => setShowNextSteps(false)} className="text-spark-eggshell/40 hover:text-spark-eggshell/70 transition-colors text-lg leading-none">×</button>
+            <button onClick={() => setNextStepsDismissed(true)} className="text-spark-eggshell/40 hover:text-spark-eggshell/70 transition-colors text-lg leading-none">×</button>
           </div>
           <div className="text-sm text-spark-eggshell/70 space-y-2 font-mono">
             <p>Here's what to expect:</p>
