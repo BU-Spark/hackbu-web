@@ -517,13 +517,17 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                               ))}
                             </optgroup>
                           )}
-                          {data.interested.length > 0 && (
-                            <optgroup label="Individuals">
-                              {data.interested.map((r: any) => (
-                                <option value={r.name}>{r.name} ({r.email})</option>
-                              ))}
-                            </optgroup>
-                          )}
+                          {(() => {
+                            const teamEmails = new Set(Object.values(data.teamGroups).flat().map((m: any) => m.email));
+                            const ungrouped = data.interested.filter((r: any) => !teamEmails.has(r.email));
+                            return ungrouped.length > 0 && (
+                              <optgroup label="Individuals">
+                                {ungrouped.map((r: any) => (
+                                  <option value={r.name}>{r.name} ({r.email})</option>
+                                ))}
+                              </optgroup>
+                            );
+                          })()}
                         </select>
                       </div>
                       <div style="flex:1;min-width:180px;">

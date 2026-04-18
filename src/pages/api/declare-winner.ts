@@ -49,8 +49,27 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+  if (winnerMembers && winnerMembers.length > 20) {
+    return new Response(JSON.stringify({ error: 'winnerMembers too large — max 20 members' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   if (!slug || !winner) {
     return new Response(JSON.stringify({ error: 'Missing required fields: slug, winner' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (winner.length > 500) {
+    return new Response(JSON.stringify({ error: 'winner name too long' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (winnerSubmission && winnerSubmission.length > 2048) {
+    return new Response(JSON.stringify({ error: 'winnerSubmission URL too long' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });

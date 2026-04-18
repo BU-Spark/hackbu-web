@@ -39,6 +39,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
+  if (emails.length > 50) {
+    return new Response(JSON.stringify({ error: 'Too many emails — max 50 per request' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   if (!/^[a-z0-9][a-z0-9-]*$/i.test(slug)) {
     return new Response(JSON.stringify({ error: 'Invalid slug format' }), {
       status: 400,
