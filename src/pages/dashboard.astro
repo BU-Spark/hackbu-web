@@ -278,6 +278,9 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       [data-theme="light"] .card-teammates strong { color: #1a1a1a; }
       [data-theme="light"] .empty-state { background: #fff; border-color: #d0d0d0; color: #888; }
       [data-theme="light"] .divider { border-color: #d0d0d0; }
+      .merge-card { position: relative; }
+      .merge-action-bar { display: none; }
+      .merge-action-bar.visible { display: flex !important; }
       [data-theme="light"] #dash-search,
       [data-theme="light"] #dash-bounty-filter { background: #fff !important; border-color: #d0d0d0 !important; color: #1a1a1a !important; }
       [data-theme="light"] #dash-search:focus,
@@ -422,7 +425,8 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                       return ungrouped.length > 0 && (
                         <div class="cards">
                           {ungrouped.map((r: any) => (
-                            <div class="card">
+                            <div class="card merge-card" data-email={r.email}>
+                              <input type="checkbox" class="merge-checkbox" style="position:absolute;top:0.6rem;right:0.6rem;accent-color:var(--teal);cursor:pointer;" />
                               <div class="card-name">{r.name}</div>
                               <div class="card-email">{r.email}</div>
                               <div class="card-footer">
@@ -440,6 +444,17 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                         </div>
                       );
                     })()}
+                    <div class="merge-action-bar" style="margin-top:0.75rem;background:#1a2a2a;border:1px solid var(--orange);border-radius:8px;padding:0.6rem 0.85rem;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                      <span class="merge-count" style="color:var(--orange);font-size:0.78rem;font-weight:600;">0 selected</span>
+                      <button class="merge-new-btn" style="padding:0.35rem 0.75rem;background:var(--orange);color:#0a0a0a;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;" disabled>Merge into new team</button>
+                      <select class="merge-existing-select" style="padding:0.35rem 0.75rem;background:transparent;color:var(--orange);border:1px solid rgba(245,158,11,0.4);border-radius:6px;font-size:0.75rem;font-family:inherit;cursor:pointer;">
+                        <option value="">Add to existing team ▾</option>
+                        {Object.keys(data.teamGroups).map((tId) => (
+                          <option value={tId}>Team {tId}</option>
+                        ))}
+                      </select>
+                      <button class="merge-clear-btn" style="padding:0.35rem 0.75rem;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:0.75rem;cursor:pointer;">Clear</button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -611,6 +626,129 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
             btn.disabled = false;
             btn.textContent = 'Declare Winner 🏆';
           }
+        });
+      });
+
+      // Merge team logic
+      function updateMergeBar(slug) {
+        const section = document.getElementById(slug);
+        if (!section) return;
+        const checked = section.querySelectorAll('.merge-checkbox:checked');
+        const bar = section.querySelector('.merge-action-bar');
+        const countEl = section.querySelector('.merge-count');
+        const newBtn = section.querySelector('.merge-new-btn');
+        const existingSelect = section.querySelector('.merge-existing-select');
+
+        if (!bar || !countEl || !newBtn || !existingSelect) return;
+
+        const n = checked.length;
+        countEl.textContent = n + ' selected';
+
+        if (n > 0) {
+          bar.classList.add('visible');
+        } else {
+          bar.classList.remove('visible');
+        }
+
+        newBtn.disabled = n < 2;
+        const hasTeams = existingSelect.options.length > 1;
+        existingSelect.disabled = !hasTeams || n < 1;
+      }
+
+      // Checkbox change handler (delegated per bounty section)
+      document.querySelectorAll('.bounty-section').forEach(function(bountySection) {
+        bountySection.addEventListener('change', function(e) {
+          if (e.target && e.target.classList.contains('merge-checkbox')) {
+            const card = e.target.closest('.merge-card');
+            if (card) {
+              card.style.borderColor = e.target.checked ? 'var(--teal)' : '';
+              card.style.borderWidth = e.target.checked ? '1.5px' : '';
+            }
+            updateMergeBar(bountySection.id);
+          }
+        });
+      });
+
+      async function doMerge(slug, emails, existingTeamId) {
+        const payload = { slug: slug, emails: emails };
+        if (existingTeamId) payload.existingTeamId = existingTeamId;
+
+        const res = await fetch('/api/admin/merge-team', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Team updated! Reloading...');
+          location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      }
+
+      // "Merge into new team" button
+      document.querySelectorAll('.merge-new-btn').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          const bountySection = btn.closest('.bounty-section');
+          if (!bountySection) return;
+          const slug = bountySection.id;
+          const emails = Array.from(bountySection.querySelectorAll('.merge-checkbox:checked'))
+            .map(function(cb) { return cb.closest('.merge-card') && cb.closest('.merge-card').dataset.email; })
+            .filter(Boolean);
+
+          if (emails.length < 2) { alert('Select at least 2 people to form a team.'); return; }
+          if (!confirm('Merge ' + emails.length + ' people into a new team for "' + slug + '"?')) return;
+
+          btn.disabled = true;
+          btn.textContent = 'Merging...';
+          try {
+            await doMerge(slug, emails, null);
+          } catch (err) {
+            alert('Network error: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = 'Merge into new team';
+          }
+        });
+      });
+
+      // "Add to existing team" select
+      document.querySelectorAll('.merge-existing-select').forEach(function(sel) {
+        sel.addEventListener('change', async function() {
+          const teamId = sel.value;
+          if (!teamId) return;
+          const bountySection = sel.closest('.bounty-section');
+          if (!bountySection) return;
+          const slug = bountySection.id;
+          const emails = Array.from(bountySection.querySelectorAll('.merge-checkbox:checked'))
+            .map(function(cb) { return cb.closest('.merge-card') && cb.closest('.merge-card').dataset.email; })
+            .filter(Boolean);
+
+          if (emails.length < 1) { sel.value = ''; return; }
+          if (!confirm('Add ' + emails.length + ' person(s) to Team ' + teamId + '?')) { sel.value = ''; return; }
+
+          sel.disabled = true;
+          try {
+            await doMerge(slug, emails, teamId);
+          } catch (err) {
+            alert('Network error: ' + err.message);
+            sel.disabled = false;
+            sel.value = '';
+          }
+        });
+      });
+
+      // "Clear" button
+      document.querySelectorAll('.merge-clear-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const bountySection = btn.closest('.bounty-section');
+          if (!bountySection) return;
+          bountySection.querySelectorAll('.merge-checkbox:checked').forEach(function(cb) {
+            cb.checked = false;
+            const card = cb.closest('.merge-card');
+            if (card) { card.style.borderColor = ''; card.style.borderWidth = ''; }
+          });
+          updateMergeBar(bountySection.id);
         });
       });
     </script>
