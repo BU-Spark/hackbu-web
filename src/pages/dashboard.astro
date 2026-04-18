@@ -517,11 +517,13 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                               ))}
                             </optgroup>
                           )}
-                          <optgroup label="Individuals">
-                            {data.interested.map((r: any) => (
-                              <option value={r.name}>{r.name} ({r.email})</option>
-                            ))}
-                          </optgroup>
+                          {data.interested.length > 0 && (
+                            <optgroup label="Individuals">
+                              {data.interested.map((r: any) => (
+                                <option value={r.name}>{r.name} ({r.email})</option>
+                              ))}
+                            </optgroup>
+                          )}
                         </select>
                       </div>
                       <div style="flex:1;min-width:180px;">
@@ -610,7 +612,6 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
           const winner = select?.value;
           const selectedOption = select && select.options[select.selectedIndex];
           const membersAttr = selectedOption ? selectedOption.getAttribute('data-members') : null;
-          const winnerMembers = membersAttr ? JSON.parse(membersAttr) : undefined;
           const winnerSubmission = urlInput?.value || '';
 
           if (!winner) {
@@ -626,6 +627,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
           btn.textContent = 'Submitting...';
 
           try {
+            const winnerMembers = membersAttr ? JSON.parse(membersAttr) : undefined;
             const res = await fetch('/api/declare-winner', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

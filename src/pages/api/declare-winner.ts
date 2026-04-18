@@ -43,6 +43,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   const { slug, winner, winnerSubmission, winnerMembers } = body;
+  if (winnerMembers !== undefined && !Array.isArray(winnerMembers)) {
+    return new Response(JSON.stringify({ error: 'winnerMembers must be an array' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   if (!slug || !winner) {
     return new Response(JSON.stringify({ error: 'Missing required fields: slug, winner' }), {
       status: 400,
