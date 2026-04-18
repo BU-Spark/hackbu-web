@@ -113,7 +113,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   // Award points to each winner (individual or all team members)
   const awardees = winnerMembers && winnerMembers.length > 0
-    ? winnerMembers.map((m) => m.name)
+    ? [...new Set(winnerMembers.map((m) => m.name).filter((n) => typeof n === 'string' && n.trim()))]
     : [winner];
 
   for (const name of awardees) {
