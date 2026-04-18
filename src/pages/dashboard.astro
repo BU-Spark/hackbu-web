@@ -237,8 +237,12 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
 
       .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
+      .merge-card { position: relative; }
+      .merge-action-bar { display: none; }
+      .merge-action-bar.visible { display: flex !important; }
 
       /* ── Light mode ── */
+
       [data-theme="light"] body { background: #f5f5f0; color: #1a1a1a; }
       [data-theme="light"] .gate-wrap { background: #f5f5f0; }
       [data-theme="light"] .gate-logo { color: #0d6b5e; }
@@ -278,9 +282,10 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
       [data-theme="light"] .card-teammates strong { color: #1a1a1a; }
       [data-theme="light"] .empty-state { background: #fff; border-color: #d0d0d0; color: #888; }
       [data-theme="light"] .divider { border-color: #d0d0d0; }
-      .merge-card { position: relative; }
-      .merge-action-bar { display: none; }
-      .merge-action-bar.visible { display: flex !important; }
+      [data-theme="light"] .merge-action-bar { background: #f5ede0 !important; border-color: #b45309 !important; }
+      [data-theme="light"] .merge-action-bar .merge-count { color: #b45309 !important; }
+      [data-theme="light"] .merge-new-btn { background: #b45309 !important; }
+      [data-theme="light"] .merge-existing-select { color: #b45309 !important; border-color: rgba(180,83,9,0.4) !important; }
       [data-theme="light"] #dash-search,
       [data-theme="light"] #dash-bounty-filter { background: #fff !important; border-color: #d0d0d0 !important; color: #1a1a1a !important; }
       [data-theme="light"] #dash-search:focus,
@@ -669,6 +674,7 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
         });
       });
 
+      // Returns true on success (reloads page), false on API error, throws on network error
       async function doMerge(slug, emails, existingTeamId) {
         const payload = { slug: slug, emails: emails };
         if (existingTeamId) payload.existingTeamId = existingTeamId;
@@ -678,12 +684,14 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const data = await res.json();
+        const json = await res.json();
         if (res.ok) {
           alert('Team updated! Reloading...');
           location.reload();
+          return true;
         } else {
-          alert('Error: ' + (data.error || 'Unknown error'));
+          alert('Error: ' + (json.error || 'Unknown error'));
+          return false;
         }
       }
 
@@ -703,7 +711,8 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
           btn.disabled = true;
           btn.textContent = 'Merging...';
           try {
-            await doMerge(slug, emails, null);
+            const ok = await doMerge(slug, emails, null);
+            if (!ok) { btn.disabled = false; btn.textContent = 'Merge into new team'; }
           } catch (err) {
             alert('Network error: ' + err.message);
             btn.disabled = false;
@@ -729,7 +738,8 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
 
           sel.disabled = true;
           try {
-            await doMerge(slug, emails, teamId);
+            const ok = await doMerge(slug, emails, teamId);
+            if (!ok) { sel.disabled = false; sel.value = ''; }
           } catch (err) {
             alert('Network error: ' + err.message);
             sel.disabled = false;
