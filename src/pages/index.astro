@@ -272,7 +272,7 @@ const motdContent = [
 
       // Skip boot on click
       let bootDismissed = false;
-      const dismissBoot = (method) => {
+      const dismissBoot = (method: string) => {
         if (!boot || bootDismissed) return;
         bootDismissed = true;
         boot.style.display = "none";
