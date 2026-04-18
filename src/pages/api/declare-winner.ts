@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   if (!rl.allowed) return rateLimitResponse(rl);
 
   // Parse body
-  let body: { slug?: string; winner?: string; winnerSubmission?: string };
+  let body: { slug?: string; winner?: string; winnerSubmission?: string; winnerMembers?: { name: string }[] };
   try {
     body = await request.json();
   } catch {
@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const { slug, winner, winnerSubmission } = body;
+  const { slug, winner, winnerSubmission, winnerMembers } = body;
   if (!slug || !winner) {
     return new Response(JSON.stringify({ error: 'Missing required fields: slug, winner' }), {
       status: 400,
@@ -111,12 +111,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const difficulty = parsed.data.difficulty || 'Intermediate';
   const badge = DIFFICULTY_BADGES[difficulty] || '⚡';
 
-  const existing = leaderboard.find((e) => e.name === winner);
-  if (existing) {
-    existing.points += 1;
-    existing.badges += badge;
-  } else {
-    leaderboard.push({ name: winner, points: 1, badges: badge, rank: 0 });
+  // Award points to each winner (individual or all team members)
+  const awardees = winnerMembers && winnerMembers.length > 0
+    ? winnerMembers.map((m) => m.name)
+    : [winner];
+
+  for (const name of awardees) {
+    const existing = leaderboard.find((e) => e.name === name);
+    if (existing) {
+      existing.points += 1;
+      existing.badges += badge;
+    } else {
+      leaderboard.push({ name, points: 1, badges: badge, rank: 0 });
+    }
   }
 
   leaderboard.sort((a, b) => b.points - a.points);
