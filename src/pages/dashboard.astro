@@ -505,12 +505,23 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
                         <label style="display:block;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">Winner</label>
                         <select class="winner-select" style="width:100%;padding:0.55rem 0.85rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:0.82rem;border-radius:8px;outline:none;">
                           <option value="">Select winner...</option>
-                          {Object.entries(data.teamGroups).map(([tId, members]) => (
-                            <option value={`Team ${tId}`}>Team {tId} ({members.map((m: any) => m.name).join(', ')})</option>
-                          ))}
-                          {data.interested.map((r: any) => (
-                            <option value={r.name}>{r.name} ({r.email})</option>
-                          ))}
+                          {Object.keys(data.teamGroups).length > 0 && (
+                            <optgroup label="Teams">
+                              {Object.entries(data.teamGroups).map(([tId, members]) => (
+                                <option
+                                  value={members.map((m: any) => m.name).join(' & ')}
+                                  data-members={JSON.stringify(members.map((m: any) => ({ name: m.name })))}
+                                >
+                                  Team {tId} — {members.map((m: any) => m.name).join(', ')}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                          <optgroup label="Individuals">
+                            {data.interested.map((r: any) => (
+                              <option value={r.name}>{r.name} ({r.email})</option>
+                            ))}
+                          </optgroup>
                         </select>
                       </div>
                       <div style="flex:1;min-width:180px;">
@@ -597,6 +608,9 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
           const select = form.querySelector('.winner-select');
           const urlInput = form.querySelector('.winner-url');
           const winner = select?.value;
+          const selectedOption = select && select.options[select.selectedIndex];
+          const membersAttr = selectedOption ? selectedOption.getAttribute('data-members') : null;
+          const winnerMembers = membersAttr ? JSON.parse(membersAttr) : undefined;
           const winnerSubmission = urlInput?.value || '';
 
           if (!winner) {
@@ -615,7 +629,12 @@ const totalTeam = Object.values(bountyData).reduce((n, d) => n + d.lookingForTea
             const res = await fetch('/api/declare-winner', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ slug, winner, winnerSubmission: winnerSubmission || undefined }),
+              body: JSON.stringify({
+                slug,
+                winner,
+                winnerSubmission: winnerSubmission || undefined,
+                ...(winnerMembers ? { winnerMembers } : {}),
+              }),
             });
             const data = await res.json();
             if (res.ok) {
