@@ -46,22 +46,38 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
+  if (existingTeamId && !/^[a-f0-9]{8}$/i.test(existingTeamId)) {
+    return new Response(JSON.stringify({ error: 'Invalid existingTeamId format' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Determine team ID
   let teamId: string;
 
   if (existingTeamId) {
-    // Validate team exists
+    // Validate team exists using paginated fetch
     const teamTag = `team-group:${slug}:${existingTeamId}`;
     let teamFound = false;
+    let offset = 0;
+    const pageSize = 1000;
     try {
-      const res = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
-        count: 1000,
-        status: 'subscribed',
-        fields: ['members.tags'],
-      });
-      teamFound = (res.members || []).some((m: any) =>
-        (m.tags || []).some((t: any) => t.name === teamTag)
-      );
+      while (true) {
+        const res = await (mailchimp as any).lists.getListMembersInfo(AUDIENCE_ID, {
+          count: pageSize,
+          offset,
+          status: 'subscribed',
+          fields: ['members.tags', 'members.email_address', 'total_items'],
+        });
+        const members = res.members || [];
+        if (members.some((m: any) => (m.tags || []).some((t: any) => t.name === teamTag))) {
+          teamFound = true;
+          break;
+        }
+        offset += pageSize;
+        if (offset >= (res.total_items || 0) || members.length < pageSize) break;
+      }
     } catch (err) {
       console.error('Failed to validate team:', err);
       return new Response(JSON.stringify({ error: 'Failed to validate existing team' }), {
@@ -89,6 +105,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   // Apply tags to each email
   const errors: string[] = [];
   for (const email of emails) {
+    if (typeof email !== 'string' || !email.includes('@')) {
+      errors.push(String(email));
+      continue;
+    }
     const subscriberHash = crypto.createHash('md5').update(email.toLowerCase()).digest('hex');
     const tagsToUpdate: { name: string; status: string }[] = [
       { name: `team-group:${slug}:${teamId}`, status: 'active' },
@@ -105,8 +125,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         .filter((t: any) => t.name.startsWith(`team-group:${slug}:`) && t.name !== `team-group:${slug}:${teamId}`)
         .map((t: any) => ({ name: t.name, status: 'inactive' }));
       tagsToUpdate.push(...oldTeamTags);
-    } catch {
-      // Member may be new to this tag set — safe to continue
+    } catch (err) {
+      console.error(`Could not fetch existing tags for ${email} (may not exist yet):`, err);
     }
 
     try {
@@ -121,7 +141,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   if (errors.length > 0) {
-    return new Response(JSON.stringify({ error: 'Some members failed to update', failed: errors }), {
+    return new Response(JSON.stringify({ error: 'Some members failed to update', failed: errors, teamId }), {
       status: 207,
       headers: { 'Content-Type': 'application/json' },
     });
