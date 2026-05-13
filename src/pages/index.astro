@@ -38,11 +38,6 @@ import { WindowManager } from "../components/WindowManager";
 import { MobileOS } from "../components/MobileOS";
 import "../styles/global.css";
 
-// Compute bounty stats — these are content-collection counts, stable between builds
-const openBounties = bounties.filter((b: any) => b.status === 'open');
-const openCount = openBounties.length;
-const totalPrize = openBounties.reduce((sum: number, b: any) => sum + (b.prize || 0), 0);
-const formattedPrize = `$${totalPrize.toLocaleString('en-US')}`;
 ---
 
 <!doctype html>
@@ -123,7 +118,6 @@ const formattedPrize = `$${totalPrize.toLocaleString('en-US')}`;
           bounties={bounties}
           leaderboard={leaderboard}
           events={events}
-          motdStats={{ openCount, formattedPrize }}
         />
       </Desktop>
 

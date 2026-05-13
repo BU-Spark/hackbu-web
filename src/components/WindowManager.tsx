@@ -8,7 +8,7 @@ import { Live } from './Live';
 import { BountyDetail } from './BountyDetail';
 import { BountyCard } from './BountyCard';
 import { playOpen, playClose, playClick } from '../lib/sounds';
-import { daysUntil } from '../lib/deadline';
+import { daysUntil, effectiveStatus } from '../lib/deadline';
 
 function getNextWednesday(): string {
   const now = new Date();
@@ -41,7 +41,7 @@ function InnovationHours() {
   );
 }
 
-function buildMotd(stats: { openCount: number; formattedPrize: string }, events: any[]): string {
+function buildMotd(bounties: any[], events: any[]): string {
   const W = 40;
   function pad(text: string, width: number): string {
     const stripped = text.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, '');
@@ -51,6 +51,11 @@ function buildMotd(stats: { openCount: number; formattedPrize: string }, events:
     return needed > 0 ? text + ' '.repeat(needed) : text;
   }
   function line(text: string): string { return `║${pad(text, W)}║`; }
+
+  const openBounties = bounties.filter((b: any) => effectiveStatus(b.status, b.deadline) === 'open');
+  const openCount = openBounties.length;
+  const totalPrize = openBounties.reduce((sum: number, b: any) => sum + (b.prize || 0), 0);
+  const formattedPrize = `$${totalPrize.toLocaleString('en-US')}`;
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -72,7 +77,7 @@ function buildMotd(stats: { openCount: number; formattedPrize: string }, events:
     line('  Message of the Day'),
     `╠${'═'.repeat(W)}╣`,
     line(''),
-    line(`  * ${stats.openCount} open bounties - ${stats.formattedPrize} in prizes`),
+    line(`  * ${openCount} open bounties - ${formattedPrize} in prizes`),
     line(`  > Next: ${nextStr}`),
     line(`  > Innovation Hours: ${wedLabel}`),
     line(''),
@@ -87,14 +92,12 @@ interface WindowManagerProps {
   bounties: any[];
   leaderboard: any[];
   events: any[];
-  motdStats: { openCount: number; formattedPrize: string };
 }
 
 export function WindowManager({
   bounties,
   leaderboard,
   events,
-  motdStats,
 }: WindowManagerProps) {
   const [openWindows, setOpenWindows] = useState<string[]>(['motd']); // Start with MOTD open
   const [zIndices, setZIndices] = useState<Record<string, number>>({
@@ -228,7 +231,7 @@ export function WindowManager({
     }
     return {
       title: b.title,
-      status: b.status || 'open',
+      status: effectiveStatus(b.status || 'open', b.deadline || 'TBD'),
       difficulty: b.difficulty || '',
       prize: b.prize,
       deadline: b.deadline || 'TBD',
@@ -266,7 +269,7 @@ export function WindowManager({
           isFocused={focusedWindow === 'motd'}
         >
           <pre className="font-mono text-sm text-spark-chartreuse whitespace-pre">
-            {buildMotd(motdStats, events)}
+            {buildMotd(bounties, events)}
           </pre>
         </Window>
       )}

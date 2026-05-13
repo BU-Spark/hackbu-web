@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { deadlineLabel } from '../lib/deadline';
+import { deadlineLabel, effectiveStatus } from '../lib/deadline';
 
 interface BountyDetailProps {
   bounty: {
@@ -56,6 +56,7 @@ function getStoredData(): Record<string, string> {
 }
 
 export function BountyDetail({ bounty }: BountyDetailProps) {
+  const status = effectiveStatus(bounty.status, bounty.deadline);
   const [modalType, setModalType] = useState<string | null>(null);
   const [fname, setFname] = useState('');
   const [lname, setLname] = useState('');
@@ -257,8 +258,8 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       </div>
 
       {/* Status badge */}
-      <span className={`inline-block px-3 py-1 rounded text-xs font-mono uppercase ${statusColors[bounty.status?.toLowerCase()] || ''}`}>
-        {bounty.status}
+      <span className={`inline-block px-3 py-1 rounded text-xs font-mono uppercase ${statusColors[status] || ''}`}>
+        {status}
       </span>
 
       <h2 className="font-display text-2xl text-spark-chartreuse">{bounty.title}</h2>
@@ -301,7 +302,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       )}
 
       {/* Winner section for completed bounties */}
-      {bounty.status === 'completed' && bounty.winner && (
+      {status === 'completed' && bounty.winner && (
         <div className="border-t border-spark-teal/20 pt-4">
           <h3 className="font-display text-lg text-purple-300 mb-2">🏆 Winner</h3>
           <div className="flex items-center gap-3">

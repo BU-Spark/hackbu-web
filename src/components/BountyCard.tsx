@@ -1,4 +1,4 @@
-import { deadlineLabel } from '../lib/deadline';
+import { deadlineLabel, effectiveStatus } from '../lib/deadline';
 
 interface BountyCardProps {
   bounty: {
@@ -35,6 +35,7 @@ export function BountyCard({ bounty, href, onClick, counts }: BountyCardProps) {
   const interested = counts?.interested ?? 0;
   const team = counts?.lookingForTeam ?? 0;
   const dl = deadlineLabel(bounty.deadline);
+  const status = effectiveStatus(bounty.status, bounty.deadline);
 
   return (
     <a
@@ -49,8 +50,8 @@ export function BountyCard({ bounty, href, onClick, counts }: BountyCardProps) {
       )}
       {/* Header row: status + difficulty */}
       <div className="flex items-center justify-between gap-2">
-        <span className={`px-2 py-0.5 rounded text-xs font-mono uppercase border ${statusColors[bounty.status] || ''}`}>
-          {bounty.status}
+        <span className={`px-2 py-0.5 rounded text-xs font-mono uppercase border ${statusColors[status] || ''}`}>
+          {status}
         </span>
         {bounty.difficulty && (
           <span className={`px-2 py-0.5 rounded text-xs font-mono ${difficultyColors[bounty.difficulty] || ''}`}>
@@ -85,7 +86,7 @@ export function BountyCard({ bounty, href, onClick, counts }: BountyCardProps) {
       )}
 
       {/* Winner badge for completed bounties */}
-      {bounty.status === 'completed' && bounty.winner && (
+      {status === 'completed' && bounty.winner && (
         <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/15 border border-purple-500/30 rounded text-xs font-mono text-purple-300">
           <span>🏆</span>
           <span>{bounty.winner}</span>

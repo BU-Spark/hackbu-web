@@ -4,7 +4,7 @@ import { BountyCard } from './BountyCard';
 import { About } from './About';
 import { CardList } from './CardList';
 import { playClick } from '../lib/sounds';
-import { daysUntil } from '../lib/deadline';
+import { effectiveStatus } from '../lib/deadline';
 
 type Screen = 'home' | 'bounties' | 'bounty-detail' | 'about' | 'events' | 'hall-of-fame';
 
@@ -94,7 +94,7 @@ export function MobileOS({ bounties, leaderboard, events }: MobileOSProps) {
       tags = typeof b.tags === 'string' ? JSON.parse(b.tags) : b.tags;
     } catch { tags = []; }
     return {
-      title: b.title, status: b.status || 'open', difficulty: b.difficulty || '',
+      title: b.title, status: effectiveStatus(b.status || 'open', b.deadline || 'TBD'), difficulty: b.difficulty || '',
       prize: b.prize, deadline: b.deadline || 'TBD', tags, slug: b.slug,
       featured: b.featured || false, descriptionHtml: b.descriptionHtml || '',
       docLink: b.docLink || '', winner: b.winner || '', winnerSubmission: b.winnerSubmission || '',

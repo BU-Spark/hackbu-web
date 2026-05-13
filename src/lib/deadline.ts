@@ -7,10 +7,19 @@ export function daysUntil(deadline: string): number | null {
 export function deadlineLabel(deadline: string): { text: string; cls: string } {
   const days = daysUntil(deadline);
   if (days === null) return { text: deadline, cls: 'text-spark-eggshell/60' };
-  if (days < 0) return { text: 'Expired', cls: 'text-gray-400' };
+  if (days < 0) return { text: 'Closed', cls: 'text-gray-400' };
   if (days === 0) return { text: 'Due today!', cls: 'text-red-400 font-semibold' };
   if (days <= 3) return { text: `${days}d left`, cls: 'text-red-400 font-semibold' };
   if (days <= 7) return { text: `${days}d left`, cls: 'text-orange-400 font-semibold' };
   if (days <= 30) return { text: `${days}d left`, cls: 'text-yellow-400' };
   return { text: `${days}d left`, cls: 'text-spark-eggshell/60' };
+}
+
+/** Derive effective status: if deadline has passed and status is 'open', treat as 'closed'. */
+export function effectiveStatus(status: string, deadline: string): string {
+  if (status === 'open') {
+    const days = daysUntil(deadline);
+    if (days !== null && days < 0) return 'closed';
+  }
+  return status;
 }
