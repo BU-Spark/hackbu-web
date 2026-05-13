@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { deadlineLabel, effectiveStatus } from '../lib/deadline';
+import { statusColors, difficultyColors } from '../lib/constants';
 
 interface BountyDetailProps {
   bounty: {
@@ -12,6 +13,8 @@ interface BountyDetailProps {
     slug: string;
     descriptionHtml?: string;
     docLink?: string;
+    repoLink?: string;
+    instructionsLink?: string;
     winner?: string;
     winnerSubmission?: string;
   };
@@ -70,9 +73,10 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   const [agreeHours, setAgreeHours] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState<string | null>(null);
   const [nextStepsDismissed, setNextStepsDismissed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [interestedCount, setInterestedCount] = useState(0);
-  const [teamCount, setTeamCount] = useState(0);
+  const [interestedCount, setInterestedCount] = useState<number | null>(null);
+  const [teamCount, setTeamCount] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; error: boolean } | null>(null);
   const [teamId, setTeamId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -106,17 +110,6 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     } catch {}
   }
 
-  const statusColors: Record<string, string> = {
-    open: 'bg-green-500/30 text-green-300',
-    completed: 'bg-purple-500/30 text-purple-300',
-    closed: 'bg-gray-500/30 text-gray-400',
-  };
-
-  const difficultyColors: Record<string, string> = {
-    Beginner: 'bg-green-500/30 text-green-300',
-    Intermediate: 'bg-yellow-500/30 text-yellow-300',
-    Advanced: 'bg-red-500/30 text-red-300',
-  };
 
   // Restore persisted form state on mount
   useEffect(() => {
@@ -136,6 +129,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
   }
 
   async function handleSubmit() {
+    if (submitting) return;
     if (!fname.trim() || !lname.trim()) {
       setFormError('Please enter your first and last name.');
       return;
@@ -162,6 +156,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       }
     }
 
+    setSubmitting(true);
     localStorage.setItem('hackbu-user-data', JSON.stringify({
       fname: fname.trim(), lname: lname.trim(), email: email.trim(), workingMode,
     }));
@@ -206,6 +201,7 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
     } catch {
       showToast('No connection — saved locally. Please try again when online.', true);
     }
+    setSubmitting(false);
     fetchCounts();
   }
 
@@ -249,11 +245,11 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
       <div className="flex gap-2 justify-end">
         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-spark-chartreuse/10 border border-spark-chartreuse/30 rounded-full text-xs font-mono text-spark-chartreuse" title="Interested">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          {interestedCount}
+          {interestedCount === null ? <span className="w-3 h-3 rounded bg-spark-chartreuse/20 animate-pulse" /> : interestedCount}
         </span>
         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-spark-orange/10 border border-spark-orange/30 rounded-full text-xs font-mono text-spark-orange" title="Looking for Teammates">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          {teamCount}
+          {teamCount === null ? <span className="w-3 h-3 rounded bg-spark-orange/20 animate-pulse" /> : teamCount}
         </span>
       </div>
 
@@ -587,30 +583,44 @@ export function BountyDetail({ bounty }: BountyDetailProps) {
             </button>
             <button
               onClick={handleSubmit}
-              className="px-4 py-1.5 bg-spark-chartreuse text-spark-black rounded text-sm font-semibold hover:bg-spark-chartreuse/80 transition-colors"
+              disabled={submitting}
+              className={`px-4 py-1.5 bg-spark-chartreuse text-spark-black rounded text-sm font-semibold transition-colors ${submitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-spark-chartreuse/80'}`}
             >
-              Submit
+              {submitting ? 'Submitting...' : 'Submit'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Project Doc */}
+      {/* Project Links */}
       <div className="border-t border-spark-teal/20 pt-4">
-        <h3 className="font-display text-lg text-spark-chartreuse mb-2">Project Description</h3>
-        {bounty.docLink ? (
-          <a
-            href={bounty.docLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-sm"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            View Project Description Doc
-          </a>
-        ) : (
-          <p className="text-spark-eggshell/40 italic text-sm">No project description document linked yet.</p>
-        )}
+        <h3 className="font-display text-lg text-spark-chartreuse mb-2">Resources</h3>
+        <div className="flex flex-wrap gap-2">
+          {bounty.docLink && (
+            <a href={bounty.docLink} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-spark-chartreuse text-spark-black rounded-lg font-semibold hover:bg-spark-chartreuse/80 transition-colors text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Project Brief
+            </a>
+          )}
+          {bounty.repoLink && (
+            <a href={bounty.repoLink} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 border border-spark-teal/40 text-spark-teal rounded-lg font-semibold hover:bg-spark-teal/10 transition-colors text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              GitHub Repo
+            </a>
+          )}
+          {bounty.instructionsLink && (
+            <a href={bounty.instructionsLink} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 border border-spark-teal/40 text-spark-teal rounded-lg font-semibold hover:bg-spark-teal/10 transition-colors text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Instructions
+            </a>
+          )}
+          {!bounty.docLink && !bounty.repoLink && !bounty.instructionsLink && (
+            <p className="text-spark-eggshell/40 italic text-sm">No project resources linked yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

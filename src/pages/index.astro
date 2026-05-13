@@ -12,6 +12,8 @@ const bounties = bountyEntries.map((entry) => ({
   status: entry.data.status,
   descriptionHtml: marked.parse(entry.body || '') as string,
   docLink: entry.data.docLink || "",
+  repoLink: entry.data.repoLink || "",
+  instructionsLink: entry.data.instructionsLink || "",
   featured: entry.data.featured || false,
   winner: entry.data.winner || "",
   winnerSubmission: entry.data.winnerSubmission || "",

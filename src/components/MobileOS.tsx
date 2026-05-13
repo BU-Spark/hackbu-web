@@ -261,7 +261,7 @@ export function MobileOS({ bounties, leaderboard, events }: MobileOSProps) {
           <div className="p-4 space-y-3">
             {/* Submit bounty link */}
             <a
-              href="https://airtable.com/app7XHhDfsNPzR7YD/shrtyXeNrcRyH0qG4"
+              href="https://airtable.com/appIL4C5APQee5Vb7/pagnDyRaFiYzFQNoo/form"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border-2 border-dashed border-spark-chartreuse/60 rounded-lg text-spark-chartreuse font-display text-sm no-underline hover:border-solid transition-all"

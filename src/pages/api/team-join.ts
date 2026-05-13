@@ -79,6 +79,6 @@ export const POST: APIRoute = async ({ request }) => {
   } catch (err: any) {
     const detail = err?.response?.body ? JSON.stringify(err.response.body) : String(err);
     console.error('Team join API error:', detail);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'Internal server error', detail }), { status: 500 });
   }
 };

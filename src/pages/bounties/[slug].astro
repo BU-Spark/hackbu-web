@@ -69,6 +69,11 @@ const { Content } = await entry.render();
       @keyframes status-pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
       .status-dot{animation:status-pulse 2s ease-in-out infinite;}
       .bracket-l{border-left:1px solid rgba(201,162,39,.2);padding-left:1rem;}
+      .gold-name{color:#e8c848;}
+      .gold-label{color:rgba(201,162,39,.5);}
+      [data-theme="light"] .gold-name{color:#8B6914;}
+      [data-theme="light"] .gold-label{color:#8B6914;}
+      [data-theme="light"] .bracket-l{border-left-color:rgba(139,105,20,.3);}
     </style>
   </head>
   <body class="min-h-screen bg-spark-black text-spark-eggshell theme-body">
@@ -153,7 +158,7 @@ const { Content } = await entry.render();
 
         {bounty.winner && bounty.status === "completed" && (
           <div class="bracket-l">
-            <div class="section-label" style="color:rgba(201,162,39,.5);">Bounty Winner</div>
+            <div class="section-label gold-label">Bounty Winner</div>
             <div class="flex items-center gap-3 mt-1">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2.5">
                 <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
@@ -161,7 +166,7 @@ const { Content } = await entry.render();
                 <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
                 <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
               </svg>
-              <span class="font-mono font-semibold" style="color:#e8c848;">{bounty.winner}</span>
+              <span class="font-mono font-semibold gold-name">{bounty.winner}</span>
               {bounty.winnerSubmission && (
                 <a href={bounty.winnerSubmission} target="_blank" rel="noopener noreferrer"
                    class="text-spark-teal/60 text-[10px] font-mono border border-spark-teal/20 px-1.5 py-0.5 hover:text-spark-teal transition-colors">
@@ -229,18 +234,33 @@ const { Content } = await entry.render();
             </button>
           </div>
           <div class="h-px" style="background:linear-gradient(to right,transparent,rgba(6,177,162,.15),transparent);"></div>
-          {bounty.docLink ? (
-            <div>
-              <div class="section-label">Project Spec</div>
+          <div class="section-label">Resources</div>
+          <div class="space-y-2">
+            {bounty.docLink && (
               <a href={bounty.docLink} target="_blank" rel="noopener noreferrer"
                  class="flex items-center gap-2 px-3 py-2 border border-spark-teal/20 text-spark-teal/70 font-mono text-xs hover:border-spark-teal/50 hover:text-spark-teal transition-all">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                View Project Description Doc &#8599;
+                Project Brief &#8599;
               </a>
-            </div>
-          ) : (
-            <p class="font-mono text-xs text-spark-eggshell/20 italic">No project doc linked yet.</p>
-          )}
+            )}
+            {bounty.repoLink && (
+              <a href={bounty.repoLink} target="_blank" rel="noopener noreferrer"
+                 class="flex items-center gap-2 px-3 py-2 border border-spark-teal/20 text-spark-teal/70 font-mono text-xs hover:border-spark-teal/50 hover:text-spark-teal transition-all">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                GitHub Repo &#8599;
+              </a>
+            )}
+            {bounty.instructionsLink && (
+              <a href={bounty.instructionsLink} target="_blank" rel="noopener noreferrer"
+                 class="flex items-center gap-2 px-3 py-2 border border-spark-teal/20 text-spark-teal/70 font-mono text-xs hover:border-spark-teal/50 hover:text-spark-teal transition-all">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Instructions &#8599;
+              </a>
+            )}
+            {!bounty.docLink && !bounty.repoLink && !bounty.instructionsLink && (
+              <p class="font-mono text-xs text-spark-eggshell/20 italic">No resources linked yet.</p>
+            )}
+          </div>
           <div class="h-px" style="background:linear-gradient(to right,transparent,rgba(6,177,162,.15),transparent);"></div>
           <div class="flex items-baseline gap-2">
             <span class="font-display text-3xl text-spark-orange leading-none">${bounty.prize}</span>
@@ -356,6 +376,7 @@ const { Content } = await entry.render();
       const buEmailWarning = document.getElementById("bu-email-warning");
       let currentType = "";
       let workingMode = "solo";
+      let submitting = false;
       inputEmail.addEventListener("input", () => {
         const val = inputEmail.value.trim();
         if (val && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && !val.toLowerCase().endsWith("@bu.edu")) buEmailWarning.classList.remove("hidden");
@@ -433,6 +454,7 @@ const { Content } = await entry.render();
       }
       function closeModal() { modal.classList.add("hidden"); currentType = ""; }
       async function submitForm() {
+        if (submitting) return;
         const fname = inputFname.value.trim(), lname = inputLname.value.trim(), email = inputEmail.value.trim();
         if (!fname || !lname) { formError.textContent = "Please enter your first and last name."; formError.classList.remove("hidden"); return; }
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { formError.textContent = "Please enter a valid email address."; formError.classList.remove("hidden"); return; }
@@ -448,6 +470,9 @@ const { Content } = await entry.render();
             if (!t.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) { formError.textContent = "Please enter a valid email for each teammate."; formError.classList.remove("hidden"); return; }
           }
         }
+        submitting = true;
+        const submitBtn = document.getElementById("modal-submit");
+        if (submitBtn) { submitBtn.textContent = "Submitting..."; submitBtn.disabled = true; submitBtn.classList.add("opacity-50", "cursor-not-allowed"); }
         localStorage.setItem("hackbu-user-data", JSON.stringify({ fname, lname, email, workingMode }));
         const submittedType = currentType;
         saveResponse(slug, submittedType, { fname, lname, email });
@@ -470,6 +495,8 @@ const { Content } = await entry.render();
             }
           } else { console.error("API error:", await res.text()); showToast("Server error — your info is saved locally. Please try again later.", true); }
         } catch (err) { console.error("Failed to submit:", err); showToast("No connection — saved locally. Please try again when online.", true); }
+        submitting = false;
+        if (submitBtn) { submitBtn.textContent = "Submit"; submitBtn.disabled = false; submitBtn.classList.remove("opacity-50", "cursor-not-allowed"); }
         fetchCounts();
       }
       async function withdraw(type) {

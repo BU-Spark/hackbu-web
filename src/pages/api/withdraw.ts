@@ -42,7 +42,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (err: any) {
+    const detail = err?.response?.body?.detail || err?.message || String(err);
     console.error('Withdraw API error:', err?.response?.body || err);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'Internal server error', detail }), { status: 500 });
   }
 };

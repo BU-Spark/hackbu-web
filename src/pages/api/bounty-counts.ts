@@ -57,7 +57,8 @@ export const GET: APIRoute = async ({ url }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
+    const detail = err?.response?.body?.detail || err?.message || String(err);
     console.error('Bounty counts API error:', err?.response?.body || err);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'Internal server error', detail }), { status: 500 });
   }
 };
