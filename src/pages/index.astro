@@ -16,7 +16,6 @@ const bounties = bountyEntries.map((entry) => ({
   winner: entry.data.winner || "",
   winnerSubmission: entry.data.winnerSubmission || "",
 }));
-import projects from "../data/projects.json";
 import leaderboard from "../data/leaderboard.json";
 import events from "../data/events.json";
 
@@ -39,69 +38,11 @@ import { WindowManager } from "../components/WindowManager";
 import { MobileOS } from "../components/MobileOS";
 import "../styles/global.css";
 
-// Compute dynamic bounty stats at build time
+// Compute bounty stats — these are content-collection counts, stable between builds
 const openBounties = bounties.filter((b: any) => b.status === 'open');
 const openCount = openBounties.length;
 const totalPrize = openBounties.reduce((sum: number, b: any) => sum + (b.prize || 0), 0);
 const formattedPrize = `$${totalPrize.toLocaleString('en-US')}`;
-
-// Find next upcoming event
-const now = new Date();
-const currentYear = now.getFullYear();
-function parseEventDate(when: string): Date | null {
-  const d = new Date(`${when}, ${currentYear}`);
-  return isNaN(d.getTime()) ? null : d;
-}
-const upcomingEvents = events
-  .map((e: any) => ({ ...e, _date: parseEventDate(e.when) }))
-  .filter((e: any) => e._date && e._date >= now)
-  .sort((a: any, b: any) => a._date - b._date);
-const nextEvent = upcomingEvents[0];
-const nextEventStr = nextEvent ? `${nextEvent.title} (${nextEvent.when})` : 'No upcoming events';
-
-// Build MOTD with fixed-width lines (40 inner chars between ║ and ║)
-const W = 40;
-function pad(text: string, width: number): string {
-  // Strip emojis to count only ASCII/box-drawing display width
-  const stripped = text.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, '');
-  // Each emoji we removed takes 2 display columns
-  const emojiCount = (text.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu) || []).length;
-  const displayLen = stripped.length + (emojiCount * 2);
-  const needed = width - displayLen;
-  return needed > 0 ? text + ' '.repeat(needed) : text;
-}
-function line(text: string): string {
-  return `║${pad(text, W)}║`;
-}
-const bountyLine = `  * ${openCount} open bounties - ${formattedPrize} in prizes`;
-const eventLine = `  > Next: ${nextEventStr}`;
-
-// Compute next Wednesday 4pm for Innovation Hours
-function getNextWedLabel(): string {
-  const day = now.getDay();
-  let daysUntilWed = (3 - day + 7) % 7;
-  if (daysUntilWed === 0 && now.getHours() >= 18) daysUntilWed = 7;
-  if (daysUntilWed === 0) return 'TODAY 4-6pm';
-  if (daysUntilWed === 1) return 'TOMORROW 4-6pm';
-  return `in ${daysUntilWed}d (Wed 4-6pm)`;
-}
-const innovLine = `  > Innovation Hours: ${getNextWedLabel()}`;
-
-const motdContent = [
-  `╔${'═'.repeat(W)}╗`,
-  line('  Welcome to HackBU OS v1.0'),
-  line('  Message of the Day'),
-  `╠${'═'.repeat(W)}╣`,
-  line(''),
-  line(bountyLine),
-  line(eventLine),
-  line(innovLine),
-  line(''),
-  line('  Tip: Windows are draggable!'),
-  line(''),
-  line('  Type `apps` or use dock below'),
-  `╚${'═'.repeat(W)}╝`,
-].join('\n');
 ---
 
 <!doctype html>
@@ -180,10 +121,9 @@ const motdContent = [
         <WindowManager
           client:load
           bounties={bounties}
-          projects={projects}
           leaderboard={leaderboard}
           events={events}
-          motd={motdContent}
+          motdStats={{ openCount, formattedPrize }}
         />
       </Desktop>
 
@@ -194,10 +134,8 @@ const motdContent = [
       <MobileOS
         client:load
         bounties={bounties}
-        projects={projects}
         leaderboard={leaderboard}
         events={events}
-        motd={motdContent}
       />
     </div>
 

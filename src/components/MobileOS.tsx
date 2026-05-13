@@ -10,10 +10,8 @@ type Screen = 'home' | 'bounties' | 'bounty-detail' | 'about' | 'events' | 'hall
 
 interface MobileOSProps {
   bounties: any[];
-  projects: any[];
   leaderboard: any[];
   events: any[];
-  motd: string;
 }
 
 function getNextWednesday(): string {
@@ -26,7 +24,7 @@ function getNextWednesday(): string {
   return next.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export function MobileOS({ bounties, projects, leaderboard, events, motd }: MobileOSProps) {
+export function MobileOS({ bounties, leaderboard, events }: MobileOSProps) {
   const [screen, setScreen] = useState<Screen>('home');
   const [history, setHistory] = useState<Screen[]>([]);
   const [selectedBounty, setSelectedBounty] = useState<any>(null);

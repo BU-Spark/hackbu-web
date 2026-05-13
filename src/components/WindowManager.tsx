@@ -41,20 +41,60 @@ function InnovationHours() {
   );
 }
 
+function buildMotd(stats: { openCount: number; formattedPrize: string }, events: any[]): string {
+  const W = 40;
+  function pad(text: string, width: number): string {
+    const stripped = text.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, '');
+    const emojiCount = (text.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu) || []).length;
+    const displayLen = stripped.length + (emojiCount * 2);
+    const needed = width - displayLen;
+    return needed > 0 ? text + ' '.repeat(needed) : text;
+  }
+  function line(text: string): string { return `║${pad(text, W)}║`; }
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const upcoming = events
+    .map((e: any) => { const d = new Date(`${e.when}, ${currentYear}`); return { ...e, _date: isNaN(d.getTime()) ? null : d }; })
+    .filter((e: any) => e._date && e._date >= now)
+    .sort((a: any, b: any) => a._date - b._date);
+  const next = upcoming[0];
+  const nextStr = next ? `${next.title} (${next.when})` : 'No upcoming events';
+
+  const day = now.getDay();
+  let daysUntilWed = (3 - day + 7) % 7;
+  if (daysUntilWed === 0 && now.getHours() >= 18) daysUntilWed = 7;
+  const wedLabel = daysUntilWed === 0 ? 'TODAY 4-6pm' : daysUntilWed === 1 ? 'TOMORROW 4-6pm' : `in ${daysUntilWed}d (Wed 4-6pm)`;
+
+  return [
+    `╔${'═'.repeat(W)}╗`,
+    line('  Welcome to HackBU OS v1.0'),
+    line('  Message of the Day'),
+    `╠${'═'.repeat(W)}╣`,
+    line(''),
+    line(`  * ${stats.openCount} open bounties - ${stats.formattedPrize} in prizes`),
+    line(`  > Next: ${nextStr}`),
+    line(`  > Innovation Hours: ${wedLabel}`),
+    line(''),
+    line('  Tip: Windows are draggable!'),
+    line(''),
+    line('  Type `apps` or use dock below'),
+    `╚${'═'.repeat(W)}╝`,
+  ].join('\n');
+}
+
 interface WindowManagerProps {
   bounties: any[];
-  projects: any[];
   leaderboard: any[];
   events: any[];
-  motd: string;
+  motdStats: { openCount: number; formattedPrize: string };
 }
 
 export function WindowManager({
   bounties,
-  projects,
   leaderboard,
   events,
-  motd,
+  motdStats,
 }: WindowManagerProps) {
   const [openWindows, setOpenWindows] = useState<string[]>(['motd']); // Start with MOTD open
   const [zIndices, setZIndices] = useState<Record<string, number>>({
@@ -226,7 +266,7 @@ export function WindowManager({
           isFocused={focusedWindow === 'motd'}
         >
           <pre className="font-mono text-sm text-spark-chartreuse whitespace-pre">
-            {motd}
+            {buildMotd(motdStats, events)}
           </pre>
         </Window>
       )}
@@ -355,7 +395,11 @@ export function WindowManager({
           zIndex={zIndices.gallery}
           isFocused={focusedWindow === 'gallery'}
         >
-          <CardList items={projects} type="project" />
+          <div className="text-center py-8 text-spark-eggshell/50 font-mono text-sm">
+            <p className="text-2xl mb-2">🚧</p>
+            <p>Project gallery coming soon!</p>
+            <p className="text-xs mt-1 text-spark-eggshell/30">Completed bounty projects will appear here.</p>
+          </div>
         </Window>
       )}
 
