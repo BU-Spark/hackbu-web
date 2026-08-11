@@ -198,6 +198,9 @@ input {
   gap: 24px;
 }
 .wordmark {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   font-family: 'Bebas Neue', Impact, sans-serif;
   font-size: 26px;
   line-height: 1;
@@ -208,6 +211,20 @@ input {
 .wordmark i {
   font-style: normal;
   color: var(--brand-bang);
+}
+/* The BU Spark! badge. Uses the "Blck Bkgrnd" asset with no filter because
+   --header stays dark in BOTH themes — the live site needs a filter hack in
+   global.css only because its header inverts in light mode. */
+.wordmark img {
+  height: 34px;
+  width: 34px;
+  flex-shrink: 0;
+}
+.wordmark .rule {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
 }
 .nav {
   display: flex;
@@ -695,6 +712,89 @@ input {
 }
 .stats b.accent {
   color: var(--accent-ink);
+}
+
+/* ─── resources panel ─── */
+.res {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.res-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 15px 18px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.res-head .n {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--faint);
+}
+.res-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--divider);
+  transition: background-color 0.12s ease;
+}
+.res-item:hover {
+  background: var(--accent-wash);
+}
+.res-ico {
+  flex: 0 0 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--accent-wash);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  transition: background-color 0.12s ease;
+}
+.res-item:hover .res-ico {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+.res-ico svg {
+  width: 17px;
+  height: 17px;
+}
+.res-txt {
+  flex: 1;
+  min-width: 0;
+}
+.res-txt b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.res-txt span {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.res-go {
+  flex-shrink: 0;
+  color: var(--faint);
+  transition: transform 0.14s ease, color 0.14s ease;
+}
+.res-item:hover .res-go {
+  color: var(--accent);
+  transform: translate(2px, -2px);
 }
 
 /* ─── interest form ─── */
