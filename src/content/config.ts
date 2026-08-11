@@ -11,6 +11,14 @@ const bounties = defineCollection({
     ),
     tags: z.array(z.string()),
     status: z.enum(['open', 'completed', 'closed']),
+    // Which track a bounty belongs to. `hackbu` is the BU IS&T collaboration —
+    // one track among several, not the whole board. Defaults so existing
+    // bounty files keep validating untouched.
+    track: z.enum(['hackbu', 'spark', 'partner']).optional().default('hackbu'),
+    sponsor: z.string().optional(),
+    requirements: z
+      .array(z.object({ text: z.string(), done: z.boolean().optional().default(false) }))
+      .optional(),
     featured: z.boolean().optional().default(false),
     winner: z.string().optional(),
     winnerSubmission: z.string().optional(),

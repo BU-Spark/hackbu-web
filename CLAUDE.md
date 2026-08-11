@@ -34,7 +34,7 @@ npm run add-bounty  # interactive CLI to scaffold a new bounty .md file
 
 **Eventbrite** — live event fetching via `/api/events` with static JSON fallback.
 - Requires `EVENTBRITE_TOKEN` env var
-- Org ID `13250579290` is hardcoded in `src/pages/api/events.ts`
+- Org ID `206780206649` is hardcoded in `src/pages/api/events.ts`
 - `WindowManager.tsx` fetches on mount, falls back to `src/data/events.json`
 
 **Rate Limiting** — in-memory rate limiter in `src/lib/rate-limit.ts`.
